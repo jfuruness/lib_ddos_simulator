@@ -32,9 +32,12 @@ class Bucket:
     def __init__(self, users: list = [], max_users=10000000):
         """Stores users"""
     
-        self.users = users
+        self.users = []
         self._max_users = max_users
         self.contains_attacker = False
+
+        for user in users:
+            self.add_user(user)
 
     def __str__(self):
         return self.users
@@ -72,7 +75,7 @@ class Simulation:
     def __init__(self, num_good_users, num_attackers, threshold, num_buckets):
         """Saves parameters for the simulation"""
 
-        self.manager = Manager(num_buckets)
+        self.manager = Manager(num_buckets, threshold)
         self.good_users = [User(x) for x in range(num_good_users)]
         self.attackers = [Attacker(x) for x in range(num_attackers)]
         self.users = self.good_users + self.attackers
@@ -83,6 +86,7 @@ class Simulation:
         # Goal is to provide as much service as possible
         # Keep as many users as you can, get rid of as many attackers as you can (asap)
         for turn in range(num_rounds):
+            self.manager.detect(turn)
             self.manager.sieve_shuffle()
       
 
@@ -100,11 +104,12 @@ class Sieve_Sim(Simulation):
 class Manager:
     """Controls all buckets (Eve)"""
   
-    def __init__(self, num_buckets: int):
+    def __init__(self, num_buckets: int, threshold: int):
         self.buckets = [Bucket() for _ in range(num_buckets)]
         # Doesn't matter because will just circle back to first bucket
         self._next_bucket = 0
         self.users = []
+        self.threshold = threshold
     
     def add_user(self, user: User): 
         self.users.append(user)
@@ -122,8 +127,6 @@ class Manager:
             # So we need to decide whether to leave user out or buy a new bucket
             # if we buy a new bucket we must load balance
             # Impliment later
-            print(user)
-            print(bucket)
             1/0
     
     def sieve_shuffle(self):
@@ -149,14 +152,19 @@ class Manager:
         # Flattens a list of user chunks into self.users
         self.users = [user for user_chunk in user_chunks for user in user_chunk]
 
-    def detect(self):
-        for user in self.users:
-            if user.suspicion > self.threshold:
-                if isinstance(user, Attacker):
-                    print("Discovered Attacker correctly")
-                    # TODO: should remove attacker here
-                else:
-                    print("Discovered Attacker incorrectly")
+
+    def detect(self, turn_num: int):
+        users_to_remove = [user for user in self.users if user.suspicion > self.threshold]
+
+        # TODO: Optimize later, prob should be dict? or set? not sure
+        for user in users_to_remove:
+            self.users.remove(user)
+            if isinstance(user, Attacker):
+                print("Discovered Attacker correctly on turn {}".format(turn_num))
+                # TODO: should remove attacker here
+            else:
+                print("Discovered Attacker incorrectly on turn {}".format(turn_num))
+                    
 
     def _update_sus(self):
         """Updates suspicion level of all users"""
@@ -169,4 +177,4 @@ class Manager:
 
 if __name__ == "__main__":
     Sieve_Sim(num_good_users=100, num_attackers=10,
-              threshold=10, num_buckets=4).run(num_rounds=1000)
+              threshold=10, num_buckets=4).run(num_rounds=50)
