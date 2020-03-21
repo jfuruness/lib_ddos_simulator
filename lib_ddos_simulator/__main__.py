@@ -5,13 +5,16 @@
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from argparse import ArgumentParser
+from sys import argv
+
 from .ddos_simulator import DDOS_Simulator
 from .sieve_manager import Sieve_Manager
 from .protag_manager import Protag_Manager
+from .utils import config_logging
 
 def main():
     """Runs simulations with command line arguments"""
@@ -22,6 +25,12 @@ def main():
     parser.add_argument("--num_buckets", dest="num_buckets", default=100)
     parser.add_argument("--threshold", dest="threshold", default=10)
     parser.add_argument("--rounds", dest="rounds", default=1000)
+
+    for i, arg in enumerate(argv):
+        if "--debug" == arg.lower():
+            config_logging(DEBUG)
+            argv.pop(i)
+            break
 
 
     args = parser.parse_args()

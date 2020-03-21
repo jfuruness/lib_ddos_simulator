@@ -5,7 +5,7 @@
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from .ddos_simulator import DDOS_Simulator

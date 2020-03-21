@@ -8,7 +8,7 @@ This manager inherits Manager class and uses Sieve shuffling algorithm
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from random import shuffle
@@ -20,6 +20,8 @@ class Sieve_Manager(Manager):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a sieve shuffling algorithm"""
+
+    __slots__ = []
 
     def detect_and_shuffle(self, turn_num: int):
         """Detects attackers and shuffles"""

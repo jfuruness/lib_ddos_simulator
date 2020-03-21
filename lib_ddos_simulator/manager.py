@@ -5,7 +5,7 @@
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from .bucket import Bucket
@@ -14,6 +14,8 @@ from .utils import split_list
 
 class Manager:
     """Simulates a manager for a DDOS attack"""
+
+    __slots__ = ["users", "_threshold", "buckets"]
   
     def __init__(self, num_buckets: int, users: list, threshold: int):
         """inits buckets and stores threshold"""

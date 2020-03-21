@@ -5,11 +5,13 @@
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 class Bucket:
     """Simulates a Bucket that provides service for users"""
+
+    __slots__ = ["users", "_max_users", "attacked"]
   
     def __init__(self, users: list = [], max_users=100000000):
         """Stores users"""

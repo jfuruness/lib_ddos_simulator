@@ -5,9 +5,11 @@
 
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness, Anna Gorbenko"
-__email__ = "jfuruness@gmail.com, a97gorbenko@gmail.com"
+__email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+
+import logging
 
 def split_list(list_to_split: list, size_of_chunk: int):
     """Splits a list into num_chunks"""
@@ -19,3 +21,14 @@ def split_list(list_to_split: list, size_of_chunk: int):
         # User chunk is the chunk Anna described
         chunks.append(list_to_split[i: i + size_of_chunk])
     return chunks
+
+def config_logging(level):
+    """Configures logging"""
+
+    if len(logging.root.handlers) <= 0:
+        logging.root.handlers = []
+        logging.basicConfig(level=level,
+                            format='%(asctime)s-%(levelname)s: %(message)s',
+                            handlers=[logging.StreamHandler()])
+
+        logging.captureWarnings(True)
