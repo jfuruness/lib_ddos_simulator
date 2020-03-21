@@ -60,3 +60,16 @@ class DDOS_Simulator:
 
         for attacker in self.attackers:
             attacker.attack()
+
+class Round_Info:
+    """Stores round info. Used instead of db for simplicity"""
+
+    def __init__(self, manager: Manager):
+        """Stores information for the round"""
+
+        self.num_buckets_used = len(manager.buckets)
+        self.users_serviced = sum(len(x) for x in manager.buckets
+                                  if not x.attacked)
+#        self.attackers_detected = 
+#        self.percent_users_serviced = 
+#        self.percent_attackers_detected = 

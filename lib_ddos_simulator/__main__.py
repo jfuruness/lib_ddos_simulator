@@ -21,7 +21,7 @@ def main():
 
     parser = ArgumentParser(description="Runs a DDOS simulation")
     parser.add_argument("--num_users", dest="num_users", default=1000)
-    parser.add_argument("--num_attackers", dest="num_attackers", default=100)
+    parser.add_argument("--num_attackers", dest="num_attackers", default=10)
     parser.add_argument("--num_buckets", dest="num_buckets", default=100)
     parser.add_argument("--threshold", dest="threshold", default=10)
     parser.add_argument("--rounds", dest="rounds", default=1000)
