@@ -7,3 +7,7 @@ ddos protection sims
 python3 setup.py sdist bdist_wheel
 python3 setup.py develop
 ```
+
+
+to run:
+```lib_ddos```
