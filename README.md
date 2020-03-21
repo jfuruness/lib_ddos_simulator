@@ -10,4 +10,4 @@ python3 setup.py develop
 
 
 to run:
-```lib_ddos```
+```ddos_sim```
