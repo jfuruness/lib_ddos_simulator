@@ -70,6 +70,6 @@ class Round_Info:
         self.num_buckets_used = len(manager.buckets)
         self.users_serviced = sum(len(x) for x in manager.buckets
                                   if not x.attacked)
-#        self.attackers_detected = 
-#        self.percent_users_serviced = 
-#        self.percent_attackers_detected = 
+        self.attackers_detected = 
+        self.percent_users_serviced = 
+        self.percent_attackers_detected = 

@@ -15,7 +15,7 @@ from .utils import split_list
 class Manager:
     """Simulates a manager for a DDOS attack"""
 
-    __slots__ = ["users", "_threshold", "buckets"]
+    __slots__ = ["users", "_threshold", "buckets", "attackers_detected"]
   
     def __init__(self, num_buckets: int, users: list, threshold: int):
         """inits buckets and stores threshold"""
@@ -25,6 +25,7 @@ class Manager:
         users_per_bucket = len(self.users) // num_buckets
         self.buckets = [Bucket(user_chunk) for user_chunk in
                         split_list(self.users, users_per_bucket)]
+        self.attackers_detected = 0
             
     def reset_buckets(self):
         """Sets all buckets to not be attacked"""
