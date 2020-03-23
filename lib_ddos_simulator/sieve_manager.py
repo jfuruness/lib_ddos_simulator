@@ -49,10 +49,9 @@ class Sieve_Manager(Manager):
         """
 
         self._update_suspicion()
-        chunk_size = len(self.users) // (len(self.buckets) // 2)
-
+        num_buckets = len(self.buckets)
         self.buckets = []
-        for user_chunk in [x for x in split_list(self.users, chunk_size)]:
+        for user_chunk in split_list(self.users, num_buckets // 2):
             shuffle(user_chunk)
             # adds a new bucket with half the users of that chunk randomly
             self.buckets.append(Bucket(user_chunk[:len(user_chunk) // 2]))

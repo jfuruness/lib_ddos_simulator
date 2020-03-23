@@ -36,11 +36,10 @@ class Protag_Manager(Manager):
                     users_to_remove.extend(bucket.users)
                 else:
                     # Attacked with more than one user, split in two
-                    for user_chunk in split_list(bucket.users, len(bucket) // 2):
+                    for user_chunk in split_list(bucket.users, 2):
                         self.buckets.append(Bucket(user_chunk))
             else:
                 # Not attacked, do not change
                 self.buckets.append(bucket)
         self.users = [x for x in self.users if x not in users_to_remove]
-        for user in users_to_remove:
-            pass # print(f"Removed {user.__class__.__name__} on turn {turn_num}")
+        self.attackers_detected += len(users_to_remove)

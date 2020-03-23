@@ -11,6 +11,7 @@ setup(
     download_url='https://github.com/agorbenko/lib_ddos.git',
     keywords=['Furuness', 'Gorbenko', 'DDOS', 'Simulation'],
     install_requires=[
+        'matplotlib',
         'wheel',
         'setuptools',
         'tqdm',

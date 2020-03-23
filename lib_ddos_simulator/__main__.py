@@ -24,7 +24,7 @@ def main():
     parser.add_argument("--num_attackers", dest="num_attackers", default=10)
     parser.add_argument("--num_buckets", dest="num_buckets", default=100)
     parser.add_argument("--threshold", dest="threshold", default=10)
-    parser.add_argument("--rounds", dest="rounds", default=1000)
+    parser.add_argument("--rounds", dest="rounds", default=20)
 
     for i, arg in enumerate(argv):
         if "--debug" == arg.lower():
@@ -34,9 +34,9 @@ def main():
 
 
     args = parser.parse_args()
-    for Manager_Class in [Sieve_Manager, Protag_Manager]:
-        DDOS_Simulator(int(args.num_users),
-                       int(args.num_attackers),
-                       int(args.num_buckets),
-                       int(args.threshold),
-                       Manager_Class).run(int(args.rounds))
+
+    DDOS_Simulator(int(args.num_users),
+                   int(args.num_attackers),
+                   int(args.num_buckets),
+                   int(args.threshold),
+                   [Sieve_Manager, Protag_Manager]).run(int(args.rounds))

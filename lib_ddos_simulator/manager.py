@@ -22,9 +22,8 @@ class Manager:
 
         self.users = users
         self._threshold = threshold
-        users_per_bucket = len(self.users) // num_buckets
         self.buckets = [Bucket(user_chunk) for user_chunk in
-                        split_list(self.users, users_per_bucket)]
+                        split_list(self.users, num_buckets)]
         self.attackers_detected = 0
             
     def reset_buckets(self):
