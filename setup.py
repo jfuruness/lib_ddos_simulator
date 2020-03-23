@@ -12,6 +12,7 @@ setup(
     keywords=['Furuness', 'Gorbenko', 'DDOS', 'Simulation'],
     install_requires=[
         'matplotlib',
+        'tikzplotlib',
         'wheel',
         'setuptools',
         'tqdm',

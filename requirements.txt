@@ -1,4 +1,5 @@
 matplotlib
+tikzplotlib
 wheel
 setuptools
 tqdm

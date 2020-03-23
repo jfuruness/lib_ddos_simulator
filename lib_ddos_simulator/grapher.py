@@ -65,15 +65,20 @@ class Grapher:
                                  marker=self.markers(manager_index))
 
         # https://stackoverflow.com/a/4701285/8903959
-#        for ax in axs:
-#            box = ax.get_position()
-#            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-#
-#        handles, labels = ax.get_legend_handles_labels()
-#
-#        # Put a legend to the right of the current axis
-#        axs[1].legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.show()
+        for ax in axs:
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+        handles, labels = ax.get_legend_handles_labels()
+
+        # Put a legend to the right of the current axis
+        axs[1].legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
+#        plt.show()
+
+        import tikzplotlib
+
+        tikzplotlib.save(os.path.join(self._path, "test.tex"))
+
 
     def styles(self, index):
         """returns styles and markers for graph lines"""
