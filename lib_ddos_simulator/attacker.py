@@ -13,7 +13,8 @@ from .user import User
 class Attacker(User):
     """Simulates an attacker for a DDOS attack"""
 
-    __slots__ = []
+    # Horns is used for animations
+    __slots__ = ["horns"]
 
     def attack(self):
         """Attacks the bucket it's in"""

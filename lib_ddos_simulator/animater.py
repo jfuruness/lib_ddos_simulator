@@ -11,6 +11,8 @@ __status__ = "Development"
 import os
 import time
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -25,7 +27,7 @@ from .user import User
 class Animater:
     """animates a DDOS attack"""
 
-    __slots__ = ["_data", "ax", "buckets", "round", "max_users", "fig", "users", "name"]
+    __slots__ = ["_data", "ax", "buckets", "round", "max_users", "fig", "users", "name", "round_text"]
   
     def __init__(self, manager):
         """Initializes simulation"""
@@ -59,13 +61,16 @@ class Animater:
                                        frames=total_rounds * 100,
                                        interval=40,
                                        blit=True)
-#        Writer = animation.writers['ffmpeg']
-#        writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-        anim.save('animation.mp4')
+        anim.save('animation.mp4', progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
+#       must use agg
 #        plt.show()
 
     def _format_graph(self):
         """Formats graph properly"""
+
+        plt.style.use('dark_background')
+        # https://stackoverflow.com/a/48958260/8903959
+        matplotlib.rcParams.update({'text.color' : "black"})
 
         fig = plt.figure()
         fig.set_dpi(100)
@@ -76,6 +81,10 @@ class Animater:
         ax = plt.axes(xlim=(0, len(self.buckets) * Bucket.patch_length()),
                       ylim=(0, max_users * User.patch_length() + 1))
         ax.set_axis_off()
+
+        gradient_image(ax, direction=0, extent=(0, 1, 0, 1), transform=ax.transAxes,
+                       cmap=plt.cm.Oranges, cmap_range=(0.1, 0.6))
+
 
         return max_users, fig, ax
 
@@ -101,6 +110,9 @@ class Animater:
                 user.patch = plt.Circle((bucket.patch_center(), 5),
                                         User.patch_radius,
                                         fc=fc)
+                if isinstance(user, Attacker):
+                    user.horns = plt.Polygon(0 * self.get_horn_array(user), fc="r", **dict(ec="k"))
+
                 user.text = plt.text(bucket.patch_center() - .5,
                                      5,
                                      f"{user.id}:0")
@@ -109,14 +121,23 @@ class Animater:
         """inits the animation"""
 
         for bucket in self.buckets:
-            self.ax.add_patch(bucket.patch) 
+            self.ax.add_patch(bucket.patch)
+            bucket.patch.set_zorder(1)
             for user in bucket.users:
                 user.patch.center = user.points[0]
+                user.patch.set_zorder(3)
                 self.ax.add_patch(user.patch)
+                if isinstance(user, Attacker):
+                    user.horns.set_zorder(2)
+                    self.ax.add_patch(user.horns)
+                    user.horns.set_xy(self.get_horn_array(user))
                 user.text.set_y(user.points[0][1])
-        round_text = plt.text(self.ax.get_xlim()[1] * .37, self.ax.get_ylim()[1] - .75, f"{self.name}: Round 0")
-
-        return [x.patch for x in self.users] + [x.text for x in self.users] + [round_text]
+                user.text.set_zorder(4)
+        self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
+                                   self.ax.get_ylim()[1] - .5,
+                                   f"{self.name}: Round 0")
+        horns = [x.horns for x in self.users if isinstance(x, Attacker)]
+        return [x.patch for x in self.users] + [x.text for x in self.users] + [self.round_text] + horns
 
     def animate(self, i):
         for user in self.users:
@@ -131,11 +152,67 @@ class Animater:
             next_point = (next_point_x1_contr + next_point_x2_contr,
                           next_point_y1_contr + next_point_y2_contr)
             user.patch.center = next_point
+            if isinstance(user, Attacker):
+                user.horns.set_xy(self.get_horn_array(user))
             user.text.set_x(next_point[0] - .7)
             user.text.set_y(next_point[1] - .2)
             user.text.set_text(f"{user.id:2.0f}:{user.suspicions[i//100]:.1f}")
+        self.round_text.set_visible(False)
+        self.round_text.remove()
+        self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
+                                   self.ax.get_ylim()[1] - .5,
+                                   f"{self.name}: Round {i // 100}",
+                                   bbox=dict(facecolor='white', alpha=1))
+        horns = [x.horns for x in self.users if isinstance(x, Attacker)]
+        return [x.patch for x in self.users] + [x.text for x in self.users] + [self.round_text] + horns
 
-        round_text = plt.text(self.ax.get_xlim()[1] *.37,
-                              self.ax.get_ylim()[1] - .75,
-                              f"{self.name}: Round {i // 100}")
-        return [x.patch for x in self.users] + [x.text for x in self.users] + [round_text]
+    def get_horn_array(self, user):
+        horn_array = np.array(
+                        [user.patch.center,
+                         [user.patch.center[0] - User.patch_radius, user.patch.center[1]],
+                         [user.patch.center[0] - User.patch_radius, user.patch.center[1] + User.patch_radius],
+                         user.patch.center,
+                         [user.patch.center[0] + User.patch_radius, user.patch.center[1]], 
+                         [user.patch.center[0] + User.patch_radius, user.patch.center[1] + User.patch_radius],
+                         user.patch.center
+                        ])
+        return horn_array
+
+
+# https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/gradient_bar.html
+import numpy as np
+
+np.random.seed(19680801)
+
+
+def gradient_image(ax, extent, direction=0.3, cmap_range=(0, 1), **kwargs):
+    """
+    Draw a gradient image based on a colormap.
+
+    Parameters
+    ----------
+    ax : Axes
+        The axes to draw on.
+    extent
+        The extent of the image as (xmin, xmax, ymin, ymax).
+        By default, this is in Axes coordinates but may be
+        changed using the *transform* kwarg.
+    direction : float
+        The direction of the gradient. This is a number in
+        range 0 (=vertical) to 1 (=horizontal).
+    cmap_range : float, float
+        The fraction (cmin, cmax) of the colormap that should be
+        used for the gradient, where the complete colormap is (0, 1).
+    **kwargs
+        Other parameters are passed on to `.Axes.imshow()`.
+        In particular useful is *cmap*.
+    """
+    phi = direction * np.pi / 2
+    v = np.array([np.cos(phi), np.sin(phi)])
+    X = np.array([[v @ [1, 0], v @ [1, 1]],
+                  [v @ [0, 0], v @ [0, 1]]])
+    a, b = cmap_range
+    X = a + (b - a) / X.max() * X
+    im = ax.imshow(X, extent=extent, interpolation='bicubic',
+                   vmin=0, vmax=1, **kwargs)
+    return im
