@@ -8,10 +8,17 @@ __maintainer__ = "Justin Furuness, Anna Gorbenko"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from .user import User
+
 class Bucket:
     """Simulates a Bucket that provides service for users"""
 
-    __slots__ = ["users", "_max_users", "attacked"]
+    # patch used in animations
+    __slots__ = ["users", "_max_users", "attacked", "patch"]
+
+    # Used in animations
+    patch_width = User.patch_length()
+    patch_padding = .5
   
     def __init__(self, users: list = [], max_users=100000000):
         """Stores users"""
@@ -46,6 +53,13 @@ class Bucket:
     def update_suspicion(self):
         """Updates suspicion level of all users in bucket"""
 
-        multiplier = 1 if self.attacked else -1
+        multiplier = 1 if self.attacked else 0#-1
         for user in self.users:
             user.suspicion += (1 / len(self.users)) * multiplier
+
+    @staticmethod
+    def patch_length():
+        return Bucket.patch_width + Bucket.patch_padding * 2
+
+    def patch_center(self):
+        return self.patch.get_x() + self.patch.get_width() / 2

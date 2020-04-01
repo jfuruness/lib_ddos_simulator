@@ -35,8 +35,15 @@ def main():
 
     args = parser.parse_args()
 
-    DDOS_Simulator(int(args.num_users),
-                   int(args.num_attackers),
-                   int(args.num_buckets),
-                   int(args.threshold),
-                   [Sieve_Manager, Protag_Manager]).run(int(args.rounds))
+#    DDOS_Simulator(int(args.num_users),
+#                   int(args.num_attackers),
+#                   int(args.num_buckets),
+#                   int(args.threshold),
+#                   [Sieve_Manager, Protag_Manager]).run(int(args.rounds))
+
+    # Now run fun graphing thing
+    DDOS_Simulator(24,  # number of users
+                   4,  # number of attackers
+                   8,  # number of buckets
+                   10,  # Threshold
+                   [Sieve_Manager]).run(10, animate=True)

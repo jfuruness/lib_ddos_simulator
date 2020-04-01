@@ -12,6 +12,7 @@ import logging
 from random import shuffle
 from tqdm import trange
 
+from .animater import Animater
 from .attacker import Attacker
 from .grapher import Grapher
 from .manager import Manager
@@ -49,20 +50,24 @@ class DDOS_Simulator:
                                len(self.good_users),
                                len(self.attackers))
 
-    def run(self, num_rounds: int):
+    def run(self, num_rounds: int, animate: bool = False):
         """Runs simulation"""
 
         for manager in self.managers:
+            animater = Animater(manager)
             algo_name = manager.__class__.__name__
             for turn in trange(num_rounds, desc=f"Running {algo_name}"):
                 # Attackers attack
                 self.attack_buckets()
                 self.grapher.capture_data(turn, manager, self.attackers)
+                if animate:
+                    animater.capture_data(manager)
                 # Manager detects and removes suspicious users, then shuffles
                 manager.detect_and_shuffle(turn)
                 # All buckets are no longer attacked for the next round
                 manager.reset_buckets()
-            
+        if animate:
+            animater.run_animation(turn)
         self.grapher.graph()
 
     def attack_buckets(self):

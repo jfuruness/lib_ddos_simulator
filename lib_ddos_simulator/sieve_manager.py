@@ -50,13 +50,13 @@ class Sieve_Manager(Manager):
 
         self._update_suspicion()
         num_buckets = len(self.buckets)
-        self.buckets = []
-        for user_chunk in split_list(self.users, num_buckets // 2):
+        for bucket_index, user_chunk in enumerate(
+                split_list(self.users, num_buckets // 2)):
             shuffle(user_chunk)
             # adds a new bucket with half the users of that chunk randomly
-            self.buckets.append(Bucket(user_chunk[:len(user_chunk) // 2]))
+            self.buckets[bucket_index * 2].__init__(user_chunk[:len(user_chunk) // 2])
             # adds a new bucket with half the users of that chunk randomly
-            self.buckets.append(Bucket(user_chunk[len(user_chunk) // 2:]))
+            self.buckets[bucket_index * 2 + 1].__init__(user_chunk[len(user_chunk) // 2:])
 
     def _update_suspicion(self):
         """Updates suspicion level of all users"""

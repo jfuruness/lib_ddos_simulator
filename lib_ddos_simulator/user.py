@@ -11,7 +11,13 @@ __status__ = "Development"
 class User:
     """Simulates a user for a DDOS attack"""
 
-    __slots__ = ["id", "suspicion", "bucket"]
+    # patch, text used in animations
+    __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
+                 "suspicions"]
+
+    # Used in animations
+    patch_radius = 1
+    patch_padding = .25
   
     def __init__(self, identifier: int, suspicion: float = 0, bucket = None):
         """Stores user values"""
@@ -22,6 +28,9 @@ class User:
         self.suspicion = suspicion
         # Bucket the user is in for service
         self.bucket = bucket
+        # Used for animation
+        self.points = []
+        self.suspicions = []
 
     def __lt__(self, other):
         """Comparison operator for users"""
@@ -35,3 +44,6 @@ class User:
         # Uses class name so that it also works for attackers
         return f"{self.__class__.__name__} {self.id}"
 
+    @staticmethod
+    def patch_length():
+        return User.patch_radius * 2 + User.patch_padding * 2

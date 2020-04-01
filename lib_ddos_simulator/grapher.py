@@ -73,11 +73,11 @@ class Grapher:
 
         # Put a legend to the right of the current axis
         axs[1].legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
-#        plt.show()
+        plt.show()
 
         import tikzplotlib
 
-        tikzplotlib.save(os.path.join(self._path, "test.tex"))
+#        tikzplotlib.save(os.path.join(self._path, "test.tex"))
 
 
     def styles(self, index):
