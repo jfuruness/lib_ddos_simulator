@@ -34,7 +34,7 @@ class Bucket:
     def __str__(self):
         """Returns users inside of bucket"""
 
-        return self.users
+        return str(self.users)
 
     def __len__(self):
         """Number of users in bucket"""

@@ -66,8 +66,8 @@ class DDOS_Simulator:
                 manager.detect_and_shuffle(turn)
                 # All buckets are no longer attacked for the next round
                 manager.reset_buckets()
-        if animate:
-            animater.run_animation(turn)
+            if animate:
+                animater.run_animation(turn)
         self.grapher.graph()
 
     def attack_buckets(self):

@@ -12,7 +12,7 @@ import os
 import time
 
 import matplotlib
-matplotlib.use("Agg")
+#matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -61,9 +61,9 @@ class Animater:
                                        frames=total_rounds * 100,
                                        interval=40,
                                        blit=True)
-        anim.save('animation.mp4', progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
+#        anim.save('animation.mp4', progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
 #       must use agg
-#        plt.show()
+        plt.show()
 
     def _format_graph(self):
         """Formats graph properly"""

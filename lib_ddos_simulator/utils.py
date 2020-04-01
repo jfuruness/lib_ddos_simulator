@@ -37,7 +37,7 @@ def split_list(list_to_split: list, num_chunks: int):
     # The remainder list will not be longer than num chunky monkeys
     for i, val in enumerate(remainder_list):
         # Add the remainder to the chunks
-        chunks[i].append(val)
+        chunks[len(chunks) - 1 - i].append(val)
     return chunks
 
 def config_logging(level):

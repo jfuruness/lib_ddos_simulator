@@ -42,7 +42,7 @@ class User:
         """For printing"""
 
         # Uses class name so that it also works for attackers
-        return f"{self.__class__.__name__} {self.id}"
+        return f"{self.__class__.__name__} {self.id}:{self.suspicion}"
 
     @staticmethod
     def patch_length():

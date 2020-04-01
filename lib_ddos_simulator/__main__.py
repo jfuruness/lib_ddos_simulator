@@ -46,4 +46,4 @@ def main():
                    4,  # number of attackers
                    8,  # number of buckets
                    10,  # Threshold
-                   [Sieve_Manager]).run(10, animate=True)
+                   Sieve_Manager.runnable_managers).run(10, animate=True)
