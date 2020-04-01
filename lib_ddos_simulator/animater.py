@@ -59,7 +59,10 @@ class Animater:
                                        frames=total_rounds * 100,
                                        interval=40,
                                        blit=True)
-        plt.show()
+#        Writer = animation.writers['ffmpeg']
+#        writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+        anim.save('animation.mp4')
+#        plt.show()
 
     def _format_graph(self):
         """Formats graph properly"""
