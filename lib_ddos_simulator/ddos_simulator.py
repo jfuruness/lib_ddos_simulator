@@ -8,8 +8,10 @@ __maintainer__ = "Justin Furuness, Anna Gorbenko"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from copy import deepcopy
 import logging
 from random import shuffle
+
 from tqdm import trange
 
 from .animater import Animater
@@ -42,8 +44,9 @@ class DDOS_Simulator:
         # Shuffle so attackers are not at the end
         shuffle(self.users)
         # Creates manager and distributes users evenly across buckets
-        self.managers = [X(num_buckets, self.users.copy(), threshold)
+        self.managers = [X(num_buckets, deepcopy(self.users), threshold)
                          for X in Manager_Child_Classes]
+
         # Creates graphing class to capture data
         self.grapher = Grapher(graph_path,
                                self.managers,
@@ -58,7 +61,7 @@ class DDOS_Simulator:
             algo_name = manager.__class__.__name__
             for turn in trange(num_rounds, desc=f"Running {algo_name}"):
                 # Attackers attack
-                self.attack_buckets()
+                self.attack_buckets(manager)
                 self.grapher.capture_data(turn, manager, self.attackers)
                 if animate:
                     animater.capture_data(manager)
@@ -70,8 +73,10 @@ class DDOS_Simulator:
                 animater.run_animation(turn)
         self.grapher.graph()
 
-    def attack_buckets(self):
+    def attack_buckets(self, manager):
         """Attackers attack"""
 
-        for attacker in self.attackers:
-            attacker.attack()
+        for user in manager.users:
+            if isinstance(user, Attacker):
+                user.attack()
+                assert user.bucket in manager.buckets

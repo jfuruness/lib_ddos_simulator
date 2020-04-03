@@ -17,27 +17,25 @@ def split_list(list_to_split: list, num_chunks: int):
     chunks = []
 
     size_of_chunk = len(list_to_split) // num_chunks
+    size_of_uneven_chunk = size_of_chunk + 1
     
-    # This number is the index of the list from which
-    # Items can no longer be divided evenly
-    split_number = size_of_chunk * num_chunks
-    perfectly_dividable_list = list_to_split[:split_number]
-
-    remainder_list = list_to_split[split_number:]
+    # An uneven chunk means due to remainder it needs one more
+    uneven_chunks = len(list_to_split) - size_of_chunk * num_chunks
     
+    # NOTE Now size of chunk is plus one because this includes remainder chunks
 
     # https://stackoverflow.com/a/312464
     # NOTE: rounds down, could be a prob
-    for i in range(0, len(perfectly_dividable_list), size_of_chunk):
-        # User chunk is the chunk Anna described
+    for i in range(0, size_of_uneven_chunk * uneven_chunks, size_of_uneven_chunk):
+        # User chunk is plus one since you this is from remainder
+        chunks.append(list_to_split[i: i + size_of_uneven_chunk])
+
+    # Now this is for non remainder chunks, ones that split evenly
+    for i in range(size_of_uneven_chunk * uneven_chunks, len(list_to_split), size_of_chunk):
+        # User chunk is plus one since you this is from remainder
         chunks.append(list_to_split[i: i + size_of_chunk])
 
-    assert len(remainder_list) < len(chunks), "see comment below. Math wrong"
-    # We can do a for loop here because by the mathematical definition
-    # The remainder list will not be longer than num chunky monkeys
-    for i, val in enumerate(remainder_list):
-        # Add the remainder to the chunks
-        chunks[len(chunks) - 1 - i].append(val)
+
     return chunks
 
 def config_logging(level):

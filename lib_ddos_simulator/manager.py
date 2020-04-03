@@ -24,6 +24,8 @@ class Manager:
         self._threshold = threshold
         self.buckets = [Bucket(user_chunk) for user_chunk in
                         split_list(self.users, num_buckets)]
+        for user in self.users:
+            assert user.bucket in self.buckets
         self.attackers_detected = 0
             
     def reset_buckets(self):

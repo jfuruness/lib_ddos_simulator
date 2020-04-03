@@ -77,16 +77,9 @@ class Sieve_Manager(Manager):
         users = []
         for bucket in buckets:
             users.extend(bucket.users)
-#        users.sort(key=lambda x: x.suspicion)
-        print("!!")
-        print(list(sorted(users)))
-        print("!!!!!!!!!!!!!!!!!")
-        print(split_list(list(sorted(users)), len(buckets)))
         for bucket, user_chunk in zip(buckets, split_list(list(sorted(users)),
                                                           len(buckets))):
             bucket.__init__(user_chunk)
-            print(bucket)
-            input("stopping")
 
     def _sort_buckets(self, buckets):
         if len(buckets) == 1:
@@ -104,9 +97,6 @@ class Sieve_Manager(Manager):
     def _shuffle_buckets(self, buckets, num_buckets_per_round):
         """Shuffle buckets between themselves"""
 
-#        print(buckets)
-#        print(num_buckets_per_round)
-#        input("ASDF")
 
         current_index = 0
         while current_index < len(buckets):
@@ -161,13 +151,16 @@ class Sieve_Manager_V1(Sieve_Manager):
         self._update_suspicion()
         attacked_buckets = [x for x in self.buckets if x.attacked]
         self._reorder_buckets(attacked_buckets)
+#        input(attacked_buckets)
         self._sort_buckets(attacked_buckets)
+#        input(attacked_buckets)
+#        input("aaa")
 
-class Sieve_Manager_V1_S0(Sieve_Manager_V0):
+class Sieve_Manager_V1_S0(Sieve_Manager_V1):
     suspicion_func_num = 0
 
-class Sieve_Manager_V1_S1(Sieve_Manager_V0):
+class Sieve_Manager_V1_S1(Sieve_Manager_V1):
     suspicion_func_num = 1
 
-class Sieve_Manager_V1_S2(Sieve_Manager_V0):
+class Sieve_Manager_V1_S2(Sieve_Manager_V1):
     suspicion_func_num = 2
