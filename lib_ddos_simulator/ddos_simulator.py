@@ -57,7 +57,8 @@ class DDOS_Simulator:
         """Runs simulation"""
 
         for manager in self.managers:
-            animater = Animater(manager)
+            if animate:
+                animater = Animater(manager)
             algo_name = manager.__class__.__name__
             for turn in trange(num_rounds, desc=f"Running {algo_name}"):
                 # Attackers attack

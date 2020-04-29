@@ -12,7 +12,7 @@ import os
 import time
 
 import matplotlib
-matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -68,6 +68,7 @@ class Animater:
     def _format_graph(self):
         """Formats graph properly"""
 
+        matplotlib.use("Agg")
         plt.style.use('dark_background')
         # https://stackoverflow.com/a/48958260/8903959
         matplotlib.rcParams.update({'text.color' : "black"})

@@ -15,6 +15,7 @@ def split_list(list_to_split: list, num_chunks: int):
     """Splits a list into num_chunks"""
 
     chunks = []
+    assert len(list_to_split) >= num_chunks, "List to split is less than number of chunks"
 
     size_of_chunk = len(list_to_split) // num_chunks
     size_of_uneven_chunk = size_of_chunk + 1

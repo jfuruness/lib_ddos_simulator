@@ -8,4 +8,6 @@ __maintainer__ = "Justin Furuness, Anna Gorbenko"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+import random
+random.seed(0)
 from .ddos_simulator import DDOS_Simulator

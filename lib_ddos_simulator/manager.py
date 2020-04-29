@@ -21,6 +21,7 @@ class Manager:
         """inits buckets and stores threshold"""
 
         self.users = users
+        assert len(self.users) > 0, "No users? Surely a bug?"
         self._threshold = threshold
         self.buckets = [Bucket(user_chunk) for user_chunk in
                         split_list(self.users, num_buckets)]
