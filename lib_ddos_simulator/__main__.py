@@ -15,6 +15,7 @@ from .ddos_simulator import DDOS_Simulator
 from .sieve_manager import Sieve_Manager
 from .protag_manager import Protag_Manager
 from .utils import config_logging
+from .combination_grapher import Combination_Grapher
 
 def main():
     """Runs simulations with command line arguments"""
@@ -27,6 +28,7 @@ def main():
     parser.add_argument("--rounds", type=int, dest="rounds", default=20)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
+    parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
 
     args = parser.parse_args()
     if args.debug:
@@ -38,6 +40,8 @@ def main():
                        8,  # number of buckets
                        10,  # Threshold
                        Sieve_Manager.runnable_managers).run(10, animate=True)
+    elif args.graph_combos:
+        Combination_Grapher().run()
     else:
         DDOS_Simulator(int(args.num_users),
                        int(args.num_attackers),

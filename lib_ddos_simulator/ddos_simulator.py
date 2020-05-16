@@ -53,14 +53,18 @@ class DDOS_Simulator:
                                len(self.good_users),
                                len(self.attackers))
 
-    def run(self, num_rounds: int, animate: bool = False):
+    def run(self, num_rounds: int, animate: bool = False, graph_trials: bool = True):
         """Runs simulation"""
 
         for manager in self.managers:
             if animate:
                 animater = Animater(manager)
             algo_name = manager.__class__.__name__
-            for turn in trange(num_rounds, desc=f"Running {algo_name}"):
+            if graph_trials:
+                turns = trange(num_rounds, desc=f"Running {algo_name}")
+            else:
+                turns = range(num_rounds)
+            for turn in turns:
                 # Attackers attack
                 self.attack_buckets(manager)
                 self.grapher.capture_data(turn, manager, self.attackers)
@@ -72,7 +76,8 @@ class DDOS_Simulator:
                 manager.reset_buckets()
             if animate:
                 animater.run_animation(turn)
-        self.grapher.graph()
+        # Returns latest utility
+        return self.grapher.graph(graph_trials)
 
     def attack_buckets(self, manager):
         """Attackers attack"""

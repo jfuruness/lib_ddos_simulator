@@ -24,17 +24,18 @@ class Grapher:
         """Initializes simulation"""
 
         self._path = path
-        if os.path.exists(path):
-            shutil.rmtree(path)
-        os.makedirs(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
         self.good_users = num_good_users
         self.attackers = num_attackers
 
         self._data = {manager: {"X": [],
                                 "Y": {"num_buckets": [],
+                                      "total_serviced": [],
                                       "percent_serviced": [],
-                                      "percent_detected": []}}
+                                      "percent_detected": [],
+                                      "utility": []}}
                                 for manager in managers}
 
     def capture_data(self, round_num: int, manager: Manager, attackers: list):
@@ -44,15 +45,22 @@ class Grapher:
         # num buckets
         self._data[manager]["Y"]["num_buckets"].append(len(manager.buckets))
         # num serviced
-        serviced = (sum(len(x) for x in manager.buckets if not x.attacked))        
+        serviced = (sum(len(x) for x in manager.buckets if not x.attacked))
+        self._data[manager]["Y"]["total_serviced"].append(serviced)
         self._data[manager]["Y"]["percent_serviced"].append(
             serviced * 100 / len(manager.users))
         # num detected
         self._data[manager]["Y"]["percent_detected"].append(
             manager.attackers_detected * 100 / len(attackers))
+        # Utility: total number ever serviced / total number of buckets used ever
+        self._data[manager]["Y"]["utility"].append(
+            sum(self._data[manager]["Y"]["total_serviced"]) / sum(self._data[manager]["Y"]["num_buckets"]))
 
-    def graph(self):
+    def graph(self, graph_trials):
         """Graphs data"""
+
+        if not graph_trials:
+            return {manager.__class__: self._data[manager]["Y"]["utility"][-1] for manager in self._data}
 
         fig, axs = self._get_formatted_fig_axs()
 
@@ -78,7 +86,7 @@ class Grapher:
         import tikzplotlib
 
 #        tikzplotlib.save(os.path.join(self._path, "test.tex"))
-
+        return {manager.__class__: self._data[manager]["Y"]["utility"][-1] for manager in self._data}
 
     def styles(self, index):
         """returns styles and markers for graph lines"""
@@ -94,7 +102,9 @@ class Grapher:
     def _get_formatted_fig_axs(self):
         """Creates and formats axes"""
 
-        fig, axs = plt.subplots(3, sharex=True)
+        for key, val in self._data.items():
+            num_subplots = len(val["Y"])
+        fig, axs = plt.subplots(num_subplots, sharex=True)
         fig.suptitle(f"{self.good_users} users, {self.attackers} attackers")
         for manager, manager_data in self._data.items():
             for key_i, (key, val) in enumerate(manager_data["Y"].items()):
