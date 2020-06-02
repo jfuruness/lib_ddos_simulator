@@ -14,6 +14,8 @@ from sys import argv
 from .ddos_simulator import DDOS_Simulator
 from .sieve_manager import Sieve_Manager
 from .protag_manager import Protag_Manager
+from .kpo_manager import Kpo_Manager
+from .miad_manager import Miad_Manager
 from .utils import config_logging
 from .combination_grapher import Combination_Grapher
 
@@ -47,4 +49,4 @@ def main():
                        int(args.num_attackers),
                        int(args.num_buckets),
                        int(args.threshold),
-                       Sieve_Manager.runnable_managers + [Protag_Manager]).run(int(args.rounds))
+                       Sieve_Manager.runnable_managers + Miad_Manager.runnable_managers + [Protag_Manager] + [Kpo_Manager]).run(int(args.rounds))

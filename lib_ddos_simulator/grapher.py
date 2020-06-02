@@ -91,12 +91,12 @@ class Grapher:
     def styles(self, index):
         """returns styles and markers for graph lines"""
 
-        styles = ["-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"]
+        styles = ["-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed", "dashed", "dashed"]
         return styles[index]
 
     def markers(self, index):
 
-        markers = [".", "1", "*", "x", "d", "2", "3", "4"]
+        markers = [".", "1", "*", "x", "d", "2", "3", "4", "4", "4", "4"]
         return markers[index]
 
     def _get_formatted_fig_axs(self):
