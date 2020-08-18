@@ -78,7 +78,7 @@ class Combination_Grapher:
         percent_attackers_list = [i / 100 for i in range(1,50)]
 
         with tqdm(total=len(managers) * len(percent_attackers_list) * trials,
-                  desc="Running scenarios") as pbar:
+                  desc=f"Running {attacker.__name__}") as pbar:
             for manager in managers:
                 manager_data = scenario_data[manager]
                 for percent_attackers in percent_attackers_list:

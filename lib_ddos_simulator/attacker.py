@@ -78,18 +78,16 @@ class Ten_Percent_Lone_Attacker(Ten_Percent_Attacker):
 class Wait_For_One_Addition_Attacker(Attacker):
     num_additions = 1
 
-    def __init__(self, *args, **kwargs):
-        super(Wait_For_One_Addition_Attacker, self).__init__(*args, **kwargs)
-        self.starting_users = len(self.buckets)
-        self.total_additions = 0
-
-    def add_additions(self):
+    def add_additions(self, turn):
+        if turn == 0:
+            self.starting_users = len(self.bucket)
+            self.total_additions = 0
         if self.bucket.users > self.starting_users:
             self.total_additions += 1
             self.starting_users = self.bucket.users
 
     def _attack(self, turn):
-        self.add_additions()
+        self.add_additions(turn)
         if self.total_additions > self.num_additions:
             self.bucket.attacked = True
 
