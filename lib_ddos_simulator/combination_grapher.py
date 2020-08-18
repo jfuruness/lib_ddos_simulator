@@ -20,6 +20,13 @@ from tqdm import tqdm
 from .manager import Manager
 from .sieve_manager import Sieve_Manager
 from .protag_manager import Protag_Manager
+
+from .kpo_manager import Kpo_Manager
+from .miad_manager import Miad_Manager
+from .bounded_manager import Bounded_Manager
+
+
+
 from . import utils
 from .ddos_simulator import DDOS_Simulator
 
@@ -34,10 +41,13 @@ class Combination_Grapher:
         self.graph_path = graph_path
 
     def run(self,
-            managers=Sieve_Manager.runnable_managers + [Protag_Manager],
+            managers=Sieve_Manager.runnable_managers[:1] + [Protag_Manager,
+                                                            Kpo_Manager,
+                                                            #Miad_Manager,
+                                                            Bounded_Manager],
             num_buckets_list=[10],
-            users_per_bucket_list=[10 ** i for i in range(1,3)],
-            num_rounds_list=[10 ** i for i in range(1,3)]):
+            users_per_bucket_list=[10 ** i for i in range(1,2)],
+            num_rounds_list=[10 ** i for i in range(1,2)]):
 
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:

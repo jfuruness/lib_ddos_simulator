@@ -28,6 +28,21 @@ class Manager:
         for user in self.users:
             assert user.bucket in self.buckets
         self.attackers_detected = 0
+
+    @property
+    def attacked_buckets(self):
+        return [x for x in self.buckets if x.attacked]
+
+    @property
+    def non_attacked_buckets(self):
+        return [x for x in self.buckets if not x.attacked]
+
+    @property
+    def attacked_users(self):
+        attacked_users = []
+        for bucket in self.attacked_buckets:
+            attacked_users.extend(bucket.users)
+        return attacked_users
             
     def reset_buckets(self):
         """Sets all buckets to not be attacked"""

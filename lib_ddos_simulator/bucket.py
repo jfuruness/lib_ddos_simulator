@@ -14,7 +14,8 @@ class Bucket:
     """Simulates a Bucket that provides service for users"""
 
     # patch used in animations
-    __slots__ = ["users", "_max_users", "attacked", "patch"]
+    __slots__ = ["users", "_max_users", "attacked", "patch",
+                 "turns_not_attacked"]
 
     # Used in animations
     patch_width = User.patch_length()
@@ -30,6 +31,7 @@ class Bucket:
             user.bucket = self
         self._max_users = max_users
         self.attacked = False
+        self.turns_not_attacked = 0
 
     def __str__(self):
         """Returns users inside of bucket"""
