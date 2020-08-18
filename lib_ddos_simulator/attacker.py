@@ -80,7 +80,7 @@ class Wait_For_One_Addition_Attacker(Attacker):
 
     def __init__(self, *args, **kwargs):
         super(Wait_For_One_Addition_Attacker, self).__init__(*args, **kwargs)
-        self.starting_users = len(self.bucket)
+        self.starting_users = len(self.buckets)
         self.total_additions = 0
 
     def add_additions(self):
