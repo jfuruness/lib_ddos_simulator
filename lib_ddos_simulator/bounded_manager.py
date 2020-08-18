@@ -22,7 +22,7 @@ class Bounded_Manager(Manager):
 
     This Manager class uses a protag shuffling algorithm"""
 
-    __slots__ = []
+    __slots__ = ["num_attackers_guess"]
 
     def __init__(self, *args, **kwargs):
         super(Bounded_Manager, self).__init__(*args, **kwargs)
@@ -36,6 +36,8 @@ class Bounded_Manager(Manager):
             # 2x guess is the new number of buckets
             new_bucket_amnt = len(self.attacked_buckets) * 2
             new_bucket_amnt -= len(self.non_attacked_buckets)
+            if new_bucket_amnt == len(self.attacked_buckets):
+                new_bucket_amnt += 1
             self._shuffle_attacked_buckets(new_bucket_amnt)
 
         elif len(self.buckets) < self.num_attackers_guess * 3:
@@ -62,8 +64,13 @@ class Bounded_Manager(Manager):
         self._incriment_buckets()
             
     def _shuffle_attacked_buckets(self, new_bucket_amnt):
+        print(len(self.attacked_buckets))
+        print(len(self.attacked_users))
+        print(new_bucket_amnt)
+        users = self.attacked_users
+        shuffle(users)
         new_attacked_buckets = [Bucket(user_chunk) for user_chunk in
-                                split_list(shuffle(self.attacked_users),
+                                split_list(users,
                                            new_bucket_amnt)]
         self.buckets = self.non_attacked_buckets + new_attacked_buckets
 
