@@ -17,6 +17,7 @@ from statistics import mean, variance
 from math import sqrt
 from tqdm import tqdm
 
+from .attacker import Attacker
 from .manager import Manager
 from .sieve_manager import Sieve_Manager
 from .protag_manager import Protag_Manager
@@ -41,33 +42,39 @@ class Combination_Grapher:
         self.graph_path = graph_path
 
     def run(self,
-            managers=Sieve_Manager.runnable_managers[:1] + [Protag_Manager,
-                                                            Kpo_Manager,
-                                                            # Miad_Manager,
-                                                            Bounded_Manager],
+            managers=Sieve_Manager.runnable_managers[-1:] + [Protag_Manager,
+                                                             Kpo_Manager,
+                                                             Bounded_Manager],# + Miad_Manager.runnable_managers,
+            attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],
             users_per_bucket_list=[10 ** i for i in range(1,3)],
-            num_rounds_list=[10 ** i for i in range(1,3)]):
+            num_rounds_list=[10 ** i for i in range(1,3)],
+            trials=100):
+
 
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:
                 for num_rounds in num_rounds_list:
-                    self.get_graph_data(num_buckets,
-                                        users_per_bucket,
-                                        num_rounds,
-                                        managers)
+                    for attacker in attackers:
+                        self.get_graph_data(attacker,
+                                            num_buckets,
+                                            users_per_bucket,
+                                            num_rounds,
+                                            managers,
+                                            trials)
 
     def get_graph_data(self,
+                       attacker,
                        num_buckets,
                        users_per_bucket,
                        num_rounds,
-                       managers):
+                       managers,
+                       trials):
 
         scenario_data = {manager: {"X": [],
                                    "Y": [],
                                    "YERR": []}
                          for manager in managers}
-        trials = 100
         percent_attackers_list = [i / 100 for i in range(1,50)]
 
         with tqdm(total=len(managers) * len(percent_attackers_list) * trials,
@@ -80,7 +87,8 @@ class Combination_Grapher:
                     # TRIALS
                     for _ in range(trials):
                         # Get the utility for each trail and append it
-                        Y.append(self.run_scenario(num_buckets,
+                        Y.append(self.run_scenario(attacker,
+                                                   num_buckets,
                                                    users_per_bucket,
                                                    num_rounds,
                                                    percent_attackers,
@@ -94,9 +102,11 @@ class Combination_Grapher:
         self.graph_scenario(scenario_data,
                             num_buckets,
                             users_per_bucket,
-                            num_rounds)
+                            num_rounds,
+                            attacker)
 
     def run_scenario(self,
+                     attacker,
                      num_buckets,
                      users_per_bucket,
                      num_rounds,
@@ -114,27 +124,27 @@ class Combination_Grapher:
                                    threshold,
                                    [manager],
                                    self.stream_level,
-                                   self.graph_path)
+                                   self.graph_path, 
+                                   attacker_cls=attacker)
         # dict of {manager: final utility}
         utilities_dict =  simulator.run(num_rounds, graph_trials=False)
         return utilities_dict[manager]
 
-    def graph_scenario(self, scenario_data, num_buckets, users_per_bucket, num_rounds):
+    def graph_scenario(self, scenario_data, num_buckets, users_per_bucket, num_rounds, attacker):
 
         fig, axs, title = self._get_formatted_fig_axs(scenario_data,
                                                       num_buckets,
                                                       users_per_bucket,
-                                                      num_rounds)
+                                                      num_rounds, attacker)
 
         for manager_index, manager in enumerate(scenario_data):
 #            for x, y, yerr in zip(scenario_data[manager]["X"],
 #                                  scenario_data[manager]["Y"],
 #                                  scenario_data[manager]["YERR"]):
-                
             axs.errorbar(scenario_data[manager]["X"],  # X val
                          scenario_data[manager]["Y"],  # Y value
                          yerr=scenario_data[manager]["YERR"],
-                         label=manager.__name__,
+                         label=f"{manager.__name__}",
                          ls=self.styles(manager_index),
                          marker=self.markers(manager_index))
 
@@ -157,24 +167,28 @@ class Combination_Grapher:
         """returns styles and markers for graph lines"""
 
         styles = ["-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"]
+        styles += styles.copy()[::-1]
+        styles += styles.copy()[0:-2:2]
         return styles[index]
 
     def markers(self, index):
 
         markers = [".", "1", "*", "x", "d", "2", "3", "4"]
+        markers += markers.copy()[0:-2:2]
+        markers += markers.copy()[::-1]
         return markers[index]
 
-    def _get_formatted_fig_axs(self, scenario_data, num_buckets, users_per_bucket, num_rounds):
+    def _get_formatted_fig_axs(self, scenario_data, num_buckets, users_per_bucket, num_rounds, attacker):
         """Creates and formats axes"""
 
         fig, axs = plt.subplots(figsize=(20,10))
-        title = f"Scenario: buckets: {num_buckets}, users: {users_per_bucket * num_buckets}, rounds: {num_rounds}"
+        title = f"Scenario: buckets: {num_buckets}, users: {users_per_bucket * num_buckets}, rounds: {num_rounds}, attacker_cls: {attacker.__name__}"
         fig.suptitle(title)
-        for manager, manager_data in scenario_data.items():
-            max_y_limit = 0
+        max_y_limit = 0
+        for _, manager_data in scenario_data.items():
             if max(manager_data["Y"]) > max_y_limit:
                 max_y_limit = max(manager_data["Y"])
-        axs.set_ylim(-1, max_y_limit + (max_y_limit // 3))
+        axs.set_ylim(-1, max_y_limit + 5)
         axs.set(xlabel="Percent Attackers", ylabel="Utility")
 
         return fig, axs, title

@@ -31,6 +31,9 @@ class Bounded_Manager(Manager):
     def detect_and_shuffle(self, turn_num: int):
         """Protag algorithm"""
 
+        if turn_num == 0:
+            self.num_attackers_guess = len(self.attacked_buckets)
+
         if len(self.attacked_buckets) > self.num_attackers_guess:
             new_bucket_amnt = len(self.attacked_buckets)
             new_bucket_amnt -= self.num_attackers_guess
@@ -46,7 +49,7 @@ class Bounded_Manager(Manager):
             # Sorts buckets by reputation
             sorted_buckets = list(sorted(self.non_attacked_buckets,
                                          key=lambda x: x.turns_not_attacked))
-            for i in range(0, len(self.sorted_buckets), 2):
+            for i in range(0, len(sorted_buckets), 2):
                 try:
                     users = sorted_buckets[i].users
                     users += sorted_buckets[i + 1].users
@@ -61,12 +64,30 @@ class Bounded_Manager(Manager):
         self._incriment_buckets()
             
     def _shuffle_attacked_buckets(self, new_bucket_amnt):
-        users = self.attacked_users
-        shuffle(users)
-        new_attacked_buckets = [Bucket(user_chunk) for user_chunk in
-                                split_list(users,
-                                           new_bucket_amnt)]
-        self.buckets = self.non_attacked_buckets + new_attacked_buckets
+        new_attacked_buckets = [x for x in self.attacked_buckets if len(x) > 1]
+        new_bucket_amnt = self._remove_attackers(new_attacked_buckets,
+                                                 new_bucket_amnt)
+
+        if len(self.attacked_buckets) > 0 and new_bucket_amnt > 0:
+            users = self.attacked_users
+            shuffle(users)
+            new_attacked_buckets = [Bucket(user_chunk) for user_chunk in
+                                    split_list(users,
+                                               new_bucket_amnt)]
+            self.buckets = self.non_attacked_buckets + new_attacked_buckets
+
+    def _remove_attackers(self, new_attacked_buckets, new_bucket_amnt):
+        diff = len(self.attacked_buckets) - len(new_attacked_buckets)
+        if diff > 0:
+            self.buckets = new_attacked_buckets + self.non_attacked_buckets
+            self.num_attackers_guess -= diff
+            self.attackers_detected += diff
+            # Just in case, prob not needed
+            self.users = []
+            for bucket in self.buckets:
+                self.users.extend(bucket.users)
+            new_bucket_amnt -= diff
+        return new_bucket_amnt
 
     def _incriment_buckets(self):
         for bucket in self.buckets:

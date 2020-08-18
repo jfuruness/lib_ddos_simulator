@@ -23,7 +23,6 @@ class Miad_Manager(Manager):
 
     This Manager class uses a Miad shuffling algorithm"""
 
-    __slots__ = []
 
     runnable_managers = []
     # https://stackoverflow.com/a/43057166/8903959

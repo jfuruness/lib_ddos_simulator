@@ -15,7 +15,7 @@ from random import shuffle
 from tqdm import trange
 
 from .animater import Animater
-from .attacker import Attacker
+from .attacker import Attacker, Basic_Attacker
 from .grapher import Grapher
 from .manager import Manager
 from .user import User
@@ -24,7 +24,8 @@ from . import utils
 class DDOS_Simulator:
     """Simulates a DDOS attack"""
 
-    __slots__ = ["good_users", "attackers", "users", "managers", "grapher"]
+    __slots__ = ["good_users", "attackers", "users", "managers", "grapher",
+                 "attacker_cls"]
   
     def __init__(self,
                  num_users: int,
@@ -33,13 +34,14 @@ class DDOS_Simulator:
                  threshold: int,
                  Manager_Child_Classes: list,
                  stream_level=logging.INFO,
-                 graph_path: str = "/tmp/lib_ddos/"):
+                 graph_path: str = "/tmp/lib_ddos/",
+                 attacker_cls=Basic_Attacker):
         """Initializes simulation"""
 
         utils.config_logging(stream_level)
 
         self.good_users = [User(x) for x in range(num_users)]
-        self.attackers = [Attacker(x) for x in range(num_attackers)]                                
+        self.attackers = [attacker_cls(x) for x in range(num_attackers)]                                
         self.users = self.good_users + self.attackers
         # Shuffle so attackers are not at the end
         shuffle(self.users)
@@ -52,6 +54,7 @@ class DDOS_Simulator:
                                self.managers,
                                len(self.good_users),
                                len(self.attackers))
+        self.attacker_cls = attacker_cls
 
     def run(self, num_rounds: int, animate: bool = False, graph_trials: bool = True):
         """Runs simulation"""
@@ -66,7 +69,7 @@ class DDOS_Simulator:
                 turns = range(num_rounds)
             for turn in turns:
                 # Attackers attack
-                self.attack_buckets(manager)
+                self.attack_buckets(manager, turn)
                 self.grapher.capture_data(turn, manager, self.attackers)
                 if animate:
                     animater.capture_data(manager)
@@ -77,12 +80,12 @@ class DDOS_Simulator:
             if animate:
                 animater.run_animation(turn)
         # Returns latest utility
-        return self.grapher.graph(graph_trials)
+        return self.grapher.graph(graph_trials, self.attacker_cls)
 
-    def attack_buckets(self, manager):
+    def attack_buckets(self, manager, turn):
         """Attackers attack"""
 
         for user in manager.users:
             if isinstance(user, Attacker):
-                user.attack()
+                user.attack(turn)
                 assert user.bucket in manager.buckets

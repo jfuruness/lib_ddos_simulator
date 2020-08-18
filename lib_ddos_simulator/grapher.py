@@ -56,7 +56,7 @@ class Grapher:
         self._data[manager]["Y"]["utility"].append(
             sum(self._data[manager]["Y"]["total_serviced"]) / sum(self._data[manager]["Y"]["num_buckets"]))
 
-    def graph(self, graph_trials):
+    def graph(self, graph_trials, attacker_cls):
         """Graphs data"""
 
         if not graph_trials:
@@ -70,7 +70,7 @@ class Grapher:
                                 val,  # Y value
                                 label=manager.__class__.__name__,
                                 ls=self.styles(manager_index),
-                                 marker=self.markers(manager_index))
+                                marker=self.markers(manager_index))
 
         # https://stackoverflow.com/a/4701285/8903959
         for ax in axs:
