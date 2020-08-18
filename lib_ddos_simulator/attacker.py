@@ -79,7 +79,7 @@ class Wait_For_One_Addition_Attacker(Attacker):
     num_additions = 1
 
     def __init__(self, *args, **kwargs):
-        super(Patient_Attacker, self).__init__(*args, **kwargs)
+        super(Wait_For_One_Addition_Attacker, self).__init__(*args, **kwargs)
         self.starting_users = len(self.bucket)
         self.total_additions = 0
 
