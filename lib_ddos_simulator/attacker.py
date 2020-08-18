@@ -82,7 +82,7 @@ class Wait_For_One_Addition_Attacker(Attacker):
         if turn == 0:
             self.starting_users = len(self.bucket)
             self.total_additions = 0
-        if self.bucket.users > self.starting_users:
+        if len(self.bucket.users) > self.starting_users:
             self.total_additions += 1
             self.starting_users = self.bucket.users
 
