@@ -32,13 +32,10 @@ class Bounded_Manager(Manager):
         """Protag algorithm"""
 
         if len(self.attacked_buckets) > self.num_attackers_guess:
-            self.num_attackers_guess = len(self.attacked_buckets)
-            # 2x guess is the new number of buckets
-            new_bucket_amnt = len(self.attacked_buckets) * 2
-            new_bucket_amnt -= len(self.non_attacked_buckets)
-            if new_bucket_amnt == len(self.attacked_buckets):
-                new_bucket_amnt += 1
+            new_bucket_amnt = len(self.attacked_buckets)
+            new_bucket_amnt -= self.num_attackers_guess
             self._shuffle_attacked_buckets(new_bucket_amnt)
+            self.num_attackers_guess = len(self.attacked_buckets)
 
         elif len(self.buckets) < self.num_attackers_guess * 3:
             # Shuffle attacked users into num attacked buckets * 2
@@ -64,9 +61,6 @@ class Bounded_Manager(Manager):
         self._incriment_buckets()
             
     def _shuffle_attacked_buckets(self, new_bucket_amnt):
-        print(len(self.attacked_buckets))
-        print(len(self.attacked_users))
-        print(new_bucket_amnt)
         users = self.attacked_users
         shuffle(users)
         new_attacked_buckets = [Bucket(user_chunk) for user_chunk in

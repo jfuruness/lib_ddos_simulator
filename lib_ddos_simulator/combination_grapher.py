@@ -43,11 +43,11 @@ class Combination_Grapher:
     def run(self,
             managers=Sieve_Manager.runnable_managers[:1] + [Protag_Manager,
                                                             Kpo_Manager,
-                                                            #Miad_Manager,
+                                                            # Miad_Manager,
                                                             Bounded_Manager],
             num_buckets_list=[10],
-            users_per_bucket_list=[10 ** i for i in range(1,2)],
-            num_rounds_list=[10 ** i for i in range(1,2)]):
+            users_per_bucket_list=[10 ** i for i in range(1,3)],
+            num_rounds_list=[10 ** i for i in range(1,3)]):
 
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:
