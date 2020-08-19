@@ -50,8 +50,8 @@ class Combination_Grapher:
                                                              Bounded_Manager],# + Miad_Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],
-            users_per_bucket_list=[10 ** i for i in range(1,3)],
-            num_rounds_list=[10 ** i for i in range(1,3)],
+            users_per_bucket_list=[10 ** i for i in range(1,4)],
+            num_rounds_list=[10 ** i for i in range(1,4)],
             trials=100):
 
         if os.path.exists(self.graph_path):
