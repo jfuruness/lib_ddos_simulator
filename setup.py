@@ -17,6 +17,7 @@ setup(
         'setuptools',
         'tqdm',
         'pytest',
+        'pathos'
     ],
     classifiers=[
         'Environment :: Console',

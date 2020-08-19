@@ -13,6 +13,7 @@ import os
 import matplotlib.pyplot as plt
 import shutil
 import logging
+import shutil
 from statistics import mean, variance
 from math import sqrt
 from multiprocessing import cpu_count
@@ -53,6 +54,10 @@ class Combination_Grapher:
             num_rounds_list=[10 ** i for i in range(1,3)],
             trials=100):
 
+        if os.path.exists(self.graph_path):
+            shutil.rmtree(self.graph_path)
+            os.makedirs(self.graph_path)
+
         total = len(managers) * 50 * trials
         total *= len(num_buckets_list) * len(users_per_bucket_list) * len(num_rounds_list) * len(attackers)
 
@@ -77,7 +82,8 @@ class Combination_Grapher:
 
         p = ProcessingPool(nodes=cpu_count())
         p.map(self.get_graph_data, _pathos_attacker, _pathos_num_buckets_list, _pathos_users_per_bucket,
-              _pathos_num_rounds, [managers] * len(_pathos_attacker), [trials] * len(_pathos_attacker))
+              _pathos_num_rounds, [managers] * len(_pathos_attacker), [trials] * len(_pathos_attacker),
+              list(range(len(_pathos_attacker))), list([len(_pathos_attacker)] * len(_pathos_attacker)))
         p.close()
         p.join()
         p.clear()
@@ -89,8 +95,13 @@ class Combination_Grapher:
                        users_per_bucket,
                        num_rounds,
                        managers,
-                       trials):
-        print("Starting")
+                       trials,
+                       num,
+                       total_num):
+        
+        # https://stackoverflow.com/a/16910957/8903959
+        cpt = sum([len(files) for r, d, files in os.walk(self.graph_path)])
+        print(f"Starting: {cpt}/{total_num}        \r")
         scenario_data = {manager: {"X": [],
                                    "Y": [],
                                    "YERR": []}
@@ -114,7 +125,6 @@ class Combination_Grapher:
                 manager_data["Y"].append(mean(Y))
                 err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
                 manager_data["YERR"].append(err_length)
-        print("Done")
 
         self.graph_scenario(scenario_data,
                             num_buckets,

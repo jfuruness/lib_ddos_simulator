@@ -3,4 +3,5 @@ tikzplotlib
 wheel
 setuptools
 tqdm
+pathos
 pytest
