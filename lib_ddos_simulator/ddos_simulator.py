@@ -15,7 +15,7 @@ from random import shuffle
 from tqdm import trange
 
 from .animater import Animater
-from .attacker import Attacker, Basic_Attacker
+from .attacker import Attacker, Basic_Attacker, Mixed_Attacker
 from .grapher import Grapher
 from .manager import Manager
 from .user import User
@@ -41,7 +41,11 @@ class DDOS_Simulator:
         utils.config_logging(stream_level)
 
         self.good_users = [User(x) for x in range(num_users)]
-        self.attackers = [attacker_cls(x) for x in range(num_attackers)]                                
+        if isinstance(attacker_cls, Mixed_Attacker):
+            self.attackers = [X(i) for i, X in
+                              enumerate(attacker_cls.get_mix(num_attackers))]
+        else:
+            self.attackers = [attacker_cls(x) for x in range(num_attackers)]
         self.users = self.good_users + self.attackers
         # Shuffle so attackers are not at the end
         shuffle(self.users)

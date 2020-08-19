@@ -51,6 +51,10 @@ class Combination_Grapher:
             num_rounds_list=[10 ** i for i in range(1,3)],
             trials=100):
 
+        total = len(managers) * 50 * trials
+        total *= len(num_buckets_list) * len(users_per_bucket_list) * len(num_rounds_list) * len(attackers)
+
+        pbar = tqdm(total=total, desc=f"Running Scenarios")
 
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:
@@ -61,7 +65,8 @@ class Combination_Grapher:
                                             users_per_bucket,
                                             num_rounds,
                                             managers,
-                                            trials)
+                                            trials,
+                                            pbar)
 
     def get_graph_data(self,
                        attacker,
@@ -69,7 +74,8 @@ class Combination_Grapher:
                        users_per_bucket,
                        num_rounds,
                        managers,
-                       trials):
+                       trials,
+                       pbar):
 
         scenario_data = {manager: {"X": [],
                                    "Y": [],
@@ -77,26 +83,24 @@ class Combination_Grapher:
                          for manager in managers}
         percent_attackers_list = [i / 100 for i in range(1,50)]
 
-        with tqdm(total=len(managers) * len(percent_attackers_list) * trials,
-                  desc=f"Running {attacker.__name__}") as pbar:
-            for manager in managers:
-                manager_data = scenario_data[manager]
-                for percent_attackers in percent_attackers_list:
-                    manager_data["X"].append(percent_attackers)
-                    Y = []
-                    # TRIALS
-                    for _ in range(trials):
-                        # Get the utility for each trail and append it
-                        Y.append(self.run_scenario(attacker,
-                                                   num_buckets,
-                                                   users_per_bucket,
-                                                   num_rounds,
-                                                   percent_attackers,
-                                                   manager))
-                        pbar.update()
-                    manager_data["Y"].append(mean(Y))
-                    err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
-                    manager_data["YERR"].append(err_length)
+        for manager in managers:
+            manager_data = scenario_data[manager]
+            for percent_attackers in percent_attackers_list:
+                manager_data["X"].append(percent_attackers)
+                Y = []
+                # TRIALS
+                for _ in range(trials):
+                    # Get the utility for each trail and append it
+                    Y.append(self.run_scenario(attacker,
+                                               num_buckets,
+                                               users_per_bucket,
+                                               num_rounds,
+                                               percent_attackers,
+                                               manager))
+                    pbar.update()
+                manager_data["Y"].append(mean(Y))
+                err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
+                manager_data["YERR"].append(err_length)
                                     
 
         self.graph_scenario(scenario_data,
@@ -157,10 +161,12 @@ class Combination_Grapher:
         # Put a legend to the right of the current axis
         axs.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
 #        plt.show()
-        plt.savefig(os.path.join(self.graph_path, f"{title}.png"))
-
-        import tikzplotlib
-
+        graph_dir = os.path.join(self.graph_path, attacker.__name__)
+        if not os.path.exists(graph_dir):
+            os.makedirs(graph_dir)
+        plt.savefig(os.path.join(graph_dir, f"{title}.png"))
+        plt.close()
+#        import tikzplotlib
 #        tikzplotlib.save(os.path.join(self._path, "test.tex"))
 
     def styles(self, index):
