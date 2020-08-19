@@ -15,6 +15,8 @@ import shutil
 import logging
 from statistics import mean, variance
 from math import sqrt
+from multiprocessing import cpu_count
+from pathos.multiprocessing import ProcessingPool
 from tqdm import tqdm
 
 from .attacker import Attacker
@@ -54,19 +56,32 @@ class Combination_Grapher:
         total = len(managers) * 50 * trials
         total *= len(num_buckets_list) * len(users_per_bucket_list) * len(num_rounds_list) * len(attackers)
 
-        pbar = tqdm(total=total, desc=f"Running Scenarios")
+#        pbar = tqdm(total=total, desc=f"Running Scenarios")
 
+        _pathos_num_buckets_list = []
+        _pathos_users_per_bucket = []
+        _pathos_num_rounds = []
+        _pathos_attacker = []
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:
                 for num_rounds in num_rounds_list:
                     for attacker in attackers:
-                        self.get_graph_data(attacker,
-                                            num_buckets,
-                                            users_per_bucket,
-                                            num_rounds,
-                                            managers,
-                                            trials,
-                                            pbar)
+                        graph_dir = os.path.join(self.graph_path, attacker.__name__)
+                        if not os.path.exists(graph_dir):
+                            os.makedirs(graph_dir)
+
+                        _pathos_num_buckets_list.append(num_buckets)
+                        _pathos_users_per_bucket.append(users_per_bucket)
+                        _pathos_num_rounds.append(num_rounds)
+                        _pathos_attacker.append(attacker)
+
+        p = ProcessingPool(nodes=cpu_count())
+        p.map(self.get_graph_data, _pathos_attacker, _pathos_num_buckets_list, _pathos_users_per_bucket,
+              _pathos_num_rounds, [managers] * len(_pathos_attacker), [trials] * len(_pathos_attacker))
+        p.close()
+        p.join()
+        p.clear()
+
 
     def get_graph_data(self,
                        attacker,
@@ -74,9 +89,8 @@ class Combination_Grapher:
                        users_per_bucket,
                        num_rounds,
                        managers,
-                       trials,
-                       pbar):
-
+                       trials):
+        print("Starting")
         scenario_data = {manager: {"X": [],
                                    "Y": [],
                                    "YERR": []}
@@ -97,11 +111,10 @@ class Combination_Grapher:
                                                num_rounds,
                                                percent_attackers,
                                                manager))
-                    pbar.update()
                 manager_data["Y"].append(mean(Y))
                 err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
                 manager_data["YERR"].append(err_length)
-                                    
+        print("Done")
 
         self.graph_scenario(scenario_data,
                             num_buckets,
@@ -162,8 +175,6 @@ class Combination_Grapher:
         axs.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
 #        plt.show()
         graph_dir = os.path.join(self.graph_path, attacker.__name__)
-        if not os.path.exists(graph_dir):
-            os.makedirs(graph_dir)
         plt.savefig(os.path.join(graph_dir, f"{title}.png"))
         plt.close()
 #        import tikzplotlib
