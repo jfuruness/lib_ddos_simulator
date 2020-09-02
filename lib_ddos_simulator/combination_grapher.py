@@ -19,6 +19,7 @@ from math import sqrt
 from multiprocessing import cpu_count
 from pathos.multiprocessing import ProcessingPool
 from tqdm import tqdm
+import json
 
 from .attacker import Attacker
 from .manager import Manager
@@ -33,7 +34,8 @@ from .bounded_manager import Bounded_Manager
 
 from . import utils
 from .ddos_simulator import DDOS_Simulator
-
+class Worst_Case_Attacker:
+    pass
 
 class Combination_Grapher:
 
@@ -58,39 +60,38 @@ class Combination_Grapher:
             shutil.rmtree(self.graph_path)
             os.makedirs(self.graph_path)
 
-        total = len(managers) * 50 * trials
-        total *= len(num_buckets_list) * len(users_per_bucket_list) * len(num_rounds_list) * len(attackers)
+        # +1 for worst case attacker
+        pbar_total = len(num_buckets_list) * len(users_per_bucket_list) * len(num_rounds_list) * len(attackers)
 
 #        pbar = tqdm(total=total, desc=f"Running Scenarios")
 
         _pathos_num_buckets_list = []
         _pathos_users_per_bucket = []
         _pathos_num_rounds = []
-        _pathos_attacker = []
         for num_buckets in num_buckets_list:
             for users_per_bucket in users_per_bucket_list:
                 for num_rounds in num_rounds_list:
-                    for attacker in attackers:
+                    for attacker in attackers + [Worst_Case_Attacker]:
                         graph_dir = os.path.join(self.graph_path, attacker.__name__)
                         if not os.path.exists(graph_dir):
                             os.makedirs(graph_dir)
 
-                        _pathos_num_buckets_list.append(num_buckets)
-                        _pathos_users_per_bucket.append(users_per_bucket)
-                        _pathos_num_rounds.append(num_rounds)
-                        _pathos_attacker.append(attacker)
+                    _pathos_num_buckets_list.append(num_buckets)
+                    _pathos_users_per_bucket.append(users_per_bucket)
+                    _pathos_num_rounds.append(num_rounds)
 
         p = ProcessingPool(nodes=cpu_count())
-        p.map(self.get_graph_data, _pathos_attacker, _pathos_num_buckets_list, _pathos_users_per_bucket,
-              _pathos_num_rounds, [managers] * len(_pathos_attacker), [trials] * len(_pathos_attacker),
-              list(range(len(_pathos_attacker))), list([len(_pathos_attacker)] * len(_pathos_attacker)))
+        total = len(_pathos_num_rounds)
+        p.map(self.get_graph_data, [attackers] * total, _pathos_num_buckets_list, _pathos_users_per_bucket,
+              _pathos_num_rounds, [managers] * total, [trials] * total,
+              list(range(total)), list([pbar_total] * total))
         p.close()
         p.join()
         p.clear()
 
 
     def get_graph_data(self,
-                       attacker,
+                       attackers,
                        num_buckets,
                        users_per_bucket,
                        num_rounds,
@@ -98,39 +99,71 @@ class Combination_Grapher:
                        trials,
                        num,
                        total_num):
-        
-        # https://stackoverflow.com/a/16910957/8903959
-        cpt = sum([len(files) for r, d, files in os.walk(self.graph_path)])
-        print(f"Starting: {cpt}/{total_num}        \r")
-        scenario_data = {manager: {"X": [],
-                                   "Y": [],
-                                   "YERR": []}
-                         for manager in managers}
-        percent_attackers_list = [i / 100 for i in range(1,50)]
+        scenario_data = {manager: {attacker: {"X": [],
+                                              "Y": [],
+                                              "YERR": []}
+                                   for attacker in attackers}
+                             for manager in managers}
 
-        for manager in managers:
-            manager_data = scenario_data[manager]
-            for percent_attackers in percent_attackers_list:
-                manager_data["X"].append(percent_attackers)
-                Y = []
-                # TRIALS
-                for _ in range(trials):
-                    # Get the utility for each trail and append it
-                    Y.append(self.run_scenario(attacker,
-                                               num_buckets,
-                                               users_per_bucket,
-                                               num_rounds,
-                                               percent_attackers,
-                                               manager))
-                manager_data["Y"].append(mean(Y))
-                err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
-                manager_data["YERR"].append(err_length)
+        for attacker in attackers:
+            # https://stackoverflow.com/a/16910957/8903959
+            cpt = sum([len(files) for r, d, files in os.walk(self.graph_path)])
+            print(f"Starting: {cpt + 1}/{total_num}        \r")
+            percent_attackers_list = [i / 100 for i in range(1,50)]
 
-        self.graph_scenario(scenario_data,
+            for manager in managers:
+                manager_data = scenario_data[manager][attacker]
+                for percent_attackers in percent_attackers_list:
+                    manager_data["X"].append(percent_attackers)
+                    Y = []
+                    # TRIALS
+                    for _ in range(trials):
+                        # Get the utility for each trail and append it
+                        Y.append(self.run_scenario(attacker,
+                                                   num_buckets,
+                                                   users_per_bucket,
+                                                   num_rounds,
+                                                   percent_attackers,
+                                                   manager))
+                    manager_data["Y"].append(mean(Y))
+                    err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
+                    manager_data["YERR"].append(err_length)
+
+            self.graph_scenario(scenario_data,
+                                num_buckets,
+                                users_per_bucket,
+                                num_rounds,
+                                attacker)
+        # Create json of worst case attackers
+        worst_case_scenario_data = {manager: {Worst_Case_Attacker: {"X": [],
+                                                                    "Y": [],
+                                                                    "YERR": [],
+                                                                    "ATKS": []}}
+                                    for manager in managers}
+        for manager, manager_data in scenario_data.items():
+            xs = manager_data[attackers[0]]["X"]
+            for i, x in enumerate(xs):
+                # should be changed to be abs max but whatevs
+                min_utility = 100000000000000000000000
+                worst_case_atk = None
+                yerr = None
+                for attacker in attackers:
+                    if manager_data[attacker]["Y"][i] < min_utility:
+                        min_utility = manager_data[attacker]["Y"][i]
+                        worst_case_atk = attacker
+                        yerr = manager_data[attacker]["YERR"][i]
+                atk = Worst_Case_Attacker
+                worst_case_scenario_data[manager][atk]["X"].append(x)
+                worst_case_scenario_data[manager][atk]["Y"].append(min_utility)
+                worst_case_scenario_data[manager][atk]["YERR"].append(yerr)
+                worst_case_scenario_data[manager][atk]["ATKS"].append(worst_case_atk.__name__)
+
+        self.graph_scenario(worst_case_scenario_data,
                             num_buckets,
                             users_per_bucket,
                             num_rounds,
-                            attacker)
+                            Worst_Case_Attacker,
+                            write_json=True)
 
     def run_scenario(self,
                      attacker,
@@ -157,7 +190,7 @@ class Combination_Grapher:
         utilities_dict =  simulator.run(num_rounds, graph_trials=False)
         return utilities_dict[manager]
 
-    def graph_scenario(self, scenario_data, num_buckets, users_per_bucket, num_rounds, attacker):
+    def graph_scenario(self, scenario_data, num_buckets, users_per_bucket, num_rounds, attacker, write_json=False):
 
         fig, axs, title = self._get_formatted_fig_axs(scenario_data,
                                                       num_buckets,
@@ -168,9 +201,9 @@ class Combination_Grapher:
 #            for x, y, yerr in zip(scenario_data[manager]["X"],
 #                                  scenario_data[manager]["Y"],
 #                                  scenario_data[manager]["YERR"]):
-            axs.errorbar(scenario_data[manager]["X"],  # X val
-                         scenario_data[manager]["Y"],  # Y value
-                         yerr=scenario_data[manager]["YERR"],
+            axs.errorbar(scenario_data[manager][attacker]["X"],  # X val
+                         scenario_data[manager][attacker]["Y"],  # Y value
+                         yerr=scenario_data[manager][attacker]["YERR"],
                          label=f"{manager.__name__}",
                          ls=self.styles(manager_index),
                          marker=self.markers(manager_index))
@@ -185,8 +218,14 @@ class Combination_Grapher:
         axs.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
 #        plt.show()
         graph_dir = os.path.join(self.graph_path, attacker.__name__)
-        plt.savefig(os.path.join(graph_dir, f"{title}.png"))
+        graph_path = os.path.join(graph_dir, f"{title}.png")
+        plt.savefig(graph_path)
         plt.close()
+        if write_json:
+            with open(graph_path.replace("png", "json"), "w") as f:
+                data = {m.__name__: {atk.__name__: end_dict for atk, end_dict in m_data.items()}
+                        for m, m_data in scenario_data.items()}
+                json.dump(data, f)
 #        import tikzplotlib
 #        tikzplotlib.save(os.path.join(self._path, "test.tex"))
 
@@ -213,8 +252,8 @@ class Combination_Grapher:
         fig.suptitle(title)
         max_y_limit = 0
         for _, manager_data in scenario_data.items():
-            if max(manager_data["Y"]) > max_y_limit:
-                max_y_limit = max(manager_data["Y"])
+            if max(manager_data[attacker]["Y"]) > max_y_limit:
+                max_y_limit = max(manager_data[attacker]["Y"])
         axs.set_ylim(-1, max_y_limit + 5)
         axs.set(xlabel="Percent Attackers", ylabel="Utility")
 
