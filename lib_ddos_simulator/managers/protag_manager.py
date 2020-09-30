@@ -7,7 +7,7 @@ This manager inherits Manager class and uses Protag shuffling algorithm
 """
 
 __Lisence__ = "BSD"
-__maintainer__ = "Justin Furuness, Anna Gorbenko"
+__maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
