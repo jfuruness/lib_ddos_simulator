@@ -7,7 +7,7 @@ setup(
     version='0.0.0',
     author='Justin Furuness and Anna Gorbenko',
     author_email=['jfuruness@gmail.com', 'agorbenko97@gmail.com'],
-    url='https://github.com/agorbenko/lib_ddos.git',
+    url='https://github.com/agorbenko/lib_ddos_simulator.git',
     download_url='https://github.com/agorbenko/lib_ddos.git',
     keywords=['Furuness', 'Gorbenko', 'DDOS', 'DOS', 'Simulation',
               'Sieve', 'Protag', 'KPO', 'DOSE',
