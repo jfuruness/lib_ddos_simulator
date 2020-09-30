@@ -1,5 +1,3 @@
-(*DISCLAIMER!!!! This package is just for fun. Use it for simulation research and/or API usage at your own risk, assume it is broken!*)
-
 # lib\_ddos\_simulator
 This package contains functionality to simulate, graph, and animate various attack/defense scenarios for DDOS attacks. It is also easily extendable to allow for easy testing of defense techniques. The purpose of this library is to determine which DDOS defense techniques from published literature work the best in practice.
 
@@ -66,6 +64,11 @@ The simulation works like the following:
 6. Each turn, the manager detects attackers and shuffles (according to that manager's algorithm
 7. Each turn, all buckets are reset
 8. The grapher represents the data after all turns are complete
+
+Assumptions:
+* Static set of users
+* No maximum capacity to a bucket
+* Managers have unlimited number of potential buckets
 
 ## Usage
 * [lib\_ddos\_simulator](#lib_ddos_simulator)

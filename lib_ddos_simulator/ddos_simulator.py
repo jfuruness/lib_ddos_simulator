@@ -14,19 +14,18 @@ from random import shuffle
 
 from tqdm import trange
 
-from .animater import Animater
-from .attacker import Attacker, Basic_Attacker, Mixed_Attacker
-from .grapher import Grapher
-from .manager import Manager
-from .user import User
+from .graphers import Animater, Grapher
+from .attackers import Attacker, Basic_Attacker, Mixed_Attacker
+from .simulation_objects import User
 from . import utils
+
 
 class DDOS_Simulator:
     """Simulates a DDOS attack"""
 
     __slots__ = ["good_users", "attackers", "users", "managers", "grapher",
                  "attacker_cls"]
-  
+
     def __init__(self,
                  num_users: int,
                  num_attackers: int,
@@ -41,9 +40,12 @@ class DDOS_Simulator:
         utils.config_logging(stream_level)
 
         self.good_users = [User(x) for x in range(num_users)]
+        # This allows us to take mixes of attackers
         if isinstance(attacker_cls, Mixed_Attacker):
+            # get_mix returns a list of attacker classes
             self.attackers = [X(i) for i, X in
                               enumerate(attacker_cls.get_mix(num_attackers))]
+        # If it is not a mixed attacker, simply initialize attackers
         else:
             self.attackers = [attacker_cls(x) for x in range(num_attackers)]
         self.users = self.good_users + self.attackers
@@ -60,20 +62,20 @@ class DDOS_Simulator:
                                len(self.attackers))
         self.attacker_cls = attacker_cls
 
-    def run(self, num_rounds: int, animate: bool = False, graph_trials: bool = True):
+    def run(self, num_rounds: int, animate=False, graph_trials=True):
         """Runs simulation"""
 
         for manager in self.managers:
-            if animate:
-                animater = Animater(manager)
-            algo_name = manager.__class__.__name__
-            if graph_trials:
-                turns = trange(num_rounds, desc=f"Running {algo_name}")
-            else:
-                turns = range(num_rounds)
+            # Sets up animator and turns
+            animater, turns = self.init_sim(manager,
+                                            num_rounds,
+                                            animate,
+                                            graph_trials)
+
             for turn in turns:
                 # Attackers attack
                 self.attack_buckets(manager, turn)
+                # Record statistics
                 self.grapher.capture_data(turn, manager, self.attackers)
                 if animate:
                     animater.capture_data(manager)
@@ -83,8 +85,25 @@ class DDOS_Simulator:
                 manager.reset_buckets()
             if animate:
                 animater.run_animation(turn)
-        # Returns latest utility
+        # Returns latest utility, used for combination graphing
         return self.grapher.graph(graph_trials, self.attacker_cls)
+
+    def init_sim(self, manager, num_rounds, animate, graph_trials):
+        """Sets up animator and turn list"""
+
+        # We can only animate one manager at a time
+        animater = Animater(manager) if animate else None
+        # If we are graphing for just one manager
+        # Print and turn on tqdm
+        if graph_trials:
+            algo_name = manager.__class__.__name__
+            turns = trange(num_rounds, desc=f"Running {algo_name}")
+        # If we are comparing managers, multiprocessing is used
+        # So no tqdm as to not have garbled output
+        else:
+            turns = range(num_rounds)
+
+        return animater, turns
 
     def attack_buckets(self, manager, turn):
         """Attackers attack"""
