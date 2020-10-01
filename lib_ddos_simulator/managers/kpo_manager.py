@@ -19,7 +19,7 @@ from ..simulation_objects import Bucket
 from ..utils import split_list
 
 
-class Kpo_Manager(Manager):
+class KPO_Manager(Manager):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a protag shuffling algorithm"""

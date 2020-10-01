@@ -13,8 +13,10 @@ import random
 random.seed(0)
 
 # Importing all due to large number of attacker types
-from .attackers import Attacker, *
+from .attackers import *
+
 from .ddos_simulator import DDOS_Simulator
 from .graphers import Animater, Combination_Grapher, Grapher
+
 # Importing all due to large number of manager types
-from .managers import Manager, *
+from .managers import *

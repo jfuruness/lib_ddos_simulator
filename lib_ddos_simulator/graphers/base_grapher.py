@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+import logging
 import os
 
 import shutil
@@ -19,16 +20,16 @@ from ..utils import config_logging
 class Base_Grapher:
     """Contains methods to be inherited by other graph classes"""
 
-    __slots__ = ["stream_level", "graph_dir", "tikz"]
+    __slots__ = ["stream_level", "graph_dir", "tikz", "save"]
   
     def __init__(self,
                  stream_level=logging.INFO,
-                 graph_dir=os.path.join("tmp", "lib_ddos_simulator"),
+                 graph_dir=os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
                  save=False):
         """Initializes simulation"""
 
-        utils.config_logging(stream_level)
+        config_logging(stream_level)
         self.stream_level = stream_level
         self.graph_dir = graph_dir
         self.make_graph_dir()
@@ -38,8 +39,7 @@ class Base_Grapher:
     def make_graph_dir(self):
         """Creates graph path from scratch"""
 
-        if os.path.exists(self.graph_dir):
-            shutil.rmtree(self.graph_dir)
+        if not os.path.exists(self.graph_dir):
             os.makedirs(self.graph_dir)
 
     def styles(self, index):
@@ -63,7 +63,7 @@ class Base_Grapher:
 
         if self.save:
             if self.tikz:
-                self.save_tikz(path)
+                self.save_tikz(path.replace(".png", ".tex"))
             else:
                 self.save_matplotlib(path, plt)
         else:
@@ -78,3 +78,4 @@ class Base_Grapher:
         """Saves matplotlib"""
 
         plt.savefig(path)
+        plt.close()

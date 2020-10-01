@@ -10,6 +10,7 @@ __status__ = "Development"
 
 from copy import deepcopy
 import logging
+import os
 from random import shuffle
 
 from tqdm import trange
@@ -23,8 +24,8 @@ from . import utils
 class DDOS_Simulator:
     """Simulates a DDOS attack"""
 
-    __slots__ = ["good_users", "attackers", "users", "managers", "grapher",
-                 "attacker_cls"]
+    __slots__ = ["graph_kwargs", "good_users", "attackers", "users",
+                 "managers", "grapher", "attacker_cls"]
 
     def __init__(self,
                  num_users: int,
@@ -41,7 +42,7 @@ class DDOS_Simulator:
         """Initializes simulation"""
 
         self.graph_kwargs = {"stream_level": stream_level,
-                             "graph_dir": self.graph_dir,
+                             "graph_dir": graph_dir,
                              "tikz": tikz,
                              "save": save}
 
@@ -81,6 +82,10 @@ class DDOS_Simulator:
                                             graph_trials)
 
             for turn in turns:
+                print(f"Turns: {turns}, "
+                      f"num_rounds: {num_rounds}, "
+                      f"manager: {manager.__class__.__name__} "
+                      f"percent atk: {len(self.attackers) / len(self.users)}")
                 # Attackers attack
                 self.attack_buckets(manager, turn)
                 # Record statistics
@@ -88,13 +93,15 @@ class DDOS_Simulator:
                 if animate:
                     animater.capture_data(manager)
                 # Manager detects and removes suspicious users, then shuffles
+                
                 manager.detect_and_shuffle(turn)
                 # All buckets are no longer attacked for the next round
                 manager.reset_buckets()
             if animate:
                 animater.run_animation(turn)
-        # Returns latest utility, used for combination graphing
-        return self.grapher.graph(graph_trials, self.attacker_cls)
+        if not animate:
+            # Returns latest utility, used for combination graphing
+            return self.grapher.graph(graph_trials, self.attacker_cls)
 
     def init_sim(self, manager, num_rounds, animate, graph_trials):
         """Sets up animator and turn list"""

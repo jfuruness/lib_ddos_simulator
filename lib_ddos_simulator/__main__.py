@@ -9,45 +9,63 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from argparse import ArgumentParser
+from logging import DEBUG
+import os
 from sys import argv
 
 from .ddos_simulator import DDOS_Simulator
-from .sieve_manager import Sieve_Manager
-from .protag_manager import Protag_Manager
-from .kpo_manager import Kpo_Manager
-from .miad_manager import Miad_Manager
-from .bounded_manager import Bounded_Manager
+from .managers import Sieve_Manager_Base, Protag_Manager, KPO_Manager, Miad_Manager, Bounded_Manager
 from .utils import config_logging
-from .combination_grapher import Combination_Grapher
+from .graphers import Combination_Grapher
 
 def main():
     """Runs simulations with command line arguments"""
 
     parser = ArgumentParser(description="Runs a DDOS simulation")
-    parser.add_argument("--num_users", type=int, dest="num_users", default=1000)
-    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=10)
-    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=100)
+    # NOTE: these defaults are chosen that way because they work for the animator
+    # Changing these defaults will result in worse animations
+    parser.add_argument("--num_users", type=int, dest="num_users", default=24)
+    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=4)
+    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=8)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=20)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=10)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
+    parser.add_argument("--combination_grapher", dest="graph_combos", default=False, action='store_true')
+    parser.add_argument("--tikz", dest="tikz", default=False, action="store_true")
+    parser.add_argument("--save", dest="save", default=False, action="store_true")
+    parser.add_argument("--trials", type=int, dest="trials", default=100)
+    parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
+
 
     args = parser.parse_args()
     if args.debug:
         config_logging(DEBUG)
 
     if args.animate:
-        DDOS_Simulator(24,  # number of users
-                       4,  # number of attackers
-                       8,  # number of buckets
-                       10,  # Threshold
-                       Sieve_Manager.runnable_managers).run(10, animate=True)
+        # NOTE: for optimal animations,
+        # use 24, 4, 8, 10 for users, attackers, buckets, threshold
+        DDOS_Simulator(args.num_users,  # number of users
+                       args.num_attackers,  # number of attackers
+                       args.num_buckets,  # number of buckets
+                       args.threshold,  # Threshold
+                       Sieve_Manager_Base.runnable_managers,
+                       graph_dir=args.graph_dir,
+                       save=args.save).run(args.rounds, animate=True)
     elif args.graph_combos:
-        Combination_Grapher().run()
+        Combination_Grapher(graph_dir=args.graph_dir,
+                            tikz=args.tikz,
+                            save=args.save).run(trials=args.trials)
     else:
-        DDOS_Simulator(int(args.num_users),
-                       int(args.num_attackers),
-                       int(args.num_buckets),
-                       int(args.threshold),
-                       Sieve_Manager.runnable_managers + Miad_Manager.runnable_managers + [Protag_Manager] + [Kpo_Manager] + [Bounded_Manager]).run(int(args.rounds))
+        all_managers = (Sieve_Manager.runnable_managers +
+                        Miad_Manager.runnable_managers +
+                        [Protag_Manager, KPO_Manager, Bounded_Manager])
+        DDOS_Simulator(args.num_users,
+                       args.num_attackers,
+                       args.num_buckets,
+                       args.threshold,
+                       all_managers,
+                       graph_dir=args.graph_dir,
+                       save=args.save,
+                       tikz=args.tikz).run(args.rounds)

@@ -103,6 +103,9 @@ class Bounded_Manager(Manager):
     def _shuffle_attacked_buckets(self, new_bucket_amnt):
         """Detects/Moves attackers into new_bucket_amnt buckets and shuffles"""
 
+        og_new_bucket_amnt = new_bucket_amnt
+        og_attackers = len(self.attackers)
+
         # Get rid of attackers if they are the only one in the bucket first
         new_attacked_buckets = [x for x in self.attacked_buckets if len(x) > 1]
         new_bucket_amnt = self._remove_attackers(new_attacked_buckets,
@@ -110,6 +113,9 @@ class Bounded_Manager(Manager):
 
         # Checking to make sure we didn't remove all attackers
         if len(self.attacked_buckets) > 0 and new_bucket_amnt > 0:
+            # This can happen if we remove an attacker
+            if new_bucket_amnt > len(self.attacked_users):
+                new_bucket_amnt = len(self.attacked_users)
             users = self.attacked_users
             shuffle(users)
             new_attacked_buckets = [Bucket(user_chunk) for user_chunk in

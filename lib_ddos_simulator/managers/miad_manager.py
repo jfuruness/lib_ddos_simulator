@@ -16,7 +16,7 @@ from random import shuffle
 
 from .manager import Manager
 
-from ..Simulation_Objects import Bucket
+from ..simulation_objects import Bucket
 from ..utils import split_list
 
 

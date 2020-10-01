@@ -8,7 +8,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from ..Simulation_Objects import Bucket, User
+from ..attackers import Attacker
+from ..simulation_objects import Bucket, User
 from ..utils import split_list
 
 
@@ -80,6 +81,12 @@ class Manager:
         self.users = []
         for bucket in self.buckets:
             self.users.extend(bucket.users)
+
+    @property
+    def attackers(self):
+        """Returns all attackers"""
+
+        return [x for x in self.users if isinstance(x, Attacker)]
 
     def add_user(self, user: User):
         """Adds user to lowest bucket.

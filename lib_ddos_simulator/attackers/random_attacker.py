@@ -10,7 +10,7 @@ __status__ = "Development"
 
 from random import random
 
-from ..attacker import Attacker
+from .attacker import Attacker
 
 
 class Random_Attacker(Attacker):

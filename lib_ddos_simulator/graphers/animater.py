@@ -8,24 +8,28 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+import os
+
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
 import numpy as np
+from tqdm import tqdm
 
-from .attacker import Attacker
-from .bucket import Bucket
-from .manager import Manager
-from .sieve_manager import Sieve_Manager
-from .user import User
+from .base_grapher import Base_Grapher
+
+from ..attackers import Attacker
+from ..simulation_objects import Bucket, User
+from ..managers import Manager, Sieve_Manager_Base
 
 
 class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
     __slots__ = ["_data", "ax", "buckets", "round", "max_users", "fig",
-                 "users", "name", "round_text", "frames_per_round"]
+                 "users", "name", "round_text", "frames_per_round",
+                 "total_rounds"]
 
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
@@ -38,12 +42,14 @@ class Animater(Base_Grapher):
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 10
-        assert isinstance(manager, Sieve_Manager), "Can't do that manager yet"
+        self.frames_per_round = 100
+        self.total_rounds = 0
+        assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
 
     def capture_data(self, manager: Manager):
         """Captures data for the round"""
 
+        self.total_rounds += 1
         # add to the points array
         for bucket in manager.buckets:
             user_y = User.patch_padding
@@ -67,19 +73,26 @@ class Animater(Base_Grapher):
                                        interval=40,
                                        blit=True)
 
+        self.save_graph(anim)
+
 
     def save_graph(self, anim):
         """Saves animation, overwrites Base_Grapher method"""
 
-        # Callback function for saving animation
-        def callback(current_frame_number, total_frames):
-            print(f'Saving frame {current_frame_number}/{total_frames}   \r')
-
         # self.save is an attr of Base_Grapher
         if self.save:
+
+            pbar = tqdm(desc="Saving video",
+                        total=self.frames_per_round * (self.total_rounds - 1))
+            # Callback function for saving animation
+            def callback(current_frame_number, total_frames):
+                pbar.update()
+
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
+
             anim.save(path, progress_callback=callback)
+            pbar.close()
         else:
             plt.show()
 
