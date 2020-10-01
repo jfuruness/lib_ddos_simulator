@@ -10,6 +10,7 @@ __status__ = "Development"
 
 from .user import User
 
+
 class Bucket:
     """Simulates a Bucket that provides service for users"""
 
@@ -20,7 +21,7 @@ class Bucket:
     # Used in animations
     patch_width = User.patch_length()
     patch_padding = .5
-  
+
     def __init__(self, users: list = [], max_users=100000000):
         """Stores users"""
 
@@ -47,6 +48,7 @@ class Bucket:
         """Adds user if not over _max_users, returns True, else False"""
 
         if len(self.users) > self._max_users:
+            assert False, "Not yet implimented"
             return False
         else:
             self.users.append(user)
@@ -55,13 +57,17 @@ class Bucket:
     def update_suspicion(self):
         """Updates suspicion level of all users in bucket"""
 
-        multiplier = 1 if self.attacked else 0#-1
+        multiplier = int(self.attacked)
         for user in self.users:
             user.suspicion += (1 / len(self.users)) * multiplier
 
     @staticmethod
     def patch_length():
+        """Animation object length"""
+
         return Bucket.patch_width + Bucket.patch_padding * 2
 
     def patch_center(self):
+        """Gets the center of the animation object for moving"""
+
         return self.patch.get_x() + self.patch.get_width() / 2

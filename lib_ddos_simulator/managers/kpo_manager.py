@@ -11,11 +11,13 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-
-from .bucket import Bucket
-from .manager import Manager
-from .utils import split_list
 import random
+
+from .manager import Manager
+
+from ..simulation_objects import Bucket
+from ..utils import split_list
+
 
 class Kpo_Manager(Manager):
     """Simulates a manager for a DDOS attack

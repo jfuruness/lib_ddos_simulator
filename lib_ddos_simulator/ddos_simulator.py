@@ -33,9 +33,17 @@ class DDOS_Simulator:
                  threshold: int,
                  Manager_Child_Classes: list,
                  stream_level=logging.INFO,
-                 graph_path: str = "/tmp/lib_ddos/",
+                 # The graph kwargs
+                 graph_dir: str = os.path.join("tmp", "lib_ddos_simulator"),
+                 tikz=False,
+                 save=False,
                  attacker_cls=Basic_Attacker):
         """Initializes simulation"""
+
+        self.graph_kwargs = {"stream_level": stream_level,
+                             "graph_dir": self.graph_dir,
+                             "tikz": tikz,
+                             "save": save}
 
         utils.config_logging(stream_level)
 
@@ -56,10 +64,10 @@ class DDOS_Simulator:
                          for X in Manager_Child_Classes]
 
         # Creates graphing class to capture data
-        self.grapher = Grapher(graph_path,
-                               self.managers,
+        self.grapher = Grapher(self.managers,
                                len(self.good_users),
-                               len(self.attackers))
+                               len(self.attackers),
+                               **self.graph_kwargs)
         self.attacker_cls = attacker_cls
 
     def run(self, num_rounds: int, animate=False, graph_trials=True):
@@ -92,7 +100,7 @@ class DDOS_Simulator:
         """Sets up animator and turn list"""
 
         # We can only animate one manager at a time
-        animater = Animater(manager) if animate else None
+        animater = Animater(manager, **self.graph_kwargs) if animate else None
         # If we are graphing for just one manager
         # Print and turn on tqdm
         if graph_trials:

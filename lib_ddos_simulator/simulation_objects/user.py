@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+
 class User:
     """Simulates a user for a DDOS attack"""
 
@@ -18,8 +19,8 @@ class User:
     # Used in animations
     patch_radius = 1
     patch_padding = .25
-  
-    def __init__(self, identifier: int, suspicion: float = 0, bucket = None):
+
+    def __init__(self, identifier: int, suspicion: float = 0, bucket=None):
         """Stores user values"""
 
         # Used to differentiate users
@@ -46,4 +47,6 @@ class User:
 
     @staticmethod
     def patch_length():
+        """Returns animation object length"""
+
         return User.patch_radius * 2 + User.patch_padding * 2

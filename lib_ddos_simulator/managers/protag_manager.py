@@ -12,9 +12,10 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-from .bucket import Bucket
 from .manager import Manager
-from .utils import split_list
+
+from ..simulation_objects import Bucket
+from ..utils import split_list
 
 class Protag_Manager(Manager):
     """Simulates a manager for a DDOS attack
@@ -26,20 +27,15 @@ class Protag_Manager(Manager):
     def detect_and_shuffle(self, turn_num: int):
         """Protag algorithm"""
 
-        old_buckets = self.buckets
-        users_to_remove = []
-        self.buckets = []
-        for bucket in old_buckets:
-            if bucket.attacked:
-                # Only one user and attacked, so remove both
-                if len(bucket) == 1:
-                    users_to_remove.extend(bucket.users)
-                else:
-                    # Attacked with more than one user, split in two
-                    for user_chunk in split_list(bucket.users, 2):
-                        self.buckets.append(Bucket(user_chunk))
-            else:
-                # Not attacked, do not change
-                self.buckets.append(bucket)
-        self.users = [x for x in self.users if x not in users_to_remove]
-        self.attackers_detected += len(users_to_remove)
+        # Removes bucket/attacker if bucket is attacked and len is 1
+        # Increase detected by 1 for every attacker removed
+        self.remove_attackers()
+
+        new_buckets = self.non_attacked_buckets
+
+        for bucket in self.attacked_buckets:
+            # Attacked with more than one user, split in two
+            for user_chunk in split_list(bucket.users, 2):
+                new_buckets.append(Bucket(user_chunk))
+
+        self.buckets = new_buckets

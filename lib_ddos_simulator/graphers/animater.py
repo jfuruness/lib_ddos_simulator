@@ -21,15 +21,17 @@ from .sieve_manager import Sieve_Manager
 from .user import User
 
 
-class Animater:
+class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
     __slots__ = ["_data", "ax", "buckets", "round", "max_users", "fig",
                  "users", "name", "round_text", "frames_per_round"]
 
-    def __init__(self, manager):
+    def __init__(self, manager, **kwargs):
         """Initializes simulation"""
 
+        super(Animater, self).__init__(**kwargs)
+        assert self.tikz is False, "Can't save animation as tikz afaik"
         self.buckets = manager.buckets
         self.max_users, self.fig, self.ax = self._format_graph()
         self.users = manager.users
@@ -65,19 +67,29 @@ class Animater:
                                        interval=40,
                                        blit=True)
 
+
+    def save_graph(self, anim):
+        """Saves animation, overwrites Base_Grapher method"""
+
+        # Callback function for saving animation
         def callback(current_frame_number, total_frames):
             print(f'Saving frame {current_frame_number}/{total_frames}   \r')
 
-        anim.save(f'{self.name}_animation.mp4', progress_callback=callback)
-        # Turned off because we save it instead
-        # plt.show()
+        # self.save is an attr of Base_Grapher
+        if self.save:
+            # graph_dir comes from inherited class
+            path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
+            anim.save(path, progress_callback=callback)
+        else:
+            plt.show()
 
     def _format_graph(self):
         """Formats graph properly
 
         Basically makes graph colorful"""
 
-        matplotlib.use("Agg")
+        if self.save:
+            matplotlib.use("Agg")
         plt.style.use('dark_background')
         # https://stackoverflow.com/a/48958260/8903959
         matplotlib.rcParams.update({'text.color': "black"})
@@ -160,6 +172,14 @@ class Animater:
         return objs
 
     def animate(self, i):
+        """Animates the frame
+
+        moves all objects partway to the next point. Basically,
+        determines the final destination, and moves 1/frames_per_round
+        of the way there. It only moves users, and so must move horns
+        and text of the user as well
+        """
+
         for user in self.users:
             current_point = user.points[i // self.frames_per_round]
             future_point = user.points[(i // self.frames_per_round) + 1]
@@ -197,6 +217,8 @@ class Animater:
         return objs
 
     def get_horn_array(self, user):
+        """Returns the horn array for the attackers"""
+
         horn_array = np.array(
                         [user.patch.center,
                          [user.patch.center[0] - User.patch_radius,
@@ -213,6 +235,7 @@ class Animater:
         return horn_array
 
 
+# Basically just makes the colors pretty
 # https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/gradient_bar.html
 def gradient_image(ax, extent, direction=0.3, cmap_range=(0, 1), **kwargs):
     """

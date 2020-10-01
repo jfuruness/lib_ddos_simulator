@@ -14,9 +14,12 @@ __status__ = "Development"
 from functools import reduce
 from random import shuffle
 
-from .bucket import Bucket
 from .manager import Manager
-from .utils import split_list
+
+from ..Simulation_Objects import Bucket
+from ..utils import split_list
+
+
 
 class Miad_Manager(Manager):
     """Simulates a manager for a DDOS attack
