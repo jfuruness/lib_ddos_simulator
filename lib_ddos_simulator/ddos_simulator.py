@@ -35,7 +35,7 @@ class DDOS_Simulator:
                  Manager_Child_Classes: list,
                  stream_level=logging.INFO,
                  # The graph kwargs
-                 graph_dir: str = os.path.join("tmp", "lib_ddos_simulator"),
+                 graph_dir: str = os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
                  save=False,
                  attacker_cls=Basic_Attacker):
@@ -82,10 +82,6 @@ class DDOS_Simulator:
                                             graph_trials)
 
             for turn in turns:
-                print(f"Turns: {turns}, "
-                      f"num_rounds: {num_rounds}, "
-                      f"manager: {manager.__class__.__name__} "
-                      f"percent atk: {len(self.attackers) / len(self.users)}")
                 # Attackers attack
                 self.attack_buckets(manager, turn)
                 # Record statistics

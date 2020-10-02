@@ -15,6 +15,9 @@ from .attacker import Attacker
 
 class Random_Attacker(Attacker):
     """Attacks at random self._percent_change_attack of the time"""
+
+    runnable = False
+
     def _attack(self, turn):
         if random() < self._percent_chance_attack:
             self.bucket.attacked = True
@@ -23,6 +26,7 @@ class Random_Attacker(Attacker):
 class Fifty_Percent_Attacker(Random_Attacker):
     """Attacks at random 50% of the time"""
 
+    runnable = True
     _percent_chance_attack = .5
 
 
@@ -36,7 +40,7 @@ class Ten_Percent_Attacker(Random_Attacker):
     """Attacks at random 10% of the time"""
 
     _percent_chance_attack = .1
-
+    runnable = True
 
 class Ten_Percent_Lone_Attacker(Ten_Percent_Attacker):
     """Attacks at 10% of the time, if no attacker attacked it's bucket"""

@@ -14,6 +14,8 @@ from .attacker import Attacker
 class Even_Turn_Attacker(Attacker):
     """Attacker that only attacks on every even turn"""
 
+    runnable = True
+
     def _attack(self, turn):
         if turn % 2:
             self.bucket.attacked = True

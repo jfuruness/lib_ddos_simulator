@@ -277,6 +277,14 @@ Many thanks to all the stack overflow questions and sites that have helped in de
 * https://stackoverflow.com/a/48958260/8903959
 * https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/gradient_bar.html
 * https://stackoverflow.com/a/43057166/8903959
+* http://matplotlib.1069221.n5.nabble.com/How-to-turn-off-matplotlib-DEBUG-msgs-td48822.html
+* https://matplotlib.org/3.1.1/gallery/text_labels_and_annotations/custom_legends.html
+* https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
+* https://stackoverflow.com/a/26305286/8903959
+* https://stackoverflow.com/a/1987484/8903959
+
+Also thanks to the pathos library. Amazing way to multiprocess.
+
 ## License
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 

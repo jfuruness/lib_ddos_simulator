@@ -54,8 +54,8 @@ class Combination_Grapher(Base_Grapher):
                       #Miad_Manager.runnable_managers),
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],
-            users_per_bucket_list=[10 ** i for i in range(1, 3)],
-            num_rounds_list=[10 ** i for i in range(1, 3)],
+            users_per_bucket_list=[10 ** i for i in range(1, 2)],
+            num_rounds_list=[10 ** i for i in range(1, 2)],
             trials=100):
         """Runs in parallel every possible scenario
 
@@ -69,7 +69,7 @@ class Combination_Grapher(Base_Grapher):
         pbar_total = (len(num_buckets_list) *
                       len(users_per_bucket_list) *
                       len(num_rounds_list) *
-                      (len(attackers) + 1))  # Add 1 to attacker for worst case
+                      len(attackers))
 
         _pathos_num_buckets_list = []
         _pathos_users_per_bucket = []
@@ -190,12 +190,8 @@ class Combination_Grapher(Base_Grapher):
                                                   num_buckets,
                                                   threshold,
                                                   [manager],
-                                                  stream_level=self.stream_level, 
-                                                  graph_dir=self.graph_dir,
-                                                  tikz=self.tikz,
-                                                  save=self.save,
-                                                  attacker_cls=attacker,
-                                                  )
+                                                  self.stream_level, 
+                                                  attacker_cls=attacker)
         # dict of {manager: final utility}
         utilities_dict = simulator.run(num_rounds, graph_trials=False)
         return utilities_dict[manager]
@@ -284,7 +280,7 @@ class Combination_Grapher(Base_Grapher):
         # Sets y limit
         axs.set_ylim(-1, max_y_limit + 5)
         # Add labels to axis
-        axs.set(xlabel="Percent Attackers", ylabel="Utility (Users/buckets)")
+        axs.set(xlabel="Percent Attackers", ylabel="Utility")
 
         return fig, axs, title
 
@@ -301,8 +297,7 @@ class Combination_Grapher(Base_Grapher):
         """Prints total number of files generated"""
 
         # https://stackoverflow.com/a/16910957/8903959
-        cpt = sum([len([x for x in files if "json" not in x.lower()])
-                    for r, d, files in os.walk(self.graph_dir)])
+        cpt = sum([len(files) for r, d, files in os.walk(self.graph_dir)])
         print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
 
     def populate_axs(self,
@@ -320,7 +315,7 @@ class Combination_Grapher(Base_Grapher):
                      label=f"{manager.__name__}",
                      ls=self.styles(manager_i),
                      # https://stackoverflow.com/a/26305286/8903959
-                     marker=None if write_json else self.markers(manager_i))
+                     marker="none" if write_json else self.markers(manager_i))
         # This means we are graphing worst case
         if write_json:
             # Get list of colors

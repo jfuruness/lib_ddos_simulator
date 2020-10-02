@@ -14,6 +14,8 @@ from .attacker import Attacker
 class Patient_Attacker(Attacker):
     """Attacker waits until they are in a combined bucket before attacking"""
 
+    runnable = False
+
     def add_additions(self, turn):
         """Records number of times their bucket size increased"""
 
@@ -35,6 +37,7 @@ class Patient_Attacker(Attacker):
 class Wait_For_One_Addition_Attacker(Patient_Attacker):
     """Attacker waits until they are in a combined bucket before attacking"""
 
+    runnable = True
     num_additions = 1
 
 
@@ -48,7 +51,7 @@ class Wait_For_One_Addition_Lone_Attacker(Wait_For_One_Addition_Attacker):
 
 class Wait_For_Two_Additions_Attacker(Patient_Attacker):
     """Attacker waits until their bucket size increased twice to attack"""
-
+    runnable = True
     num_additions = 2
 
 
@@ -63,6 +66,7 @@ class Wait_For_Two_Additions_Lone_Attacker(Wait_For_Two_Additions_Attacker):
 class Wait_For_Three_Additions_Attacker(Patient_Attacker):
     """Attacker waits until their bucket size increased thrice to attack"""
 
+    runnable = True
     num_additions = 3
 
 

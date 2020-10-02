@@ -31,7 +31,9 @@ class Attacker(User):
         """
 
         super().__init_subclass__(**kwargs)
-        cls.runnable_attackers.append(cls)
+        assert hasattr(cls, "runnable"), "Subclass must have runnable bool"
+        if cls.runnable and not cls.lone:
+            cls.runnable_attackers.append(cls)
 
     def attack(self, turn):
         """Attacks the bucket it's in"""

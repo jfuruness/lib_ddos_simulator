@@ -19,6 +19,8 @@ from .patient_attacker import Wait_For_Three_Additions_Lone_Attacker
 class Mixed_Attacker(Attacker):
     """Returns a mix of attacker for the simulation"""
 
+    runnable = True
+
     @staticmethod
     def get_mix(num_attackers):
         attacker_classes = []
