@@ -45,6 +45,9 @@ class Sieve_Manager_Base(Manager):
                                 self._update_suspicion_2]
         self._update_suspicion = self.suspicion_funcs[self.suspicion_func_num]
 
+    def add_additional_buckets(self, *args):
+        pass
+
     def _reorder_buckets(self, buckets):
 
         users = []
@@ -52,7 +55,7 @@ class Sieve_Manager_Base(Manager):
             users.extend(bucket.users)
         for bucket, user_chunk in zip(buckets, split_list(list(sorted(users)),
                                                           len(buckets))):
-            bucket.__init__(user_chunk)
+            bucket.reinit(user_chunk)
 
     def _sort_buckets(self, buckets):
         if len(buckets) == 1:
@@ -79,7 +82,7 @@ class Sieve_Manager_Base(Manager):
             shuffle(shuffled_users)
             user_chunks = split_list(shuffled_users, num_buckets_per_round)
             for bucket, user_chunk in zip(cur_buckets, user_chunks):
-                bucket.__init__(user_chunk)
+                bucket.reinit(user_chunk)
             current_index += num_buckets_per_round
 
     def _update_suspicion_0(self):

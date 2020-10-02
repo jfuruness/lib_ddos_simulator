@@ -27,10 +27,10 @@ class Sieve_Manager_V1(Sieve_Manager_Base):
         """
 
         self._update_suspicion()
-        attacked_buckets = [x for x in self.buckets if x.attacked]
-        if len(attacked_buckets) > 0:
-            self._reorder_buckets(attacked_buckets)
-            self._sort_buckets(attacked_buckets)
+        self.remove_attackers()
+        if len(self.attacked_buckets) > 0:
+            self._reorder_buckets(self.attacked_buckets)
+            self._sort_buckets(self.attacked_buckets)
 
 
 class Sieve_Manager_V1_S0(Sieve_Manager_V1):

@@ -52,11 +52,12 @@ class DDOS_Simulator:
         # This allows us to take mixes of attackers
         if isinstance(attacker_cls, Mixed_Attacker):
             # get_mix returns a list of attacker classes
-            self.attackers = [X(i) for i, X in
+            self.attackers = [X(i+len(self.good_users)) for i, X in
                               enumerate(attacker_cls.get_mix(num_attackers))]
         # If it is not a mixed attacker, simply initialize attackers
         else:
-            self.attackers = [attacker_cls(x) for x in range(num_attackers)]
+            self.attackers = [attacker_cls(x + len(self.good_users))
+                              for x in range(num_attackers)]
         self.users = self.good_users + self.attackers
         # Shuffle so attackers are not at the end
         shuffle(self.users)

@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from copy import deepcopy
 import os
 
 import matplotlib
@@ -27,29 +28,40 @@ from ..managers import Manager, Sieve_Manager_Base
 class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
-    __slots__ = ["_data", "ax", "buckets", "round", "max_users", "fig",
-                 "users", "name", "round_text", "frames_per_round",
-                 "total_rounds"]
+    slots__ = ["_data", "ax", "round", "max_users", "fig",
+                 "name", "round_text", "frames_per_round",
+                 "total_rounds", "manager", "ogbuckets", "ogusers"]
 
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
 
         super(Animater, self).__init__(**kwargs)
         assert self.tikz is False, "Can't save animation as tikz afaik"
-        self.buckets = manager.buckets
+        self.manager = manager
+        self.ogbuckets = deepcopy(manager.buckets)
         self.max_users, self.fig, self.ax = self._format_graph()
-        self.users = manager.users
+        self.ogusers = deepcopy(manager.users)
+
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
         self.frames_per_round = 100
         self.total_rounds = 0
-        assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
+        #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
+
+    @property
+    def users(self):
+        return self.manager.users + self.manager.eliminated_users
+
+    @property
+    def buckets(self):
+        return self.manager.buckets
 
     def capture_data(self, manager: Manager):
         """Captures data for the round"""
 
         self.total_rounds += 1
+
         # add to the points array
         for bucket in manager.buckets:
             user_y = User.patch_padding
@@ -59,6 +71,11 @@ class Animater(Base_Grapher):
                 user.suspicions.append(user.suspicion)
                 user_y = circle_y + User.patch_radius
                 user_y += (User.patch_padding * 2)
+
+        for user in manager.eliminated_users:
+            user.points.append((-10, -10,))
+            user.suspicions.append(0)
+
 
     def run_animation(self, total_rounds):
         """Graphs data
@@ -110,12 +127,12 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # This could also be changed for higher resolution
         fig.set_dpi(100)
-        fig.set_size_inches(12, 5)
+        fig.set_size_inches(50, 50)
 
         max_users = max([len(x) for x in self.buckets])
 
         ax = plt.axes(xlim=(0, len(self.buckets) * Bucket.patch_length()),
-                      ylim=(0, max_users * User.patch_length() + 1))
+                      ylim=(0, max_users * User.patch_length() * 3 + 1))
         ax.set_axis_off()
 
         gradient_image(ax,
@@ -130,19 +147,22 @@ class Animater(Base_Grapher):
     def _create_bucket_patches(self):
         """Creates patches of users and buckets"""
 
+        self.bucket_patches = []
         x = Bucket.patch_padding
         for bucket in self.buckets:
             bucket.patch = FancyBboxPatch((x, 0),
                                           Bucket.patch_width,
-                                          self.max_users * User.patch_length(),
+                                          self.max_users * User.patch_length() * 3,
                                           boxstyle="round,pad=0.1",
                                           fc="b")
             bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
             x += Bucket.patch_length()
+            self.bucket_patches.append(bucket.patch)
 
     def _create_user_patches(self):
         """Creates patches of users"""
 
+        self.user_patches = []
         for bucket in self.buckets:
             for user in bucket.users:
                 fc = "r" if isinstance(user, Attacker) else "g"
@@ -157,6 +177,7 @@ class Animater(Base_Grapher):
                 user.text = plt.text(bucket.patch_center() - .5,
                                      5,
                                      f"{user.id}:0")
+                self.user_patches.append(user.patch)
 
     def init(self):
         """inits the animation
@@ -166,22 +187,26 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             self.ax.add_patch(bucket.patch)
             bucket.patch.set_zorder(1)
-            for user in bucket.users:
-                user.patch.center = user.points[0]
-                user.patch.set_zorder(3)
-                self.ax.add_patch(user.patch)
-                if isinstance(user, Attacker):
-                    user.horns.set_zorder(2)
-                    self.ax.add_patch(user.horns)
-                    user.horns.set_xy(self.get_horn_array(user))
-                user.text.set_y(user.points[0][1])
-                user.text.set_zorder(4)
+        for user in self.users:
+            user.patch.center = user.points[0]
+
+            self.ax.add_patch(user.patch)
+            user.patch.set_zorder(3)
+            if isinstance(user, Attacker):
+                user.horns.set_zorder(2)
+                self.ax.add_patch(user.horns)
+                user.horns.set_xy(self.get_horn_array(user))
+            user.text.set_y(user.points[0][1])
+            user.text.set_zorder(4)
+
+
         self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0")
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
         objs = [x.patch for x in self.users] + [x.text for x in self.users]
         objs += [self.round_text] + horns
+
         return objs
 
     def animate(self, i):
@@ -193,6 +218,7 @@ class Animater(Base_Grapher):
         and text of the user as well
         """
 
+        #input("start of animate")
         for user in self.users:
             current_point = user.points[i // self.frames_per_round]
             future_point = user.points[(i // self.frames_per_round) + 1]
@@ -227,6 +253,7 @@ class Animater(Base_Grapher):
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
         objs = [x.patch for x in self.users] + [x.text for x in self.users]
         objs += [self.round_text] + horns
+        #input("End of animate")
         return objs
 
     def get_horn_array(self, user):

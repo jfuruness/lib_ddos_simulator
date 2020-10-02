@@ -22,7 +22,7 @@ class Bucket:
     patch_width = User.patch_length()
     patch_padding = .5
 
-    def __init__(self, users: list = [], max_users=100000000):
+    def __init__(self, users: list = [], max_users=100000000, attacked=False):
         """Stores users"""
 
         assert len(users) < max_users, "Too many users, over max_users"
@@ -31,8 +31,23 @@ class Bucket:
         for user in users:
             user.bucket = self
         self._max_users = max_users
-        self.attacked = False
+        self.attacked = attacked
         self.turns_not_attacked = 0
+
+    def reinit(self, users, max_users=100000000, attacked=False):
+        """inits with patch"""
+
+        patch = None
+        if hasattr(self, "patch"):
+            patch = self.patch
+        #self.__init__(users, max_users=max_users, attacked=attacked)
+        self.users = users
+        for user in self.users:
+            user.bucket = self
+        self._max_users = max_users
+        self.attacked = attacked
+        
+        self.patch = patch
 
     def __str__(self):
         """Returns users inside of bucket"""

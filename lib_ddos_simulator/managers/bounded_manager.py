@@ -78,7 +78,6 @@ class Bounded_Manager(Manager):
         Combine non attacked buckets by reputation,
         add one to attacked buckets"""
 
-        new_non_attacked_buckets = []
         # Sorts buckets by reputation
         sorted_buckets = list(sorted(self.non_attacked_buckets,
                                      key=lambda x: x.turns_not_attacked))
@@ -88,15 +87,15 @@ class Bounded_Manager(Manager):
                 # Combine the two buckets
                 users = sorted_buckets[i].users
                 users += sorted_buckets[i + 1].users
-                new_non_attacked_buckets.append(Bucket(users))
+                sorted_buckets[i].users = users
+                sorted_buckets[i + 1].users = []
             # last bucket
             except IndexError:
                 # Odd # of buckets, just append the full bucket
                 # NOTE: This should prob be changed
                 # NOTE: Should evenly divide out amongst all buckets
                 # NOTE: rather than having one last full bucket
-                new_non_attacked_buckets.append(sorted_buckets[i])
-        self.buckets = new_non_attacked_buckets + self.attacked_buckets
+                pass
         # Add one bucket to attackers and reorder
         self._shuffle_attacked_buckets(len(self.attacked_buckets) + 1)
 
@@ -118,10 +117,14 @@ class Bounded_Manager(Manager):
                 new_bucket_amnt = len(self.attacked_users)
             users = self.attacked_users
             shuffle(users)
-            new_attacked_buckets = [Bucket(user_chunk) for user_chunk in
-                                    split_list(users,
-                                               new_bucket_amnt)]
-            self.buckets = self.non_attacked_buckets + new_attacked_buckets
+
+            # Clear out buckets
+            for bucket in self.attacked_buckets:
+                bucket.users = []
+
+            buckets_to_add_to = self.attacked_buckets + self.non_used_buckets
+            for i, user_chunk in enumerate(split_list(users, new_bucket_amnt)):
+                buckets_to_add_to[i].reinit(user_chunk)
 
     def _remove_attackers(self, new_attacked_buckets, new_bucket_amnt):
         """Removes attackers if they are the only one in the bucket"""
@@ -141,7 +144,7 @@ class Bounded_Manager(Manager):
     def _incriment_buckets(self):
         """Incriments buckets by # turns not attacked in a row"""
 
-        for bucket in self.buckets:
+        for bucket in self.used_buckets:
             if bucket.attacked:
                 bucket.turns_not_attacked = 0
             else:

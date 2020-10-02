@@ -27,8 +27,9 @@ class Sieve_Manager_V0(Sieve_Manager_Base):
         """
 
         self._update_suspicion()
-        self._reorder_buckets(self.buckets)
-        self._sort_buckets(self.buckets)
+        self.remove_attackers()
+        self._reorder_buckets(self.used_buckets)
+        self._sort_buckets(self.used_buckets)
 
 
 class Sieve_Manager_V0_S0(Sieve_Manager_V0):
