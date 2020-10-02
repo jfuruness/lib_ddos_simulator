@@ -11,7 +11,7 @@ __status__ = "Development"
 from copy import deepcopy
 import logging
 import os
-from random import shuffle
+import random
 
 from tqdm import trange
 
@@ -60,7 +60,7 @@ class DDOS_Simulator:
                               for x in range(num_attackers)]
         self.users = self.good_users + self.attackers
         # Shuffle so attackers are not at the end
-        shuffle(self.users)
+        random.shuffle(self.users)
         # Creates manager and distributes users evenly across buckets
         self.managers = [X(num_buckets, deepcopy(self.users), threshold)
                          for X in Manager_Child_Classes]
@@ -77,34 +77,48 @@ class DDOS_Simulator:
 
         for manager in self.managers:
             # Sets up animator and turns
-            animater, turns = self.init_sim(manager,
-                                            num_rounds,
-                                            animate,
-                                            graph_trials)
+            random_seed = random.random()
+            # Animations runs this twice to know how large to make anims
+            for i in range(2):
+                # Sets up animator and turns
+                animater, turns = self.init_sim(manager,
+                                                num_rounds,
+                                                animate,
+                                                graph_trials,
+                                                random_seed,
+                                                i)
 
-            for turn in turns:
-                # Attackers attack
-                self.attack_buckets(manager, turn)
-                # Record statistics
-                self.grapher.capture_data(turn, manager, self.attackers)
+                for turn in turns:
+                    # Attackers attack
+                    self.attack_buckets(manager, turn)
+                    # Record statistics
+                    self.grapher.capture_data(turn, manager, self.attackers)
+                    if animate and i == 1:
+                        animater.capture_data(manager)
+                    # Manager detects and removes suspicious users, then shuffles
+                    
+                    manager.detect_and_shuffle(turn)
+                    # All buckets are no longer attacked for the next round
+                    manager.reset_buckets()
                 if animate:
-                    animater.capture_data(manager)
-                # Manager detects and removes suspicious users, then shuffles
-                
-                manager.detect_and_shuffle(turn)
-                # All buckets are no longer attacked for the next round
-                manager.reset_buckets()
-            if animate:
-                animater.run_animation(turn)
-        if not animate:
-            # Returns latest utility, used for combination graphing
-            return self.grapher.graph(graph_trials, self.attacker_cls)
+                    if i == 1:
+                        animater.run_animation(turn)
+                # If we are not animating, not reason to run again
+                else:
+                    break
+            if not animate:
+                # Returns latest utility, used for combination graphing
+                return self.grapher.graph(graph_trials, self.attacker_cls)
 
-    def init_sim(self, manager, num_rounds, animate, graph_trials):
+    def init_sim(self, manager, num_rounds, animate, graph_trials, seed, i):
         """Sets up animator and turn list"""
 
+        # Seeded so that exactly the same trial is run twice
+        random.seed(seed)
+        manager.reinit()
         # We can only animate one manager at a time
-        animater = Animater(manager, **self.graph_kwargs) if animate else None
+        animater = Animater(manager,
+                            **self.graph_kwargs) if animate and i else None
         # If we are graphing for just one manager
         # Print and turn on tqdm
         if graph_trials:
@@ -120,6 +134,7 @@ class DDOS_Simulator:
     def attack_buckets(self, manager, turn):
         """Attackers attack"""
 
+        manager.get_animation_statistics()
         for user in manager.users:
             if isinstance(user, Attacker):
                 user.attack(turn)

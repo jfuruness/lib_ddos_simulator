@@ -9,6 +9,7 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from copy import deepcopy
+from enum import Enum
 import os
 
 import matplotlib
@@ -24,13 +25,18 @@ from ..attackers import Attacker
 from ..simulation_objects import Bucket, User
 from ..managers import Manager, Sieve_Manager_Base
 
+class Bucket_States(Enum):
+    USED = 1
+    UNUSED = 0
+    ATTACKED = -1
 
 class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
     slots__ = ["_data", "ax", "round", "max_users", "fig",
                  "name", "round_text", "frames_per_round",
-                 "total_rounds", "manager", "ogbuckets", "ogusers"]
+                 "total_rounds", "manager", "ogbuckets", "ogusers",
+                 "detected_location"]
 
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
@@ -40,13 +46,16 @@ class Animater(Base_Grapher):
         self.manager = manager
         self.ogbuckets = deepcopy(manager.buckets)
         self.max_users, self.fig, self.ax = self._format_graph()
+        assert self.save or len(manager.users) <= 40,\
+            "Matplotlib can't handle that many users"
         self.ogusers = deepcopy(manager.users)
 
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 100
+        self.frames_per_round = 100 
         self.total_rounds = 0
+        self.detected_location = (-10, -10,)
         #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
 
     @property
@@ -71,9 +80,16 @@ class Animater(Base_Grapher):
                 user.suspicions.append(user.suspicion)
                 user_y = circle_y + User.patch_radius
                 user_y += (User.patch_padding * 2)
+            if bucket.attacked:
+                bucket.states.append(Bucket_States.ATTACKED)
+            elif len(bucket) == 0:
+                bucket.states.append(Bucket_States.UNUSED)
+            else:
+                bucket.states.append(Bucket_States.USED)
 
         for user in manager.eliminated_users:
-            user.points.append((-10, -10,))
+            user.points.append(self.detected_location)
+            user.detected = True
             user.suspicions.append(0)
 
 
@@ -127,12 +143,12 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # This could also be changed for higher resolution
         fig.set_dpi(100)
-        fig.set_size_inches(50, 50)
+        fig.set_size_inches(100, 100)
 
-        max_users = max([len(x) for x in self.buckets])
+        max_users = self.manager.max_users_y
 
         ax = plt.axes(xlim=(0, len(self.buckets) * Bucket.patch_length()),
-                      ylim=(0, max_users * User.patch_length() * 3 + 1))
+                      ylim=(0, max_users * User.patch_length() + 1))
         ax.set_axis_off()
 
         gradient_image(ax,
@@ -152,9 +168,9 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             bucket.patch = FancyBboxPatch((x, 0),
                                           Bucket.patch_width,
-                                          self.max_users * User.patch_length() * 3,
+                                          self.max_users * User.patch_length(),
                                           boxstyle="round,pad=0.1",
-                                          fc="b")
+                                          fc=bucket.og_face_color)
             bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
             x += Bucket.patch_length()
             self.bucket_patches.append(bucket.patch)
@@ -165,13 +181,12 @@ class Animater(Base_Grapher):
         self.user_patches = []
         for bucket in self.buckets:
             for user in bucket.users:
-                fc = "r" if isinstance(user, Attacker) else "g"
                 user.patch = plt.Circle((bucket.patch_center(), 5),
                                         User.patch_radius,
-                                        fc=fc)
+                                        fc=user.og_face_color)
                 if isinstance(user, Attacker):
                     user.horns = plt.Polygon(0 * self.get_horn_array(user),
-                                             fc="r",
+                                             fc=user.og_face_color,
                                              **dict(ec="k"))
 
                 user.text = plt.text(bucket.patch_center() - .5,
@@ -203,11 +218,7 @@ class Animater(Base_Grapher):
         self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0")
-        horns = [x.horns for x in self.users if isinstance(x, Attacker)]
-        objs = [x.patch for x in self.users] + [x.text for x in self.users]
-        objs += [self.round_text] + horns
-
-        return objs
+        return self.return_animation_objects()
 
     def animate(self, i):
         """Animates the frame
@@ -218,7 +229,12 @@ class Animater(Base_Grapher):
         and text of the user as well
         """
 
-        #input("start of animate")
+        self.animate_users(i)
+        #self.animate_buckets(i)
+        self.animate_round_text(i)
+        return self.return_animation_objects(i)
+
+    def animate_users(self, i):
         for user in self.users:
             current_point = user.points[i // self.frames_per_round]
             future_point = user.points[(i // self.frames_per_round) + 1]
@@ -240,8 +256,30 @@ class Animater(Base_Grapher):
                 user.horns.set_xy(self.get_horn_array(user))
             user.text.set_x(next_point[0] - .7)
             user.text.set_y(next_point[1] - .2)
-            text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
-            user.text.set_text(f"{user.id:2.0f}:{text}")
+            if future_point == self.detected_location:
+                user.text.set_text("Detected")
+                user.patch.set_facecolor("grey")
+            else:
+                text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
+                user.text.set_text(f"{user.id:2.0f}:{text}")
+                user.patch.set_facecolor(user.og_face_color)
+
+    def animate_buckets(self, i):
+        for bucket in self.buckets:
+            current_state = bucket.states[i // self.frames_per_round]
+            future_state = bucket.states[(i // self.frames_per_round) + 1]
+            if future_state == Bucket_States.ATTACKED:
+                if i // self.frames_per_round > 2:
+                    print("here")
+                bucket.patch.set_facecolor("y")
+                bucket.patch.set_zorder(5)
+                #bucket.patch.set_fc("r")
+            else:
+                bucket.patch.set_facecolor(bucket.og_face_color)
+                #bucket.patch.set_facecolor("r")
+            #bucket.patch.set_facecolor(bucket.og_face_color)
+            
+    def animate_round_text(self, i):
         self.round_text.set_visible(False)
         self.round_text.remove()
         # This is why it works best with that sizing
@@ -250,10 +288,11 @@ class Animater(Base_Grapher):
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
                                    bbox=dict(facecolor='white', alpha=1))
+
+    def return_animation_objects(self, *args):
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
         objs = [x.patch for x in self.users] + [x.text for x in self.users]
-        objs += [self.round_text] + horns
-        #input("End of animate")
+        objs += [self.round_text] + horns# + [x.patch for x in self.buckets]
         return objs
 
     def get_horn_array(self, user):

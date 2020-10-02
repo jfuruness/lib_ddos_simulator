@@ -19,6 +19,7 @@ class User:
     # Used in animations
     patch_radius = 1
     patch_padding = .25
+    og_face_color = "g"
 
     def __init__(self, identifier: int, suspicion: float = 0, bucket=None):
         """Stores user values"""

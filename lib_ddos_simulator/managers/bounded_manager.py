@@ -122,9 +122,8 @@ class Bounded_Manager(Manager):
             for bucket in self.attacked_buckets:
                 bucket.users = []
 
-            buckets_to_add_to = self.attacked_buckets + self.non_used_buckets
             for i, user_chunk in enumerate(split_list(users, new_bucket_amnt)):
-                buckets_to_add_to[i].reinit(user_chunk)
+                self.get_new_bucket().reinit(user_chunk)
 
     def _remove_attackers(self, new_attacked_buckets, new_bucket_amnt):
         """Removes attackers if they are the only one in the bucket"""

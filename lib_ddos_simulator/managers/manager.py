@@ -16,28 +16,60 @@ from ..utils import split_list
 class Manager:
     """Simulates a manager for a DDOS attack"""
 
-    __slots__ = ["users", "_threshold", "buckets", "attackers_detected", "eliminated_users"]
+    __slots__ = ["users", "_threshold", "buckets", "attackers_detected",
+                 "eliminated_users", "og_num_buckets", "max_users_y",
+                 "max_buckets", "og_user_order"]
 
-    def __init__(self, num_buckets: int, users: list, threshold: int):
+    def __init__(self,
+                 num_buckets: int,
+                 users: list,
+                 threshold: int,
+                 # Used in animations
+                 max_users_y=0,
+                 max_buckets=0):
         """inits buckets and stores threshold"""
 
         # NOTE: should prob change this and have self.users
         # NOTE: be a property iterating over self.buckets
         self.users = users
+        self.og_user_order = [x.id for x in self.users]
         self._threshold = threshold
+        self.og_num_buckets = num_buckets
         # Divide users evenly among buckets
         self.buckets = [Bucket(user_chunk) for user_chunk in
                         split_list(self.users, num_buckets)]
-        self.add_additional_buckets(num_buckets)
+        self.add_additional_buckets(max_buckets)
         self.attackers_detected = 0
         self.eliminated_users = []
         # Simple error checks
         self.validate()
 
-    def add_additional_buckets(self, num_buckets):
+        # Animation statistics
+        self.max_users_y = max_users_y
+        self.max_buckets = max_buckets
+        self.get_animation_statistics()
+
+    def reinit(self):
+        users_dict = {x.id: x for x in self.users + self.eliminated_users}
+        self.__init__(self.og_num_buckets,
+                      # Reorder users to how they were originally
+                      [users_dict[x] for x in self.og_user_order],
+                      self._threshold,
+                      max_users_y=self.max_users_y,
+                      max_buckets=self.max_buckets)
+
+    def get_new_bucket(self):
+        try:
+            return self.non_used_buckets[0]
+        except IndexError as e:
+            self.buckets.append(Bucket())
+            return self.buckets[-1]
+
+    def add_additional_buckets(self, max_buckets):
         """Must add additional buckets depending on algo"""
 
-        self.buckets += [Bucket() for _ in range(num_buckets)]
+        new_buckets = max_buckets - len(self.buckets)
+        self.buckets += [Bucket() for _ in range(new_buckets)]
 
     def validate(self):
         """Simple error checks"""
@@ -70,6 +102,7 @@ class Manager:
     def reset_buckets(self):
         """Sets all buckets to not be attacked"""
 
+        self.get_animation_statistics()
         for bucket in self.buckets:
             bucket.attacked = False
 
@@ -109,6 +142,11 @@ class Manager:
     @property
     def non_used_buckets(self):
         return self.unused_buckets
+
+    def get_animation_statistics(self):
+        cur_max_users_y = max(len(x) for x in self.buckets)
+        self.max_users_y = max(cur_max_users_y, self.max_users_y)
+        self.max_buckets = max(len(self.buckets), self.max_buckets)
 
     def add_user(self, user: User):
         """Adds user to lowest bucket.

@@ -31,10 +31,8 @@ class Protag_Manager(Manager):
         # Increase detected by 1 for every attacker removed
         self.remove_attackers()
 
-        unused_buckets = self.non_used_buckets
-
         for bucket in self.attacked_buckets:
             # Attacked with more than one user, split in two
             user_chunk1, user_chunk2 = split_list(bucket.users, 2)
             bucket.reinit(user_chunk1, attacked=True)
-            self.non_used_buckets[-1].reinit(user_chunk2, attacked=True)
+            self.get_new_bucket().reinit(user_chunk2, attacked=True)

@@ -16,11 +16,12 @@ class Bucket:
 
     # patch used in animations
     __slots__ = ["users", "_max_users", "attacked", "patch",
-                 "turns_not_attacked"]
+                 "turns_not_attacked", "states"]
 
     # Used in animations
     patch_width = User.patch_length()
     patch_padding = .5
+    og_face_color = "b"
 
     def __init__(self, users: list = [], max_users=100000000, attacked=False):
         """Stores users"""
@@ -33,6 +34,8 @@ class Bucket:
         self._max_users = max_users
         self.attacked = attacked
         self.turns_not_attacked = 0
+        # For animations
+        self.states = []
 
     def reinit(self, users, max_users=100000000, attacked=False):
         """inits with patch"""

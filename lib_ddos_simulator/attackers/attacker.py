@@ -17,6 +17,8 @@ class Attacker(User):
     # Horns is used for animations
     __slots__ = ["horns"]
 
+    og_face_color = "r"
+
     # Whether attacker attacks alone or not
     lone = False
 
