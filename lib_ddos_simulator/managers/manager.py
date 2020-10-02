@@ -77,7 +77,6 @@ class Manager:
         """Removes buckets and attackers if bucket is attacker and len is 1"""
 
         for bucket in self.buckets:
-            X = [x.id for x in bucket.users]
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 self.eliminated_users.extend(bucket.users)
