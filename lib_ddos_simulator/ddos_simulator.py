@@ -38,13 +38,15 @@ class DDOS_Simulator:
                  graph_dir: str = os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
                  save=False,
+                 high_res=False,
                  attacker_cls=Basic_Attacker):
         """Initializes simulation"""
 
         self.graph_kwargs = {"stream_level": stream_level,
                              "graph_dir": graph_dir,
                              "tikz": tikz,
-                             "save": save}
+                             "save": save,
+                             "high_res": high_res}
 
         utils.config_logging(stream_level)
 

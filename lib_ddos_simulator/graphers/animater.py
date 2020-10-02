@@ -42,6 +42,7 @@ class Animater(Base_Grapher):
         """Initializes simulation"""
 
         super(Animater, self).__init__(**kwargs)
+
         assert self.tikz is False, "Can't save animation as tikz afaik"
         self.manager = manager
         self.ogbuckets = deepcopy(manager.buckets)
@@ -53,9 +54,12 @@ class Animater(Base_Grapher):
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 10 
+        self.frames_per_round = 10
+        if self.high_res:
+            self.frames_per_round = 10
         self.total_rounds = 0
         self.detected_location = (-10, -10,)
+
         #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
 
     @property
@@ -166,14 +170,22 @@ class Animater(Base_Grapher):
         self.bucket_patches = []
         x = Bucket.patch_padding
         for bucket in self.buckets:
-            # Fancy Bbox patch not used due to processing requirements
-            bucket.patch = plt.Rectangle((x, 0),
-#            bucket.patch =  FancyBboxPatch((x, 0),
-                                          Bucket.patch_width,
-                                          self.max_users * User.patch_length(),
-#                                          boxstyle="round,pad=0.1",
-                                          fc=bucket.og_face_color)
-#            bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+
+            kwargs = {"fc": bucket.og_face_color}
+
+            if self.high_res:
+                patch_type = FancyBboxPatch
+                kwargs["boxstyle"] = "round,pad=0.1"
+            else:
+                patch_type = plt.Rectangle
+
+
+            bucket.patch = patch_type((x, 0),
+                                      Bucket.patch_width,
+                                      self.max_users * User.patch_length(),
+                                      **kwargs)
+            if self.high_res:
+                bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
             x += Bucket.patch_length()
             self.bucket_patches.append(bucket.patch)
 
@@ -204,6 +216,8 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             self.ax.add_patch(bucket.patch)
             bucket.patch.set_zorder(1)
+            if bucket.states[0] == Bucket_States.UNUSED and self.high_res:
+                bucket.patch.set_alpha(0)
         for user in self.users:
             user.patch.center = user.points[0]
 
@@ -232,7 +246,8 @@ class Animater(Base_Grapher):
         """
 
         self.animate_users(i)
-        self.animate_buckets(i)
+        if self.high_res:
+            self.animate_buckets(i)
         self.animate_round_text(i)
         return self.return_animation_objects(i)
 
@@ -271,6 +286,7 @@ class Animater(Base_Grapher):
             current_state = bucket.states[i // self.frames_per_round]
             future_state = bucket.states[(i // self.frames_per_round) + 1]
 
+            # Alpha changes removed due to processing requirements
             if i % self.frames_per_round == 0:
                 if current_state == Bucket_States.ATTACKED:
                     bucket.patch.set_facecolor("y")
@@ -278,12 +294,14 @@ class Animater(Base_Grapher):
                     #bucket.patch.set_fc("r")
                 elif current_state == Bucket_States.USED:
                     bucket.patch.set_facecolor(bucket.og_face_color)
-                    bucket.patch.set_alpha(None)
-            if current_state == Bucket_States.UNUSED:
-                bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
+                    #bucket.patch.set_alpha(None)
+
+            if current_state in [Bucket_States.ATTACKED, Bucket_States.USED] and future_state == Bucket_States.UNUSED:
+                bucket.patch.set_alpha( 1 - ((i % self.frames_per_round) / self.frames_per_round))
 
             if future_state in [Bucket_States.ATTACKED, Bucket_States.USED] and current_state == Bucket_States.UNUSED:
                 bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
+
             
     def animate_round_text(self, i):
         self.round_text.set_visible(False)
@@ -297,9 +315,11 @@ class Animater(Base_Grapher):
 
     def return_animation_objects(self, *args):
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
-        objs = [x.patch for x in self.buckets]
-        objs += [x.patch for x in self.users] + [x.text for x in self.users]
+
+        objs = [x.patch for x in self.users] + [x.text for x in self.users]
         objs += [self.round_text] + horns
+        if self.high_res:
+            objs += [x.patch for x in self.buckets]
         return objs
 
     def get_horn_array(self, user):

@@ -34,7 +34,9 @@ def main():
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
     parser.add_argument("--combination_grapher", dest="graph_combos", default=False, action='store_true')
     parser.add_argument("--tikz", dest="tikz", default=False, action="store_true")
+
     parser.add_argument("--save", dest="save", default=False, action="store_true")
+    parser.add_argument("--high_res", dest="high_res", default=False, action="store_true")
     parser.add_argument("--trials", type=int, dest="trials", default=100)
     parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
 
@@ -50,14 +52,17 @@ def main():
                        args.num_attackers,  # number of attackers
                        args.num_buckets,  # number of buckets
                        args.threshold,  # Threshold
-                       [Protag_Manager, Bounded_Manager],
-                       #Sieve_Manager_Base.runnable_managers,
+                       [Protag_Manager,
+                        Bounded_Manager
+                        ] + Sieve_Manager_Base.runnable_managers,
                        graph_dir=args.graph_dir,
-                       save=args.save).run(args.rounds, animate=True)
+                       save=args.save,
+                       high_res=args.high_res).run(args.rounds, animate=True)
     elif args.graph_combos:
         Combination_Grapher(graph_dir=args.graph_dir,
                             tikz=args.tikz,
-                            save=args.save).run(trials=args.trials)
+                            save=args.save,
+                            high_res=args.high_res).run(trials=args.trials)
     else:
         all_managers = (Sieve_Manager.runnable_managers +
                         Miad_Manager.runnable_managers +
@@ -69,4 +74,5 @@ def main():
                        all_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,
-                       tikz=args.tikz).run(args.rounds)
+                       tikz=args.tikz,
+                       high_res=args.high_res).run(args.rounds)

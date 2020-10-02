@@ -20,13 +20,14 @@ from ..utils import config_logging
 class Base_Grapher:
     """Contains methods to be inherited by other graph classes"""
 
-    __slots__ = ["stream_level", "graph_dir", "tikz", "save"]
+    __slots__ = ["stream_level", "graph_dir", "tikz", "save", "high_res"]
   
     def __init__(self,
                  stream_level=logging.INFO,
                  graph_dir=os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
-                 save=False):
+                 save=False,
+                 high_res=False):
         """Initializes simulation"""
 
         config_logging(stream_level)
@@ -35,6 +36,7 @@ class Base_Grapher:
         self.make_graph_dir()
         self.tikz = tikz
         self.save = save
+        self.high_res = high_res
 
     def make_graph_dir(self, destroy=False):
         """Creates graph path from scratch"""
