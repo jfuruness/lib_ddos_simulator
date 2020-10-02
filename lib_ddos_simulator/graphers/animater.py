@@ -53,7 +53,7 @@ class Animater(Base_Grapher):
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 100 
+        self.frames_per_round = 10 
         self.total_rounds = 0
         self.detected_location = (-10, -10,)
         #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
@@ -166,12 +166,14 @@ class Animater(Base_Grapher):
         self.bucket_patches = []
         x = Bucket.patch_padding
         for bucket in self.buckets:
-            bucket.patch = FancyBboxPatch((x, 0),
+            # Fancy Bbox patch not used due to processing requirements
+            bucket.patch = plt.Rectangle((x, 0),
+#            bucket.patch =  FancyBboxPatch((x, 0),
                                           Bucket.patch_width,
                                           self.max_users * User.patch_length(),
-                                          boxstyle="round,pad=0.1",
+#                                          boxstyle="round,pad=0.1",
                                           fc=bucket.og_face_color)
-            bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+#            bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
             x += Bucket.patch_length()
             self.bucket_patches.append(bucket.patch)
 
@@ -230,7 +232,7 @@ class Animater(Base_Grapher):
         """
 
         self.animate_users(i)
-        #self.animate_buckets(i)
+        self.animate_buckets(i)
         self.animate_round_text(i)
         return self.return_animation_objects(i)
 
@@ -268,16 +270,20 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             current_state = bucket.states[i // self.frames_per_round]
             future_state = bucket.states[(i // self.frames_per_round) + 1]
-            if future_state == Bucket_States.ATTACKED:
-                if i // self.frames_per_round > 2:
-                    print("here")
-                bucket.patch.set_facecolor("y")
-                bucket.patch.set_zorder(5)
-                #bucket.patch.set_fc("r")
-            else:
-                bucket.patch.set_facecolor(bucket.og_face_color)
-                #bucket.patch.set_facecolor("r")
-            #bucket.patch.set_facecolor(bucket.og_face_color)
+
+            if i % self.frames_per_round == 0:
+                if current_state == Bucket_States.ATTACKED:
+                    bucket.patch.set_facecolor("y")
+                    #bucket.patch.set_zorder(5)
+                    #bucket.patch.set_fc("r")
+                elif current_state == Bucket_States.USED:
+                    bucket.patch.set_facecolor(bucket.og_face_color)
+                    bucket.patch.set_alpha(None)
+            if current_state == Bucket_States.UNUSED:
+                bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
+
+            if future_state in [Bucket_States.ATTACKED, Bucket_States.USED] and current_state == Bucket_States.UNUSED:
+                bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
             
     def animate_round_text(self, i):
         self.round_text.set_visible(False)
@@ -291,8 +297,9 @@ class Animater(Base_Grapher):
 
     def return_animation_objects(self, *args):
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
-        objs = [x.patch for x in self.users] + [x.text for x in self.users]
-        objs += [self.round_text] + horns# + [x.patch for x in self.buckets]
+        objs = [x.patch for x in self.buckets]
+        objs += [x.patch for x in self.users] + [x.text for x in self.users]
+        objs += [self.round_text] + horns
         return objs
 
     def get_horn_array(self, user):
