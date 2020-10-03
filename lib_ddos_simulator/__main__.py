@@ -52,8 +52,8 @@ def main():
                        args.num_attackers,  # number of attackers
                        args.num_buckets,  # number of buckets
                        args.threshold,  # Threshold
-                       [DOSE_Manager, Protag_Manager,
-                        Bounded_Manager] + Sieve_Manager_Base.runnable_managers,
+                       [Bounded_Manager, DOSE_Manager, Protag_Manager,
+                        ] + Sieve_Manager_Base.runnable_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,
                        high_res=args.high_res).run(args.rounds, animate=True)
