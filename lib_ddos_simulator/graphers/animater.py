@@ -339,7 +339,7 @@ class Animater(Base_Grapher):
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   fontsize=12 if not self.high_res else 12 / math.sqrt(3),
+                                   fontsize=12 if not self.high_res else 12 / 3,
                                    bbox=dict(facecolor='white', alpha=1),
                                    horizontalalignment='center',
                                    verticalalignment='center')
@@ -429,7 +429,7 @@ class Animater(Base_Grapher):
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   fontsize=12 if not self.high_res else 12 / math.sqrt(3),
+                                   fontsize=12 if not self.high_res else 12 / 3,
                                    bbox=dict(facecolor='white', alpha=1),
                                    horizontalalignment='center',
                                    verticalalignment='center')
