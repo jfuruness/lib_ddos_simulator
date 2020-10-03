@@ -24,11 +24,11 @@ def main():
     parser = ArgumentParser(description="Runs a DDOS simulation")
     # NOTE: these defaults are chosen that way because they work for the animator
     # Changing these defaults will result in worse animations
-    parser.add_argument("--num_users", type=int, dest="num_users", default=24)
-    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=4)
+    parser.add_argument("--num_users", type=int, dest="num_users", default=48)
+    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=12)
     parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=8)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=10)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=20)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')

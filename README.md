@@ -287,6 +287,7 @@ Many thanks to all the stack overflow questions and sites that have helped in de
 * https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
 * https://stackoverflow.com/a/26305286/8903959
 * https://stackoverflow.com/a/1987484/8903959
+* https://stackoverflow.com/a/14666461/8903959
 
 Also thanks to the pathos library. Amazing way to multiprocess.
 

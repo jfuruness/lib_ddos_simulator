@@ -16,7 +16,8 @@ class User:
 
     # patch, text used in animations
     __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
-                 "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk"]
+                 "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk",
+                 "track_suspicion"]
 
     # Used in animations
     patch_radius = 1

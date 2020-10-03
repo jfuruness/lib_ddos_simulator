@@ -14,6 +14,12 @@ import os
 
 import matplotlib
 import matplotlib as mpl
+dpi = 200
+# https://stackoverflow.com/a/51955985/8903959
+mpl.rcParams['figure.dpi'] = dpi
+import matplotlib
+matplotlib.rcParams['figure.dpi'] = dpi
+mpl.rcParams['figure.dpi'] = dpi
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -38,7 +44,7 @@ class Animater(Base_Grapher):
                  "name", "round_text", "frames_per_round",
                  "total_rounds", "manager", "ogbuckets", "ogusers",
                  "detected_location", "blue_to_yellow",
-                 "yellow_to_blue"]
+                 "yellow_to_blue", "track_suspicions"]
 
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
@@ -56,13 +62,13 @@ class Animater(Base_Grapher):
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 10
-        if self.high_res:
+        self.frames_per_round = 100
+        if self.save:
             self.frames_per_round = 100
         self.total_rounds = 0
         self.detected_location = (-10, -10,)
         # Frames left before turning non attacked to attacked
-        self.percent_left_before_change = .1
+        self.percent_left_before_change = .2
 
         # Reason we limit # of color changes is because
         # We only do the atk in last 10% of frames in the round
@@ -131,7 +137,7 @@ class Animater(Base_Grapher):
                                        init_func=self.init,
                                        frames=frames,
                                        interval=40,
-                                       blit=True if self.high_res else False)
+                                       blit=True if self.save else False)
 
         self.save_graph(anim)
 
@@ -151,7 +157,8 @@ class Animater(Base_Grapher):
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
-            anim.save(path, progress_callback=callback, dpi=5, bitrate=5)
+            # https://stackoverflow.com/a/14666461/8903959
+            anim.save(path, progress_callback=callback, dpi=200, bitrate=1000)
             pbar.close()
         else:
             plt.show()
@@ -167,10 +174,11 @@ class Animater(Base_Grapher):
         # https://stackoverflow.com/a/48958260/8903959
         matplotlib.rcParams.update({'text.color': "black"})
 
+        # NOTE:
+        # I'm not sure this fig is ever used
+        # Should prob be removed
         fig = plt.figure()
-        # This could also be changed for higher resolution
-        fig.set_dpi(100)
-
+        # NOTE: Increasing figure size makes it take way longer
         fig.set_size_inches(12, 6)
 
         max_users = self.manager.max_users_y
@@ -197,7 +205,7 @@ class Animater(Base_Grapher):
 
             kwargs = {"fc": bucket.og_face_color}
 
-            if self.high_res:
+            if self.save:
                 patch_type = FancyBboxPatch
                 kwargs["boxstyle"] = "round,pad=0.1"
             else:
@@ -208,7 +216,7 @@ class Animater(Base_Grapher):
                                       Bucket.patch_width,
                                       self.max_users * User.patch_length(),
                                       **kwargs)
-            if self.high_res:
+            if self.save:
                 bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
             x += Bucket.patch_length()
             self.bucket_patches.append(bucket.patch)
@@ -229,7 +237,7 @@ class Animater(Base_Grapher):
 
                 user.text = plt.text(bucket.patch_center() - .5,
                                      5,
-                                     f"{user.id}:0")
+                                     f"{user.id}")
                 self.user_patches.append(user.patch)
 
     def init(self):
@@ -240,14 +248,15 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             self.ax.add_patch(bucket.patch)
             bucket.patch.set_zorder(1)
-            if self.high_res:
+            if self.save:
                 if bucket.states[0] == Bucket_States.UNUSED:
                     bucket.patch.set_alpha(0)
                 elif bucket.states[0] == Bucket_States.ATTACKED:
                     # Change this to not be hardcoded
                     bucket.patch.set_facecolor("y")
-            
+        max_sus = 0
         for user in self.users:
+            max_sus = max(max(user.suspicions), max_sus)
             user.patch.center = user.points[0]
 
             self.ax.add_patch(user.patch)
@@ -258,6 +267,8 @@ class Animater(Base_Grapher):
                 user.horns.set_xy(self.get_horn_array(user))
             user.text.set_y(user.points[0][1])
             user.text.set_zorder(4)
+
+        self.track_suspicions = max_sus != 0
 
 
         self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
@@ -278,7 +289,7 @@ class Animater(Base_Grapher):
         """
 
         self.animate_users(i)
-        if self.high_res:
+        if self.save:
             self.animate_buckets(i)
         self.animate_round_text(i)
         return self.return_animation_objects(i)
@@ -311,7 +322,7 @@ class Animater(Base_Grapher):
                 user.text.set_text("Detected")
                 user.patch.set_facecolor("grey")
             else:
-                if i % self.frames_per_round == 0:
+                if self.track_suspicions and i % self.frames_per_round == 0:
                     text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
                     user.text.set_text(f"{user.id:2.0f}:{text}")
                 if i == 0:
@@ -357,7 +368,7 @@ class Animater(Base_Grapher):
 
         objs = [x.patch for x in self.users] + [x.text for x in self.users]
         objs += [self.round_text] + horns
-        if self.high_res:
+        if self.save:
             objs += [x.patch for x in self.buckets]
         return objs
 
