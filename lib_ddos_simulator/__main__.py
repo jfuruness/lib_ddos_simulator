@@ -14,7 +14,7 @@ import os
 from sys import argv
 
 from .ddos_simulator import DDOS_Simulator
-from .managers import Sieve_Manager_Base, Protag_Manager, Bounded_Manager
+from .managers import Sieve_Manager_Base, Protag_Manager, Bounded_Manager, DOSE_Manager
 from .utils import config_logging
 from .graphers import Combination_Grapher
 
@@ -24,9 +24,9 @@ def main():
     parser = ArgumentParser(description="Runs a DDOS simulation")
     # NOTE: these defaults are chosen that way because they work for the animator
     # Changing these defaults will result in worse animations
-    parser.add_argument("--num_users", type=int, dest="num_users", default=48)
-    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=12)
-    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=8)
+    parser.add_argument("--num_users", type=int, dest="num_users", default=96)
+    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=24)
+    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=16)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
     parser.add_argument("--rounds", type=int, dest="rounds", default=20)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
@@ -52,7 +52,7 @@ def main():
                        args.num_attackers,  # number of attackers
                        args.num_buckets,  # number of buckets
                        args.threshold,  # Threshold
-                       [Protag_Manager,
+                       [DOSE_Manager, Protag_Manager,
                         Bounded_Manager] + Sieve_Manager_Base.runnable_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,

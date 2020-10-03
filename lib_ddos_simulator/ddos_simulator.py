@@ -17,31 +17,9 @@ from tqdm import trange
 
 from .graphers import Animater, Grapher
 from .attackers import Attacker, Basic_Attacker, Mixed_Attacker
+from . import managers
 from .simulation_objects import User
 from . import utils
-
-############################## DLETE THIS
-class DOSE_Manager:
-    pass
-
-class DOSE_Attack_Event:
-    """Purpose of this class is just to keep track of atk events
-
-    helpful in dealing with DOSE stats
-    """
-
-    def __init__(self, bucket):
-        self.users = bucket.users
-        self.uids = set(x.id for x in bucket.users)
-        # 3 is from their matplotlib code
-        # This is CRPA val
-        self.sus_added = DOSE_Manager.dose_atk_sus_to_add(bucket)
-
-    def reduce_sus(self, users):
-        for user in self.users:
-            user.dose_atk_risk -= self.sus_added
-        
-        
 
 
 class DDOS_Simulator:
@@ -167,6 +145,7 @@ class DDOS_Simulator:
                 user.attack(turn)
                 assert user.bucket in manager.buckets
 
-        if isinstance(manager, DOSE_Manager):
+        if isinstance(manager, managers.DOSE_Manager):
             for bucket in manager.attacked_buckets:
-                manager.dose_atk_events.append(DOSE_Attack_Event(bucket))
+                manager.dose_atk_events.append(
+                    managers.DOSE_Attack_Event(bucket))

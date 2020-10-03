@@ -51,10 +51,10 @@ class Grapher(Base_Grapher):
         cur_data = self._data[manager]["Y"]
 
         # num buckets
-        cur_data["num_buckets"].append(len(manager.buckets))
+        cur_data["num_buckets"].append(len(manager.used_buckets))
 
         # num serviced
-        serviced = (sum(len(x) for x in manager.buckets if not x.attacked))
+        serviced = (sum(len(x) for x in manager.non_attacked_buckets))
 
         # total serviced
         cur_data["total_serviced"].append(serviced)

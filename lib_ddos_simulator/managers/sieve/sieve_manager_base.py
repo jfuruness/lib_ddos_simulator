@@ -14,9 +14,9 @@ __status__ = "Development"
 from functools import reduce
 from random import shuffle
 
-from .manager import Manager
+from ..manager import Manager
 
-from ..utils import split_list
+from ...utils import split_list
 
 
 class Sieve_Manager_Base(Manager):

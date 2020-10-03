@@ -43,6 +43,13 @@ class User:
         self.conn_lt = 0
         self.dose_atk_risk = 0
 
+    # For animations, since dose has it's own suspicion of sorts
+    def get_suspicion(self):
+        if self.dose_risk > 0:
+            return self.dose_risk
+        else:
+            return self.suspicion
+
     @property
     def dose_risk(self):
         return self.lone_drone_suspicion + self.dose_atk_risk

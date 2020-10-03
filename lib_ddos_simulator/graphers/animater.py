@@ -59,6 +59,19 @@ class Animater(Base_Grapher):
             "Matplotlib can't handle that many users"
         self.ogusers = deepcopy(manager.users)
 
+        matplotlib.rcParams.update({'font.size': 10})
+
+
+        if manager.max_buckets > 10:
+            matplotlib.rcParams.update({'font.size': 7})
+
+
+        if manager.max_users_y > 10:
+            matplotlib.rcParams.update({'font.size': 5})
+
+        if manager.max_buckets > 20:
+            matplotlib.rcParams.update({'font.size': 3})
+
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
@@ -110,7 +123,8 @@ class Animater(Base_Grapher):
             for user in bucket.users:
                 circle_y = User.patch_radius + user_y
                 user.points.append((bucket.patch_center(), circle_y,))
-                user.suspicions.append(user.suspicion)
+                # Get suspicion due to DOSE
+                user.suspicions.append(user.get_suspicion())
                 user_y = circle_y + User.patch_radius
                 user_y += (User.patch_padding * 2)
             if bucket.attacked:
@@ -235,9 +249,11 @@ class Animater(Base_Grapher):
                                              fc=user.og_face_color,
                                              **dict(ec="k"))
 
-                user.text = plt.text(bucket.patch_center() - .5,
+                user.text = plt.text(bucket.patch_center(),
                                      5,
-                                     f"{user.id}")
+                                     f"{user.id}",
+                                     horizontalalignment='center',
+                                     verticalalignment='center')
                 self.user_patches.append(user.patch)
 
     def init(self):
@@ -271,10 +287,13 @@ class Animater(Base_Grapher):
         self.track_suspicions = max_sus != 0
 
 
-        self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
+        self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   bbox=dict(facecolor='white', alpha=1))
+                                   fontsize=12,
+                                   bbox=dict(facecolor='white', alpha=1),
+                                   horizontalalignment='center',
+                                   verticalalignment='center')
 
 
         return self.return_animation_objects()
@@ -314,8 +333,8 @@ class Animater(Base_Grapher):
             user.patch.center = next_point
             if isinstance(user, Attacker):
                 user.horns.set_xy(self.get_horn_array(user))
-            user.text.set_x(next_point[0] - .7)
-            user.text.set_y(next_point[1] - .2)
+            user.text.set_x(next_point[0])
+            user.text.set_y(next_point[1])
             if (future_point == self.detected_location
                 and current_point != self.detected_location
                 and i % self.frames_per_round== 0):
@@ -357,11 +376,14 @@ class Animater(Base_Grapher):
         self.round_text.set_visible(False)
         self.round_text.remove()
         # This is why it works best with that sizing
-        self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
+        self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   bbox=dict(facecolor='white', alpha=1))
+                                   fontsize=12,
+                                   bbox=dict(facecolor='white', alpha=1),
+                                   horizontalalignment='center',
+                                   verticalalignment='center')
 
     def return_animation_objects(self, *args):
         horns = [x.horns for x in self.users if isinstance(x, Attacker)]
