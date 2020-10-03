@@ -10,7 +10,7 @@ __status__ = "Development"
 
 from .bounded_manager import Bounded_Manager
 from .dose import DOSE_Manager, DOSE_Attack_Event
-from .protag_manager import Protag_Manager
+from .protag import Protag_Manager_Base, Protag_Manager_Merge, Protag_Manager_No_Merge
 
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2
 from .sieve import Sieve_Manager_V1_S0, Sieve_Manager_V1_S1, Sieve_Manager_V1_S2

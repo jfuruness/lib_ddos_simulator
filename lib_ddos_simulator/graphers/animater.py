@@ -3,6 +3,27 @@
 
 """This module contains the class Animater to animate ddos simulations"""
 
+"""
+NOTE TO ANY FUTURE DEVS:
+
+I got a little carried away with this thing, and it needs a serious refactor
+But animations are quite useless, and every time I look at this file I try
+to improve the animations, so I'm not going to do it.
+
+
+If you wrote a manager and the animation is breaking, chances are you:
+1. Got rid of a bucket when you shouldn't have
+2. Created a new bucket when you should've called manager.get_new_bucket()
+3. Got rid of a user when you should've added to manager.eliminated_users
+4. Created a user mid round (not functional)
+5. Your animation is too complex (try a small one, like 9 users)
+
+If you ever need to change this, please just contact me
+jfuruness@gmail.com
+and I'll fix it.
+"""
+
+
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"

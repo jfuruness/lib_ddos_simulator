@@ -12,26 +12,33 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-from .manager import Manager
+from ..manager import Manager
 
-from ..simulation_objects import Bucket
-from ..utils import split_list
+from ...simulation_objects import Bucket
+from ...utils import split_list
 
-class Protag_Manager(Manager):
+class Protag_Manager_Base(Manager):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a protag shuffling algorithm"""
 
     __slots__ = []
 
-    runnable = True
-        
+    runnable = False
+
+    def __init__(self, *args, **kwargs):
+        msg = "Must have a combine buckets method, even if it's empty"""
+        assert self.runnable is False or hasattr(self, "combine_buckets"), msg
+
+        super(Protag_Manager_Base, self).__init__(*args, **kwargs)
+
     def detect_and_shuffle(self, turn_num: int):
         """Protag algorithm"""
 
         # Removes bucket/attacker if bucket is attacked and len is 1
         # Increase detected by 1 for every attacker removed
         self.remove_attackers()
+        self.combine_buckets()
 
         for bucket in self.attacked_buckets:
             # Attacked with more than one user, split in two
