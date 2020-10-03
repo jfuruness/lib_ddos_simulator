@@ -220,6 +220,11 @@ pip3 install -r requirements.txt --upgrade
 python3 setup.py develop
 ```
 
+Note that if you plan on doing animations, make sure to do:
+```bash
+sudo apt-get install ffmpeg
+```
+
 To test the development package, cd into the root directory and run pytest.
 
 

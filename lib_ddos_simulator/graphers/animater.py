@@ -131,7 +131,7 @@ class Animater(Base_Grapher):
                                        init_func=self.init,
                                        frames=frames,
                                        interval=40,
-                                       blit=True)
+                                       blit=True if self.high_res else False)
 
         self.save_graph(anim)
 
@@ -151,7 +151,7 @@ class Animater(Base_Grapher):
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
-            anim.save(path, progress_callback=callback)
+            anim.save(path, progress_callback=callback, dpi=5, bitrate=5)
             pbar.close()
         else:
             plt.show()
@@ -170,10 +170,8 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # This could also be changed for higher resolution
         fig.set_dpi(100)
-        if self.high_res:
-            fig.set_size_inches(100, 100)
-        else:
-            fig.set_size_inches(10, 10)
+
+        fig.set_size_inches(12, 6)
 
         max_users = self.manager.max_users_y
 
