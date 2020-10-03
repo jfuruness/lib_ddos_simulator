@@ -45,10 +45,26 @@ class Sieve_Manager_Base(Manager):
                                 self._update_suspicion_2]
         self._update_suspicion = self.suspicion_funcs[self.suspicion_func_num]
 
-    def add_additional_buckets(self, *args):
-        pass
+    def detect_and_shuffle(self, turn_num: int):
+        """Performs sieve shuffle algorithm
+
+        First updates suspicion of users.
+        Then sorts users by suspicion.
+        Then splits users into num buckets/2 chunks
+        Then for each chunk, put in two buckets randomly
+        """
+
+        self._update_suspicion()
+        self.remove_attackers()
+        buckets = self.get_buckets_to_sort()
+        if len(buckets) > 0:
+            self._reorder_buckets(buckets)
+            self._sort_buckets(buckets)
+
 
     def _reorder_buckets(self, buckets):
+        if len(buckets) == 0:
+            return
 
         users = []
         for bucket in buckets:
@@ -58,7 +74,9 @@ class Sieve_Manager_Base(Manager):
             bucket.reinit(user_chunk)
 
     def _sort_buckets(self, buckets):
-        if len(buckets) == 1:
+        if len(buckets) == 0:
+            return
+        elif len(buckets) == 1:
             shuffle(buckets[0].users)
         elif len(buckets) % 2 == 0:
             self._shuffle_buckets(buckets, num_buckets_per_round=2)

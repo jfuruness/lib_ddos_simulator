@@ -25,8 +25,6 @@ from ..attackers import Attacker
 from ..managers import Bounded_Manager
 # Done this way to avoid circular imports
 from .. import ddos_simulator
-from ..managers import KPO_Manager
-from ..managers import Miad_Manager
 from ..managers import Protag_Manager
 from ..managers import Sieve_Manager_Base
 
@@ -50,7 +48,7 @@ class Combination_Grapher(Base_Grapher):
 
     def run(self,
             managers=(Sieve_Manager_Base.runnable_managers +
-                      [Protag_Manager, KPO_Manager, Bounded_Manager]), #+
+                      [Protag_Manager, Bounded_Manager]), #+
                       #Miad_Manager.runnable_managers),
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],

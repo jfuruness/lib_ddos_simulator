@@ -8,13 +8,15 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from math import e
+
 
 class User:
     """Simulates a user for a DDOS attack"""
 
     # patch, text used in animations
     __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
-                 "suspicions"]
+                 "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk"]
 
     # Used in animations
     patch_radius = 1
@@ -33,6 +35,22 @@ class User:
         # Used for animation
         self.points = []
         self.suspicions = []
+        # Expected connection lifetime
+        # This was hardcoded in DOSE paper
+        self.exp_conn_lt = 20
+        # Connection lifetime (incriments each round)
+        self.conn_lt = 0
+        self.dose_atk_risk = 0
+
+    @property
+    def dose_risk(self):
+        return self.lone_drone_suspicion + self.dose_atk_risk
+
+    @property
+    def lone_drone_suspicion(self):
+        """Lone drone suspicion for dose algorithm"""
+
+        return e ** (-self.conn_lt / self.exp_conn_lt)
 
     def __lt__(self, other):
         """Comparison operator for users"""

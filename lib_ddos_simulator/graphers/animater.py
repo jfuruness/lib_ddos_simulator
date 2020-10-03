@@ -13,6 +13,7 @@ from enum import Enum
 import os
 
 import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -36,7 +37,8 @@ class Animater(Base_Grapher):
     slots__ = ["_data", "ax", "round", "max_users", "fig",
                  "name", "round_text", "frames_per_round",
                  "total_rounds", "manager", "ogbuckets", "ogusers",
-                 "detected_location"]
+                 "detected_location", "blue_to_yellow",
+                 "yellow_to_blue"]
 
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
@@ -56,11 +58,32 @@ class Animater(Base_Grapher):
         self.name = manager.__class__.__name__
         self.frames_per_round = 10
         if self.high_res:
-            self.frames_per_round = 10
+            self.frames_per_round = 100
         self.total_rounds = 0
         self.detected_location = (-10, -10,)
+        # Frames left before turning non attacked to attacked
+        self.percent_left_before_change = .1
+
+        # Reason we limit # of color changes is because
+        # We only do the atk in last 10% of frames in the round
+        self.blue_to_yellow = [self.color_fader(c1="b", c2="y", mix=x/int(self.frames_per_round * self.percent_left_before_change))
+                               for x in range(int(self.frames_per_round * self.percent_left_before_change))]
+        self.blue_to_yellow[0] = "b"
+        self.blue_to_yellow[-1] = "y"
+        self.yellow_to_blue = [self.color_fader(mix=x/self.frames_per_round)
+                               for x in range(self.frames_per_round)]
+        self.yellow_to_blue[0] = "y"
+        self.yellow_to_blue[-1] = "b"
 
         #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
+
+    def color_fader(self, c1="y", c2="b", mix=0):
+        """Returns colors from c1 to c2"""
+
+        # https://stackoverflow.com/a/50784012/8903959
+        c1=np.array(mpl.colors.to_rgb(c1))
+        c2=np.array(mpl.colors.to_rgb(c2))
+        return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
 
     @property
     def users(self):
@@ -147,7 +170,10 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # This could also be changed for higher resolution
         fig.set_dpi(100)
-        fig.set_size_inches(100, 100)
+        if self.high_res:
+            fig.set_size_inches(100, 100)
+        else:
+            fig.set_size_inches(10, 10)
 
         max_users = self.manager.max_users_y
 
@@ -216,8 +242,13 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             self.ax.add_patch(bucket.patch)
             bucket.patch.set_zorder(1)
-            if bucket.states[0] == Bucket_States.UNUSED and self.high_res:
-                bucket.patch.set_alpha(0)
+            if self.high_res:
+                if bucket.states[0] == Bucket_States.UNUSED:
+                    bucket.patch.set_alpha(0)
+                elif bucket.states[0] == Bucket_States.ATTACKED:
+                    # Change this to not be hardcoded
+                    bucket.patch.set_facecolor("y")
+            
         for user in self.users:
             user.patch.center = user.points[0]
 
@@ -233,7 +264,10 @@ class Animater(Base_Grapher):
 
         self.round_text = plt.text(self.ax.get_xlim()[1] * .37,
                                    self.ax.get_ylim()[1] - .5,
-                                   f"{self.name}: Round 0")
+                                   f"{self.name}: Round 0",
+                                   bbox=dict(facecolor='white', alpha=1))
+
+
         return self.return_animation_objects()
 
     def animate(self, i):
@@ -273,37 +307,44 @@ class Animater(Base_Grapher):
                 user.horns.set_xy(self.get_horn_array(user))
             user.text.set_x(next_point[0] - .7)
             user.text.set_y(next_point[1] - .2)
-            if future_point == self.detected_location:
+            if (future_point == self.detected_location
+                and current_point != self.detected_location
+                and i % self.frames_per_round== 0):
                 user.text.set_text("Detected")
                 user.patch.set_facecolor("grey")
             else:
-                text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
-                user.text.set_text(f"{user.id:2.0f}:{text}")
-                user.patch.set_facecolor(user.og_face_color)
+                if i % self.frames_per_round == 0:
+                    text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
+                    user.text.set_text(f"{user.id:2.0f}:{text}")
+                if i == 0:
+                    user.patch.set_facecolor(user.og_face_color)
 
     def animate_buckets(self, i):
+        if i % 100 == 0:
+            pass #input(list(bucket.states[i // self.frames_per_round] for bucket in self.buckets))
         for bucket in self.buckets:
             current_state = bucket.states[i // self.frames_per_round]
             future_state = bucket.states[(i // self.frames_per_round) + 1]
 
-            # Alpha changes removed due to processing requirements
-            if i % self.frames_per_round == 0:
-                if current_state == Bucket_States.ATTACKED:
-                    bucket.patch.set_facecolor("y")
-                    #bucket.patch.set_zorder(5)
-                    #bucket.patch.set_fc("r")
-                elif current_state == Bucket_States.USED:
-                    bucket.patch.set_facecolor(bucket.og_face_color)
-                    #bucket.patch.set_alpha(None)
-
-            if current_state in [Bucket_States.ATTACKED, Bucket_States.USED] and future_state == Bucket_States.UNUSED:
+            # Transition between used and unused
+            if future_state == Bucket_States.UNUSED and current_state != Bucket_States.UNUSED:
                 bucket.patch.set_alpha( 1 - ((i % self.frames_per_round) / self.frames_per_round))
-
-            if future_state in [Bucket_States.ATTACKED, Bucket_States.USED] and current_state == Bucket_States.UNUSED:
+            elif current_state == Bucket_States.UNUSED and future_state != Bucket_States.UNUSED:
                 bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
 
-            
+            # Transition between attacked and not attacked
+            if current_state == Bucket_States.ATTACKED and future_state != Bucket_States.ATTACKED:
+                bucket.patch.set_facecolor(self.yellow_to_blue[i % self.frames_per_round])
+            elif future_state == Bucket_States.ATTACKED and current_state != Bucket_States.ATTACKED:
+                frames_left_in_round = self.frames_per_round - (i % self.frames_per_round)
+                if frames_left_in_round <= self.percent_left_before_change * self.frames_per_round:
+                    frames_before_change = int(self.frames_per_round * self.percent_left_before_change)
+                    color_index = frames_before_change - frames_left_in_round
+                    bucket.patch.set_facecolor(self.blue_to_yellow[color_index])
+
     def animate_round_text(self, i):
+        if i % self.frames_per_round != 0:
+            return
         self.round_text.set_visible(False)
         self.round_text.remove()
         # This is why it works best with that sizing

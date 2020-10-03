@@ -17,19 +17,8 @@ from .sieve_manager_base import Sieve_Manager_Base
 class Sieve_Manager_V0(Sieve_Manager_Base):
     """Sieve Manager detect and shuffle algorithm version 1"""
 
-    def detect_and_shuffle(self, turn_num: int):
-        """Performs sieve shuffle algorithm
-
-        First updates suspicion of users.
-        Then sorts users by suspicion.
-        Then splits users into num buckets/2 chunks
-        Then for each chunk, put in two buckets randomly
-        """
-
-        self._update_suspicion()
-        self.remove_attackers()
-        self._reorder_buckets(self.used_buckets)
-        self._sort_buckets(self.used_buckets)
+    def get_buckets_to_sort(self):
+        return self.used_buckets
 
 
 class Sieve_Manager_V0_S0(Sieve_Manager_V0):

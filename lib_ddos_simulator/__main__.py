@@ -14,7 +14,7 @@ import os
 from sys import argv
 
 from .ddos_simulator import DDOS_Simulator
-from .managers import Sieve_Manager_Base, Protag_Manager, KPO_Manager, Miad_Manager, Bounded_Manager
+from .managers import Sieve_Manager_Base, Protag_Manager, Bounded_Manager
 from .utils import config_logging
 from .graphers import Combination_Grapher
 
@@ -52,9 +52,9 @@ def main():
                        args.num_attackers,  # number of attackers
                        args.num_buckets,  # number of buckets
                        args.threshold,  # Threshold
-                       [Protag_Manager,
-                        Bounded_Manager
-                        ] + Sieve_Manager_Base.runnable_managers,
+                       #[Protag_Manager,
+                        #[Bounded_Manager],
+                        [] + Sieve_Manager_Base.runnable_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,
                        high_res=args.high_res).run(args.rounds, animate=True)

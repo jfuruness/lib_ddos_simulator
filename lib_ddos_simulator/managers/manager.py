@@ -38,7 +38,8 @@ class Manager:
         # Divide users evenly among buckets
         self.buckets = [Bucket(user_chunk) for user_chunk in
                         split_list(self.users, num_buckets)]
-        self.add_additional_buckets(max_buckets)
+        if max_buckets > 0:
+            self.add_additional_buckets(max_buckets)
         self.attackers_detected = 0
         self.eliminated_users = []
         # Simple error checks
@@ -51,6 +52,10 @@ class Manager:
 
     def reinit(self):
         users_dict = {x.id: x for x in self.users + self.eliminated_users}
+        for user in users_dict.values():
+            user.suspicion = 0
+            user.conn_lt = 0
+            user.dose_atk_risk = 0
         self.__init__(self.og_num_buckets,
                       # Reorder users to how they were originally
                       [users_dict[x] for x in self.og_user_order],
@@ -109,10 +114,12 @@ class Manager:
     def remove_attackers(self):
         """Removes buckets and attackers if bucket is attacker and len is 1"""
 
+        caught_attackers = []
         for bucket in self.buckets:
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 self.eliminated_users.extend(bucket.users)
+                caught_attackers.extend(bucket.users)
                 bucket.users = []
                 bucket.attacked = True
 
@@ -120,6 +127,8 @@ class Manager:
         self.users = []
         for bucket in self.buckets:
             self.users.extend(bucket.users)
+
+        return caught_attackers
 
     @property
     def attackers(self):
