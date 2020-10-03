@@ -11,6 +11,7 @@ __status__ = "Development"
 from copy import deepcopy
 from enum import Enum
 import os
+import math
 
 import matplotlib
 import matplotlib as mpl
@@ -49,8 +50,15 @@ class Animater(Base_Grapher):
     def __init__(self, manager, **kwargs):
         """Initializes simulation"""
 
-        super(Animater, self).__init__(**kwargs)
 
+        super(Animater, self).__init__(**kwargs)
+        if self.high_res:
+            # https://stackoverflow.com/a/51955985/8903959
+            mpl.rcParams['figure.dpi'] = 600
+            matplotlib.rcParams['figure.dpi'] = 600
+
+
+        self.row_cutoff = 30
         assert self.tikz is False, "Can't save animation as tikz afaik"
         self.manager = manager
         self.ogbuckets = deepcopy(manager.buckets)
@@ -59,18 +67,26 @@ class Animater(Base_Grapher):
             "Matplotlib can't handle that many users"
         self.ogusers = deepcopy(manager.users)
 
+        fontsize = 10
         matplotlib.rcParams.update({'font.size': 10})
 
 
         if manager.max_buckets > 10:
-            matplotlib.rcParams.update({'font.size': 7})
+            fontsize = 7
 
 
-        if manager.max_users_y > 10:
+        if manager.max_users_y > 10 or self.high_res:
+            fontsize = 5
             matplotlib.rcParams.update({'font.size': 5})
 
         if manager.max_buckets > 20:
-            matplotlib.rcParams.update({'font.size': 3})
+            fontsize = 3
+
+        if self.high_res:
+            # 3 is difference between low res and high res dpi
+            fontsize = fontsize / math.sqrt(3)
+
+        matplotlib.rcParams.update({'font.size': fontsize})
 
         self._create_bucket_patches()
         self._create_user_patches()
@@ -119,7 +135,7 @@ class Animater(Base_Grapher):
 
         # add to the points array
         for bucket in manager.buckets:
-            user_y = User.patch_padding
+            user_y = User.patch_padding + bucket.patch.get_y()
             for user in bucket.users:
                 circle_y = User.patch_radius + user_y
                 user.points.append((bucket.patch_center(), circle_y,))
@@ -171,8 +187,11 @@ class Animater(Base_Grapher):
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
+            dpi = 600 if self.high_res else 200
+            bitrate = 3000 if self.high_res else 1000
+
             # https://stackoverflow.com/a/14666461/8903959
-            anim.save(path, progress_callback=callback, dpi=200, bitrate=1000)
+            anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
             pbar.close()
         else:
             plt.show()
@@ -194,12 +213,17 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # NOTE: Increasing figure size makes it take way longer
         fig.set_size_inches(12, 6)
+        
 
         max_users = self.manager.max_users_y
 
-        ax = plt.axes(xlim=(0, len(self.buckets) * Bucket.patch_length()),
-                      ylim=(0, max_users * User.patch_length() + 1))
+        
+        rows = math.ceil(len(self.buckets) / self.row_cutoff)
+
+        ax = plt.axes(xlim=(0, min(len(self.buckets), self.row_cutoff)* Bucket.patch_length()),
+                      ylim=(0, (max_users * User.patch_length() + Bucket.patch_padding) * rows+ 1))
         ax.set_axis_off()
+        ax.margins(0)
 
         gradient_image(ax,
                        direction=0,
@@ -214,26 +238,46 @@ class Animater(Base_Grapher):
         """Creates patches of users and buckets"""
 
         self.bucket_patches = []
-        x = Bucket.patch_padding
-        for bucket in self.buckets:
+        bucket_rows = [[]]
+        for i, bucket in enumerate(reversed(self.buckets)):
+            if i % self.row_cutoff == 0 and i != 0:
 
-            kwargs = {"fc": bucket.og_face_color}
-
-            if self.save:
-                patch_type = FancyBboxPatch
-                kwargs["boxstyle"] = "round,pad=0.1"
+                bucket_rows.append([])
+                bucket_rows[-1].append(bucket)
             else:
-                patch_type = plt.Rectangle
+                bucket_rows[-1].append(bucket)
 
+        ordered_bucket_rows = []
+        for bucket_row in bucket_rows:
+            ordered_bucket_rows.append(list(reversed(bucket_row)))
 
-            bucket.patch = patch_type((x, 0),
-                                      Bucket.patch_width,
-                                      self.max_users * User.patch_length(),
-                                      **kwargs)
-            if self.save:
-                bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
-            x += Bucket.patch_length()
-            self.bucket_patches.append(bucket.patch)
+        x = Bucket.patch_padding
+        y = 0
+
+        for bucket_row in reversed(ordered_bucket_rows):
+            for bucket in bucket_row:
+                kwargs = {"fc": bucket.og_face_color}
+                if self.save:
+                    patch_type = FancyBboxPatch
+                    kwargs["boxstyle"] = "round,pad=0.1"
+                else:
+                    patch_type = plt.Rectangle
+
+                bucket.patch = patch_type((x, y),
+                                          Bucket.patch_width,
+                                          self.max_users * User.patch_length(),
+                                          **kwargs)
+
+                if self.save:
+                    bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+
+                x += Bucket.patch_length()
+                self.bucket_patches.append(bucket.patch)
+
+            # Next row
+            y += bucket.patch_height
+            x = Bucket.patch_padding
+
 
     def _create_user_patches(self):
         """Creates patches of users"""
@@ -248,6 +292,7 @@ class Animater(Base_Grapher):
                     user.horns = plt.Polygon(0 * self.get_horn_array(user),
                                              fc=user.og_face_color,
                                              **dict(ec="k"))
+                    user.horns.set_linewidth(.5)
 
                 user.text = plt.text(bucket.patch_center(),
                                      5,
@@ -270,19 +315,23 @@ class Animater(Base_Grapher):
                 elif bucket.states[0] == Bucket_States.ATTACKED:
                     # Change this to not be hardcoded
                     bucket.patch.set_facecolor("y")
+        zorder = 2
         max_sus = 0
         for user in self.users:
             max_sus = max(max(user.suspicions), max_sus)
             user.patch.center = user.points[0]
 
             self.ax.add_patch(user.patch)
-            user.patch.set_zorder(3)
             if isinstance(user, Attacker):
-                user.horns.set_zorder(2)
+                user.horns.set_zorder(zorder)
+                zorder += 1
                 self.ax.add_patch(user.horns)
                 user.horns.set_xy(self.get_horn_array(user))
+            user.patch.set_zorder(zorder)
+            zorder += 1
             user.text.set_y(user.points[0][1])
-            user.text.set_zorder(4)
+            user.text.set_zorder(zorder)
+            zorder += 1
 
         self.track_suspicions = max_sus != 0
 
@@ -290,7 +339,7 @@ class Animater(Base_Grapher):
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   fontsize=12,
+                                   fontsize=12 if not self.high_res else 12 / math.sqrt(3),
                                    bbox=dict(facecolor='white', alpha=1),
                                    horizontalalignment='center',
                                    verticalalignment='center')
@@ -342,7 +391,7 @@ class Animater(Base_Grapher):
                 user.patch.set_facecolor("grey")
             else:
                 if self.track_suspicions and i % self.frames_per_round == 0:
-                    text = f"{user.suspicions[i//self.frames_per_round]:.1f}"
+                    text = f"{user.suspicions[(i//self.frames_per_round) + 1]:.1f}"
                     user.text.set_text(f"{user.id:2.0f}:{text}")
                 if i == 0:
                     user.patch.set_facecolor(user.og_face_color)
@@ -380,7 +429,7 @@ class Animater(Base_Grapher):
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   fontsize=12,
+                                   fontsize=12 if not self.high_res else 12 / math.sqrt(3),
                                    bbox=dict(facecolor='white', alpha=1),
                                    horizontalalignment='center',
                                    verticalalignment='center')

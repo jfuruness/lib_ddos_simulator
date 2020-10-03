@@ -23,6 +23,8 @@ class Bounded_Manager(Manager):
 
     __slots__ = ["num_attackers_guess"]
 
+    runnable = True
+
     def __init__(self, *args, **kwargs):
         super(Bounded_Manager, self).__init__(*args, **kwargs)
         self.num_attackers_guess = 0

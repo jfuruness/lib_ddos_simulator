@@ -22,11 +22,10 @@ import json
 from .base_grapher import Base_Grapher
 
 from ..attackers import Attacker
-from ..managers import Bounded_Manager
 # Done this way to avoid circular imports
 from .. import ddos_simulator
-from ..managers import Protag_Manager
-from ..managers import Sieve_Manager_Base
+from ..managers import Manager
+
 
 
 
@@ -47,9 +46,7 @@ class Combination_Grapher(Base_Grapher):
     __slots__ = ["second_legend"]
 
     def run(self,
-            managers=(Sieve_Manager_Base.runnable_managers +
-                      [Protag_Manager, Bounded_Manager]), #+
-                      #Miad_Manager.runnable_managers),
+            managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],
             users_per_bucket_list=[10 ** i for i in range(1, 3)],

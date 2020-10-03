@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from .. import attackers
 from .user import User
 
 
@@ -52,6 +53,10 @@ class Bucket:
         
         self.patch = patch
 
+    @property
+    def attackers(self):
+        return [x for x in self.users if isinstance(x, attackers.Attacker)]
+
     def __str__(self):
         """Returns users inside of bucket"""
 
@@ -84,6 +89,10 @@ class Bucket:
         """Animation object length"""
 
         return Bucket.patch_width + Bucket.patch_padding * 2
+
+    @property
+    def patch_height(self):
+        return self.patch.get_height() + Bucket.patch_padding * 2
 
     def patch_center(self):
         """Gets the center of the animation object for moving"""

@@ -20,6 +20,29 @@ class Manager:
                  "eliminated_users", "og_num_buckets", "max_users_y",
                  "max_buckets", "og_user_order"]
 
+    runnable_managers = []
+
+    # https://stackoverflow.com/a/43057166/8903959
+    def __init_subclass__(cls, **kwargs):
+        """This method essentially creates a list of all subclasses"""
+
+        super().__init_subclass__(**kwargs)
+
+        assert hasattr(cls, "runnable"), "Must add runnable class attr"
+
+        if cls.runnable:
+            if hasattr(cls, "suspicion_func_num") and cls.suspicion_func_num != 0:
+                pass
+            else:
+                cls.runnable_managers.append(cls)
+                Manager.runnable_managers.append(cls)
+
+        for q in [Manager, cls]:
+            # Sorts alphabetically
+            q.runnable_managers = list(sorted(set(q.runnable_managers),
+                                         key=lambda x: x.__name__))
+
+
     def __init__(self,
                  num_buckets: int,
                  users: list,

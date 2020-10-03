@@ -23,6 +23,8 @@ class Protag_Manager(Manager):
     This Manager class uses a protag shuffling algorithm"""
 
     __slots__ = []
+
+    runnable = True
         
     def detect_and_shuffle(self, turn_num: int):
         """Protag algorithm"""

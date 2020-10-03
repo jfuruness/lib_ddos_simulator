@@ -45,7 +45,9 @@ class User:
 
     # For animations, since dose has it's own suspicion of sorts
     def get_suspicion(self):
-        if self.dose_risk > 0:
+        if self.suspicion > 0:
+            return self.suspicion
+        elif self.dose_risk > self.lone_drone_suspicion:
             return self.dose_risk
         else:
             return self.suspicion

@@ -35,6 +35,8 @@ class DOSE_Manager(Manager):
 
     __slots__ = ["dose_atk_events"]
 
+    runnable = True
+
     # Single threat case hardcoded to 2 in DOSE code
     # Multithreat case is hardcoded to 3 in DOSE code
     CRPA = 3
@@ -74,7 +76,7 @@ class DOSE_Manager(Manager):
         for attacker in caught_attackers:
             old_events = self.dose_atk_events.copy()
             self.dose_atk_events = []
-            for event in self.dose_atk_events:
+            for event in old_events:
                 if attacker.id in event.uids:
                     # reduce
                     event.reduce_sus()

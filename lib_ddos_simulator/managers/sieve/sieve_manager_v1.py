@@ -17,16 +17,21 @@ from .sieve_manager_base import Sieve_Manager_Base
 class Sieve_Manager_V1(Sieve_Manager_Base):
     """Sieve Manager detect and shuffle algorithm version 1"""
 
+    runnable = False
+
     def get_buckets_to_sort(self):
         return self.attacked_buckets
 
 class Sieve_Manager_V1_S0(Sieve_Manager_V1):
+    runnable = True
     suspicion_func_num = 0
 
 
 class Sieve_Manager_V1_S1(Sieve_Manager_V1):
+    runnable = True
     suspicion_func_num = 1
 
 
 class Sieve_Manager_V1_S2(Sieve_Manager_V1):
+    runnable = True
     suspicion_func_num = 2

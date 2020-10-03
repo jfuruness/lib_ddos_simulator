@@ -17,6 +17,8 @@ from .sieve_manager_base import Sieve_Manager_Base
 class Sieve_Manager_KPO(Sieve_Manager_Base):
     """Sieve Manager detect and shuffle algorithm version 1"""
 
+    runnable = False
+
     def get_buckets_to_sort(self):
         # Double attacked buckets if atked buckets == total
         if len(self.attacked_buckets) == len(self.used_buckets):
@@ -31,12 +33,15 @@ class Sieve_Manager_KPO(Sieve_Manager_Base):
 
 
 class Sieve_Manager_KPO_S0(Sieve_Manager_KPO):
+    runnable = True
     suspicion_func_num = 0
 
 
 class Sieve_Manager_KPO_S1(Sieve_Manager_KPO):
+    runnable = True
     suspicion_func_num = 1
 
 
 class Sieve_Manager_KPO_S2(Sieve_Manager_KPO):
+    runnable = True
     suspicion_func_num = 2

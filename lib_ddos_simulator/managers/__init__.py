@@ -10,9 +10,12 @@ __status__ = "Development"
 
 from .bounded_manager import Bounded_Manager
 from .dose import DOSE_Manager, DOSE_Attack_Event
-from .manager import Manager
 from .protag_manager import Protag_Manager
-from .sieve import Sieve_Manager_Base
+
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2
 from .sieve import Sieve_Manager_V1_S0, Sieve_Manager_V1_S1, Sieve_Manager_V1_S2
 from .sieve import Sieve_Manager_KPO_S0, Sieve_Manager_KPO_S1, Sieve_Manager_KPO_S2
+from .sieve import Sieve_Manager_Base
+
+# Done here to force init
+from .manager import Manager

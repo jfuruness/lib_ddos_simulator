@@ -26,15 +26,18 @@ class Sieve_Manager_Base(Manager):
 
     __slots__ = []
 
-    runnable_managers = []
+    runnable = False
+
+    sieve_managers = []
 
     # https://stackoverflow.com/a/43057166/8903959
     def __init_subclass__(cls, **kwargs):
         """This method essentially creates a list of all subclasses"""
 
         super().__init_subclass__(**kwargs)
-        if hasattr(cls, "suspicion_func_num"):
-            cls.runnable_managers.append(cls)
+        # Done just to avoid big graph problems
+        if hasattr(cls, "suspicion_func_num") and cls.suspicion_func_num == 0:
+            cls.sieve_managers.append(cls)
 
     def __init__(self, *args, **kwargs):
         """Stores suspicion functions"""

@@ -28,6 +28,6 @@ class DOSE_Attack_Event:
         # This is CRPA val
         self.sus_added = DOSE_Manager.dose_atk_sus_to_add(bucket)
 
-    def reduce_sus(self, users):
+    def reduce_sus(self):
         for user in self.users:
             user.dose_atk_risk -= self.sus_added
