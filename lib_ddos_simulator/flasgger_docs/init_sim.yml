@@ -1,0 +1,46 @@
+Initializes simulation with user ids, bucket ids, and manager
+---
+parameters:
+  - name: uids
+    in: query
+    description: Comma separated user ids
+    type: string
+    required: true
+  - name: bids
+    in: query
+    type: string
+    description: Comma separated bucket ids
+    required: true
+  - name: manager
+    in: query
+    type: string
+    description: Manager to run
+    required: true
+responses:
+  200:
+    description: Initializes simulation with user ids, bucket ids, and manager
+    examples:
+        {
+          "data": {
+            "bucket_mapping": {
+              "1": [
+                1,
+                3
+              ],
+              "2": [
+                2
+              ],
+              "3": [
+                4
+              ]
+            },
+            "eliminated_users": [
+              []
+            ],
+            "manager": "Protag_Manager_No_Merge"
+          },
+          "metadata": {
+            "desc": "Initializes simulation",
+            "url": "http://localhost:5000/init?uids=1,2,3,4&bids=1,2,3&manager=protag_manager_no_merge"
+          }
+        }

@@ -1,3 +1,4 @@
+flasgger
 flask
 matplotlib
 tikzplotlib

@@ -16,13 +16,14 @@ import os
 import random
 import sys
 
+from flasgger import Swagger, swag_from
 from flask import Flask, request, jsonify
 
 from .simulation_objects import User
 from .managers import Manager
 from .utils import config_logging
 
-def error_proof(*args1):
+def format_json(desc=""):
     """Try catch around api calls"""
 
     def my_decorator(func):
@@ -30,8 +31,11 @@ def error_proof(*args1):
         def function_that_runs_func(*args2, **kwargs):
             # Inside the decorator
             try:
+                metadata = {"metadata": {"desc": desc,
+                                         "url": request.url}}
                 # Get the results from the function
-                return func(*args2, **kwargs)
+                return jsonify({**{"data": func(*args2, **kwargs)},
+                                **metadata})
             except Exception as e:
                 if "pytest" in sys.modules:
                     raise e
@@ -63,6 +67,7 @@ def complete_turn(app, downed_bucket_ids):
 def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__)
+    swagger = Swagger(app)
 
     app.app_dir = "/tmp/lib_ddos_simulator"
     if not os.path.exists(app.app_dir):
@@ -73,8 +78,9 @@ def create_app():
     def home():
         return "App is running"
 
-    @app.route("/init", methods=['GET', 'POST'])
-    @error_proof()
+    @app.route("/init")
+    @swag_from("flasgger_docs/init_sim.yml")
+    @format_json(desc="Initializes simulation")
     def init():
         """Initializes app
 
@@ -94,10 +100,11 @@ def create_app():
 
         # init here
         init_sim(app, user_ids, bucket_ids, manager_cls)
-        return jsonify(app.manager.json)
+        return app.manager.json
 
-    @app.route("/turn", methods=['GET', 'POST'])
-    @error_proof()
+    @app.route("/turn")
+    @swag_from("flasgger_docs/turn.yml")
+    @format_json(desc="Cause simulation to take actions")
     def turn():
         """Takes a turn. Input downed buckets"""
 
@@ -107,10 +114,13 @@ def create_app():
         else:
             bucket_ids = []
         complete_turn(app, bucket_ids)
-        return jsonify(app.manager.json)
+        return app.manager.json
 
     @app.route("/runnable_managers")
+    @swag_from("flasgger_docs/runnable_managers.yml")
+    @format_json(desc="List of runnable managers")
     def runnable_managers():
-        return str([x.__name__ for x in Manager.runnable_managers])
+        return {"managers": ([x.__name__ for x in
+                                 Manager.runnable_managers])}
 
     return app

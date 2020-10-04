@@ -1,0 +1,23 @@
+List of runnable managers
+---
+responses:
+  200:
+    description: List of runnable managers
+    examples:
+    {
+      "data": {
+        "managers": [
+          "Bounded_Manager",
+          "DOSE_Manager",
+          "Protag_Manager_Merge",
+          "Protag_Manager_No_Merge",
+          "Sieve_Manager_KPO_S0",
+          "Sieve_Manager_V0_S0",
+          "Sieve_Manager_V1_S0"
+        ]
+      },
+      "metadata": {
+        "desc": "List of runnable managers",
+        "url": "http://localhost:5000/runnable_managers"
+      }
+    }

@@ -50,9 +50,9 @@ class Test_API:
                    f'uids={",".join(str(x) for x in uids)}'
                    f'&bids={",".join(str(x) for x in bids)}'
                    f'&manager={manager}')
-            resp = client.post(url)
+            resp = client.get(url)
 
-            Test_API.compare_jsons(resp.get_json(), json_obj)
+            Test_API.compare_jsons(resp.get_json()["data"], json_obj)
 
         og_manager_take_action = deepcopy(Manager.take_action)
         def take_action_patch(manager_self, turn=0):
@@ -62,7 +62,7 @@ class Test_API:
             if turn == -1:
                 return
             resp = client.get('/turn?bids='+ ",".join(str(x) for x in attacked_ids))
-            Test_API.compare_jsons(resp.get_json(), manager_self.json)
+            Test_API.compare_jsons(resp.get_json()["data"], manager_self.json)
     
 
         # https://medium.com/@george.shuklin/mocking-complicated-init-in-python-6ef9850dd202
