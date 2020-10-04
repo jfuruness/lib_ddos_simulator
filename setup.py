@@ -14,7 +14,7 @@ setup(
               'Distributed Denial of Service',
               'Denial of Service'],
     install_requires=[
-        'flas',
+        'flask',
         'matplotlib',
         'tikzplotlib',
         'wheel',
