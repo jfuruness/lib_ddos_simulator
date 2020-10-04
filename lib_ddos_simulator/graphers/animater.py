@@ -212,7 +212,7 @@ class Animater(Base_Grapher):
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
             bitrate = 3000 if self.high_res else 1000
-
+            assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
             pbar.close()
@@ -392,24 +392,24 @@ class Animater(Base_Grapher):
         for user in self.users:
             current_point = user.points[i // self.frames_per_round]
             future_point = user.points[(i // self.frames_per_round) + 1]
-
-            remainder = i - ((i // self.frames_per_round)
-                             * self.frames_per_round)
-            next_point_x1_contr = current_point[0] * (
-                (self.frames_per_round - remainder) / self.frames_per_round)
-            next_point_x2_contr = future_point[0] * (
-                remainder / self.frames_per_round)
-            next_point_y1_contr = current_point[1] * (
-                (self.frames_per_round - remainder) / self.frames_per_round)
-            next_point_y2_contr = future_point[1] * (
-                remainder / self.frames_per_round)
-            next_point = (next_point_x1_contr + next_point_x2_contr,
-                          next_point_y1_contr + next_point_y2_contr)
-            user.patch.center = next_point
-            if isinstance(user, Attacker):
-                user.horns.set_xy(self.get_horn_array(user))
-            user.text.set_x(next_point[0])
-            user.text.set_y(next_point[1])
+            if current_point != future_point:
+                remainder = i - ((i // self.frames_per_round)
+                                 * self.frames_per_round)
+                next_point_x1_contr = current_point[0] * (
+                    (self.frames_per_round - remainder) / self.frames_per_round)
+                next_point_x2_contr = future_point[0] * (
+                    remainder / self.frames_per_round)
+                next_point_y1_contr = current_point[1] * (
+                    (self.frames_per_round - remainder) / self.frames_per_round)
+                next_point_y2_contr = future_point[1] * (
+                    remainder / self.frames_per_round)
+                next_point = (next_point_x1_contr + next_point_x2_contr,
+                              next_point_y1_contr + next_point_y2_contr)
+                user.patch.center = next_point
+                if isinstance(user, Attacker):
+                    user.horns.set_xy(self.get_horn_array(user))
+                user.text.set_x(next_point[0])
+                user.text.set_y(next_point[1])
             if (future_point == self.detected_location
                 and current_point != self.detected_location
                 and i % self.frames_per_round== 0):
@@ -423,8 +423,6 @@ class Animater(Base_Grapher):
                     user.patch.set_facecolor(user.og_face_color)
 
     def animate_buckets(self, i):
-        if i % 100 == 0:
-            pass #input(list(bucket.states[i // self.frames_per_round] for bucket in self.buckets))
         for bucket in self.buckets:
             current_state = bucket.states[i // self.frames_per_round]
             future_state = bucket.states[(i // self.frames_per_round) + 1]
