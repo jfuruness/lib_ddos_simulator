@@ -17,19 +17,20 @@ class Bucket:
 
     # patch used in animations
     __slots__ = ["users", "_max_users", "attacked", "patch",
-                 "turns_not_attacked", "states"]
+                 "turns_not_attacked", "states", "id"]
 
     # Used in animations
     patch_width = User.patch_length()
     patch_padding = .5
     og_face_color = "b"
 
-    def __init__(self, users: list = [], max_users=100000000, attacked=False):
+    def __init__(self, users=[], id=0, max_users=100000000, attacked=False):
         """Stores users"""
 
         assert len(users) < max_users, "Too many users, over max_users"
 
         self.users = users
+        self.id = id
         for user in users:
             user.bucket = self
         self._max_users = max_users

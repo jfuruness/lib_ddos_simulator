@@ -64,7 +64,10 @@ class Grapher(Base_Grapher):
         cur_data["percent_serviced"].append(percent_serviced)
 
         # Percent detected
-        percent_detected = manager.attackers_detected * 100 / len(attackers)
+        if len(attackers) == 0:
+            percent_detected = 100
+        else:
+            percent_detected = manager.attackers_detected * 100 / len(attackers)
         cur_data["percent_detected"].append(percent_detected)
 
         # Utility: total number ever serviced / total number of buckets used

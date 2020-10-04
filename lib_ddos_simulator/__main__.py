@@ -13,6 +13,7 @@ from logging import DEBUG
 import os
 from sys import argv
 
+from .api import create_app
 from .ddos_simulator import DDOS_Simulator
 from .managers import Manager
 from .utils import config_logging
@@ -39,13 +40,17 @@ def main():
     parser.add_argument("--high_res", dest="high_res", default=False, action="store_true")
     parser.add_argument("--trials", type=int, dest="trials", default=100)
     parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
+    parser.add_argument("--api", dest="api", default=False, action="store_true")
+    parser.add_argument("--json", dest="json", default=False, action="store_true")
 
 
     args = parser.parse_args()
     if args.debug:
         config_logging(DEBUG)
 
-    if args.animate:
+    if args.api:
+        create_app().run(debug=True)
+    elif args.animate:
         # NOTE: for optimal animations,
         # use 24, 4, 8, 10 for users, attackers, buckets, threshold
         DDOS_Simulator(args.num_users,  # number of users

@@ -26,12 +26,12 @@ class Bounded_Manager(Manager):
 
     def __init__(self, *args, **kwargs):
         super(Bounded_Manager, self).__init__(*args, **kwargs)
-        self.num_attackers_guess = 0
+        self.num_attackers_guess = None
 
-    def detect_and_shuffle(self, turn_num: int):
+    def detect_and_shuffle(self, *args):
         """Bounded Manager algorithm"""
 
-        if turn_num == 0:
+        if self.num_attackers_guess is None:
             # Start attacker guess with # attacked buckets
             self.num_attackers_guess = len(self.attacked_buckets)
 

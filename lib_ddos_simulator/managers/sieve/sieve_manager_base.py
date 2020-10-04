@@ -37,7 +37,7 @@ class Sieve_Manager_Base(Manager):
                                 self._update_suspicion_2]
         self._update_suspicion = self.suspicion_funcs[self.suspicion_func_num]
 
-    def detect_and_shuffle(self, turn_num: int):
+    def detect_and_shuffle(self, *args):
         """Performs sieve shuffle algorithm
 
         First updates suspicion of users.

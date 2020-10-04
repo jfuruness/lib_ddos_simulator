@@ -58,7 +58,7 @@ class DOSE_Manager(Manager):
         for bucket in self.attacked_buckets:
             self.dose_atk_events.append(DOSE_Attack_Event(bucket))
 
-    def detect_and_shuffle(self, turn_num: int):
+    def detect_and_shuffle(self, *args):
         """DOSE algorithm"""
 
         self.remove_attackers()

@@ -18,7 +18,8 @@ class Manager:
 
     __slots__ = ["users", "_threshold", "buckets", "attackers_detected",
                  "eliminated_users", "og_num_buckets", "max_users_y",
-                 "max_buckets", "og_user_order"]
+                 "max_buckets", "og_user_order", "bucket_id", "og_json",
+                 "downed_json"]
 
     runnable_managers = []
 
@@ -48,7 +49,7 @@ class Manager:
     def __init__(self,
                  num_buckets: int,
                  users: list,
-                 threshold: int,
+                 threshold: int = 0,
                  # Used in animations
                  max_users_y=0,
                  max_buckets=0):
@@ -60,9 +61,12 @@ class Manager:
         self.og_user_order = [x.id for x in self.users]
         self._threshold = threshold
         self.og_num_buckets = num_buckets
+        self.buckets = []
         # Divide users evenly among buckets
-        self.buckets = [Bucket(user_chunk) for user_chunk in
-                        split_list(self.users, num_buckets)]
+        for _id, user_chunk in enumerate(split_list(self.users, num_buckets)):
+            self.buckets.append(Bucket(user_chunk, _id))
+        self.bucket_id = _id + 1
+
         if max_buckets > 0:
             self.add_additional_buckets(max_buckets)
         self.attackers_detected = 0
@@ -88,7 +92,7 @@ class Manager:
                       max_users_y=self.max_users_y,
                       max_buckets=self.max_buckets)
 
-    def take_action(self, turn):
+    def take_action(self, turn=0):
         """Actions to take every turn"""
 
         self.record_dose_events()
@@ -105,7 +109,8 @@ class Manager:
         try:
             return self.non_used_buckets[0]
         except IndexError:
-            self.buckets.append(Bucket())
+            self.buckets.append(Bucket(id=self.bucket_id))
+            self.bucket_id += 1
             return self.buckets[-1]
 
     def add_additional_buckets(self, max_buckets):
@@ -208,3 +213,19 @@ class Manager:
         """
 
         assert False, "Not yet implimented"
+
+    @property
+    def json(self):
+        """For flask app, returns json of {bucket_id: user_ids}"""
+
+        buckets = {bucket.id: list(sorted([x.id for x in bucket.users]))
+                   for bucket in self.used_buckets}
+        eliminated = list(sorted(x.id for x in self.eliminated_users)),
+        return {"bucket_mapping": buckets,
+                "eliminated_users": eliminated,
+                "manager": self.__class__.__name__}
+
+    def get_buckets_by_ids(self, ids):
+        """Returns a list of buckets by ids"""
+
+        return [x for x in self.buckets if x.id in set(ids)]

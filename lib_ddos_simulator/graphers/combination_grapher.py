@@ -10,6 +10,7 @@ __status__ = "Development"
 
 import logging
 import os
+import sys
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -90,7 +91,8 @@ class Combination_Grapher(Base_Grapher):
 
         # If we are debugging, no multiprocessing
         # https://stackoverflow.com/a/1987484/8903959
-        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        if (logging.getLogger().getEffectiveLevel() == logging.DEBUG
+            or "pytest" in sys.modules):
             for i in range(total):
                 try:
                     current_args = [x[i] for x in full_args]

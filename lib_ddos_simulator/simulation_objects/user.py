@@ -43,7 +43,7 @@ class User:
         self.conn_lt = 0
         self.dose_atk_risk = 0
 
-    def take_action(self, manager, turn):
+    def take_action(self, *args):  # Note that args are manager, turn
         """Action that user takes every round"""
 
         # Used in DOSE for connection lifetime

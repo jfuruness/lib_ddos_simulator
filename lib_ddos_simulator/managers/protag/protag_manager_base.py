@@ -34,7 +34,7 @@ class Protag_Manager_Base(Manager):
 
         super(Protag_Manager_Base, self).__init__(*args, **kwargs)
 
-    def detect_and_shuffle(self, turn_num: int):
+    def detect_and_shuffle(self, *args):
         """Protag algorithm"""
 
         # Removes bucket/attacker if bucket is attacked and len is 1
