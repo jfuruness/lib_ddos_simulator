@@ -28,7 +28,7 @@ def main():
     parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=48)
     parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=32)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=40)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=45)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
