@@ -75,7 +75,7 @@ class Animater(Base_Grapher):
         super(Animater, self).__init__(**kwargs)
         self.low_dpi = 200
         if self.high_res:
-            self.high_dpi = 800
+            self.high_dpi = 600
             # https://stackoverflow.com/a/51955985/8903959
             mpl.rcParams['figure.dpi'] = self.high_dpi
             matplotlib.rcParams['figure.dpi'] = self.high_dpi
