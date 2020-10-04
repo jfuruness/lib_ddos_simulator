@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from ..attackers import Basic_Attacker
+from ..attackers import Basic_Attacker, Even_Turn_Attacker
 from ..managers.manager import Manager
 from ..graphers import Combination_Grapher
 
@@ -40,7 +40,6 @@ class Test_API:
             if threshold == -123:
                 return
 
-    #        temp.take_action = self.take_action_patch
             uids, bids, manager, json_obj = Test_API.json_to_init_api(manager_self.json)
             data = {"manager": manager}
             assert len(uids) > 0
@@ -73,7 +72,8 @@ class Test_API:
                 # So don't do that
                 with patch('random.shuffle', lambda x: x):
                     combo_grapher = Combination_Grapher(save=True).run(
-                                                   attackers=[Basic_Attacker],
+                                                   attackers=[Basic_Attacker,
+                                                              Even_Turn_Attacker],
                                                    num_buckets_list=[4],
                                                    users_per_bucket_list=[4],
                                                    num_rounds_list=[5],

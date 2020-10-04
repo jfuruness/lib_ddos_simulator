@@ -75,6 +75,8 @@ class Animater(Base_Grapher):
         super(Animater, self).__init__(**kwargs)
         self.low_dpi = 200
         if self.high_res:
+            # Anything higher than 600 and you need to drastically increase bitrate
+            # But increasing bitrate causes it to crash on other machines
             self.high_dpi = 600
             # https://stackoverflow.com/a/51955985/8903959
             mpl.rcParams['figure.dpi'] = self.high_dpi
@@ -107,7 +109,7 @@ class Animater(Base_Grapher):
 
         if self.high_res:
             # 3 is difference between low res and high res dpi
-            fontsize = fontsize / (self.high_dpi / self.low_dpi)
+            fontsize = fontsize / math.sqrt(self.high_dpi / self.low_dpi)
 
         matplotlib.rcParams.update({'font.size': fontsize})
 
@@ -212,9 +214,15 @@ class Animater(Base_Grapher):
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
             bitrate = 3000 if self.high_res else 1000
-            assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
+            ###############################################################################
+            bitrate = 6000
+            dpi=1200
+
+            # assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
+            FFwriter=animation.FFMpegFileWriter(dpi=dpi, bitrate=bitrate)
             # https://stackoverflow.com/a/14666461/8903959
-            anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
+            #anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
+            anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate, writer=FFwriter)
             pbar.close()
         else:
             plt.show()
