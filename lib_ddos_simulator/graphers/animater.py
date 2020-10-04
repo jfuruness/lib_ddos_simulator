@@ -73,10 +73,12 @@ class Animater(Base_Grapher):
 
 
         super(Animater, self).__init__(**kwargs)
+        self.low_dpi = 200
         if self.high_res:
+            self.high_dpi = 1800
             # https://stackoverflow.com/a/51955985/8903959
-            mpl.rcParams['figure.dpi'] = 600
-            matplotlib.rcParams['figure.dpi'] = 600
+            mpl.rcParams['figure.dpi'] = self.high_dpi
+            matplotlib.rcParams['figure.dpi'] = self.high_dpi
 
 
         self.row_cutoff = 30
@@ -105,7 +107,7 @@ class Animater(Base_Grapher):
 
         if self.high_res:
             # 3 is difference between low res and high res dpi
-            fontsize = fontsize / math.sqrt(3)
+            fontsize = fontsize / (self.high_dpi / self.low_dpi)
 
         matplotlib.rcParams.update({'font.size': fontsize})
 
@@ -208,8 +210,8 @@ class Animater(Base_Grapher):
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
-            dpi = 600 if self.high_res else 200
-            bitrate = 3000 if self.high_res else 1000
+            dpi = self.high_dpi if self.high_res else self.low_dpi
+            bitrate = 10000 if self.high_res else 1000
 
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
@@ -313,7 +315,7 @@ class Animater(Base_Grapher):
                     user.horns = plt.Polygon(0 * self.get_horn_array(user),
                                              fc=user.og_face_color,
                                              **dict(ec="k"))
-                    user.horns.set_linewidth(.5)
+                    user.horns.set_linewidth(.1 if self.high_res else .5)
 
                 user.text = plt.text(bucket.patch_center(),
                                      5,
@@ -356,12 +358,15 @@ class Animater(Base_Grapher):
 
         self.track_suspicions = max_sus != 0
 
+        round_text_kwargs = dict(facecolor='white', alpha=1)
+        if self.high_res:
+            round_text_kwargs["boxstyle"] = "square,pad=.05"
 
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   fontsize=12 if not self.high_res else 12 / 3,
-                                   bbox=dict(facecolor='white', alpha=1),
+                                   fontsize=12 if not self.high_res else 12 / (self.high_dpi / self.low_dpi),
+                                   bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
 
@@ -445,13 +450,17 @@ class Animater(Base_Grapher):
             return
         self.round_text.set_visible(False)
         self.round_text.remove()
+        round_text_kwargs = dict(facecolor='white', alpha=1)
+        if self.high_res:
+            # https://stackoverflow.com/a/29127933/8903959
+            round_text_kwargs["boxstyle"] = "square,pad=.05"
         # This is why it works best with that sizing
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   fontsize=12 if not self.high_res else 12 / 3,
-                                   bbox=dict(facecolor='white', alpha=1),
+                                   fontsize=12 if not self.high_res else 12 / (self.high_dpi / self.low_dpi),
+                                   bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
 
