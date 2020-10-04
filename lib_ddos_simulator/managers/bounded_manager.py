@@ -8,7 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from random import shuffle
+import random
 
 from .manager import Manager
 
@@ -114,7 +114,7 @@ class Bounded_Manager(Manager):
             if new_bucket_amnt > len(self.attacked_users):
                 new_bucket_amnt = len(self.attacked_users)
             users = self.attacked_users
-            shuffle(users)
+            random.shuffle(users)
 
             # Clear out buckets
             for bucket in self.attacked_buckets:

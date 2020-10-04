@@ -11,7 +11,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 from copy import deepcopy
-from unittest.mock import patch
+import random
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -64,10 +65,13 @@ class Test_API:
             resp = client.get('/turn?bids='+ ",".join(str(x) for x in attacked_ids))
             Test_API.compare_jsons(resp.get_json(), manager_self.json)
     
+
         # https://medium.com/@george.shuklin/mocking-complicated-init-in-python-6ef9850dd202
         with patch.object(Manager, "__init__", init_patch):
             with patch.object(Manager, "take_action", take_action_patch):
-                with patch("random.shuffle"):
+                # NOTE: pretty sure this won't work if you do from random import shuffle
+                # So don't do that
+                with patch('random.shuffle', lambda x: x):
                     combo_grapher = Combination_Grapher(save=True).run(
                                                    attackers=[Basic_Attacker],
                                                    num_buckets_list=[4],
@@ -99,8 +103,9 @@ class Test_API:
     def compare_jsons(obj1, obj2):
         assert obj1["manager"] == obj2["manager"]
         assert list(obj1["eliminated_users"]) == list(obj2["eliminated_users"])
-        for (bucket1, user_list1), (bucket2, user_list2) in zip(obj1["bucket_mapping"].items(),
-                                                                obj2["bucket_mapping"].items()):
-            assert str(bucket1) == str(bucket2)
-            assert user_list1 == user_list2
+        bucket_ids1 = set(str(x) for x in obj1["bucket_mapping"].keys())
+        bucket_ids2 = set(str(x) for x in obj2["bucket_mapping"].keys())
+        assert bucket_ids1 == bucket_ids2
+        for _id in bucket_ids1:
+            assert obj1["bucket_mapping"].get(_id, obj1["bucket_mapping"].get(int(_id))) == obj2["bucket_mapping"].get(_id, obj2["bucket_mapping"].get(int(_id)))
 
