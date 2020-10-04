@@ -12,7 +12,6 @@ from random import shuffle
 
 from .manager import Manager
 
-from ..simulation_objects import Bucket
 from ..utils import split_list
 
 
@@ -103,9 +102,6 @@ class Bounded_Manager(Manager):
 
     def _shuffle_attacked_buckets(self, new_bucket_amnt):
         """Detects/Moves attackers into new_bucket_amnt buckets and shuffles"""
-
-        og_new_bucket_amnt = new_bucket_amnt
-        og_attackers = len(self.attackers)
 
         # Get rid of attackers if they are the only one in the bucket first
         new_attacked_buckets = [x for x in self.attacked_buckets if len(x) > 1]

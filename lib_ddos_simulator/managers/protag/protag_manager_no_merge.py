@@ -22,7 +22,7 @@ class Protag_Manager_No_Merge(Protag_Manager_Base):
 
     This Manager class uses a protag shuffling algorithm
 
-    this manager class also merges buckets if not attacked"""
+    this manager class never merges buckets"""
 
     __slots__ = []
 

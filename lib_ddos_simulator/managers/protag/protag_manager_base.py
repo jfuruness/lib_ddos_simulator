@@ -14,8 +14,8 @@ __status__ = "Development"
 
 from ..manager import Manager
 
-from ...simulation_objects import Bucket
 from ...utils import split_list
+
 
 class Protag_Manager_Base(Manager):
     """Simulates a manager for a DDOS attack
@@ -27,6 +27,8 @@ class Protag_Manager_Base(Manager):
     runnable = False
 
     def __init__(self, *args, **kwargs):
+        """Error checking"""
+
         msg = "Must have a combine buckets method, even if it's empty"""
         assert self.runnable is False or hasattr(self, "combine_buckets"), msg
 
@@ -40,8 +42,9 @@ class Protag_Manager_Base(Manager):
         self.remove_attackers()
         self.combine_buckets()
 
+        bucks = self.attacked_buckets
         for bucket in self.attacked_buckets:
             # Attacked with more than one user, split in two
             user_chunk1, user_chunk2 = split_list(bucket.users, 2)
-            bucket.reinit(user_chunk1, attacked=True)
-            self.get_new_bucket().reinit(user_chunk2, attacked=True)
+            bucket.reinit(user_chunk1)
+            self.get_new_bucket().reinit(user_chunk2)

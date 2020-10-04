@@ -30,8 +30,11 @@ class Manager:
 
         assert hasattr(cls, "runnable"), "Must add runnable class attr"
 
+        # Only attack if it's runnable
         if cls.runnable:
-            if hasattr(cls, "suspicion_func_num") and cls.suspicion_func_num != 0:
+            # Ignore all sus funcs > 0, too many managers
+            if (hasattr(cls, "suspicion_func_num")
+                    and cls.suspicion_func_num != 0):
                 pass
             else:
                 cls.runnable_managers.append(cls)
@@ -40,8 +43,7 @@ class Manager:
         for q in [Manager, cls]:
             # Sorts alphabetically
             q.runnable_managers = list(sorted(set(q.runnable_managers),
-                                         key=lambda x: x.__name__))
-
+                                              key=lambda x: x.__name__))
 
     def __init__(self,
                  num_buckets: int,
@@ -102,7 +104,7 @@ class Manager:
     def get_new_bucket(self):
         try:
             return self.non_used_buckets[0]
-        except IndexError as e:
+        except IndexError:
             self.buckets.append(Bucket())
             return self.buckets[-1]
 

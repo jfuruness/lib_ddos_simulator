@@ -27,8 +27,6 @@ from .. import ddos_simulator
 from ..managers import Manager
 
 
-
-
 class Worst_Case_Attacker:
     """placeholder
 
@@ -90,7 +88,7 @@ class Combination_Grapher(Base_Grapher):
                      list(range(total)),
                      list([pbar_total] * total)]
 
-
+        # If we are debugging, no multiprocessing
         # https://stackoverflow.com/a/1987484/8903959
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
             for i in range(total):
@@ -152,7 +150,6 @@ class Combination_Grapher(Base_Grapher):
                                 users_per_bucket,
                                 num_rounds,
                                 attacker)
-         
 
         # Graphs worst case scenario
         worst_case_data = self.worst_case_data(managers,
@@ -174,25 +171,23 @@ class Combination_Grapher(Base_Grapher):
                      manager):
         """Runs a trial for simulation"""
 
-        # print("Running scenario!")
         users = num_buckets * users_per_bucket
         attackers = int(users * percent_attackers)
         good_users = users - attackers
         # No longer used, but maybe in the future
         threshold = 0
-        simulator = ddos_simulator.DDOS_Simulator(good_users,
-                                                  attackers,
-                                                  num_buckets,
-                                                  threshold,
-                                                  [manager],
-                                                  stream_level=self.stream_level, 
-                                                  graph_dir=self.graph_dir,
-                                                  tikz=self.tikz,
-                                                  save=self.save,
-                                                  attacker_cls=attacker,
-                                                  )
+        sim = ddos_simulator.DDOS_Simulator(good_users,
+                                            attackers,
+                                            num_buckets,
+                                            threshold,
+                                            [manager],
+                                            stream_level=self.stream_level,
+                                            graph_dir=self.graph_dir,
+                                            tikz=self.tikz,
+                                            save=self.save,
+                                            attacker_cls=attacker)
         # dict of {manager: final utility}
-        utilities_dict = simulator.run(num_rounds, graph_trials=False)
+        utilities_dict = sim.run(num_rounds, graph_trials=False)
         return utilities_dict[manager]
 
     def worst_case_data(self, managers, scenario_data, attackers):
@@ -225,7 +220,6 @@ class Combination_Grapher(Base_Grapher):
                 cur_data_point["ATKS"].append(worst_case_atk.__name__)
 
         return worst_case_scenario_data
-
 
     def graph_scenario(self,
                        scenario_data,
@@ -291,13 +285,12 @@ class Combination_Grapher(Base_Grapher):
             os.makedirs(graph_dir)
         return graph_dir
 
-
     def print_progress(self, attacker, total_num):
         """Prints total number of files generated"""
 
         # https://stackoverflow.com/a/16910957/8903959
         cpt = sum([len([x for x in files if "json" not in x.lower()])
-                    for r, d, files in os.walk(self.graph_dir)])
+                   for r, d, files in os.walk(self.graph_dir)])
         print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
 
     def populate_axs(self,
@@ -318,28 +311,49 @@ class Combination_Grapher(Base_Grapher):
                      marker=None if write_json else self.markers(manager_i))
         # This means we are graphing worst case
         if write_json:
-            # Get list of colors
-            color_dict = self.get_worst_case_atk_color_dict()
-            colors = [color_dict[atk_name] for atk_name in
-                      scenario_data[manager][attacker]["ATKS"]]
-            axs.scatter(scenario_data[manager][attacker]["X"],
-                        scenario_data[manager][attacker]["Y"],
-                        c=colors,
-                        s=40,
-                        zorder=3,
-                        marker=self.markers(manager_i))
+            self.overlay_scatter_plot(axs,
+                                      scenario_data,
+                                      manager,
+                                      attacker,
+                                      manager_i,
+                                      write_json)
 
-            legend_elements = [Line2D([0],
-                                      [0],
-                                      marker=self.markers(manager_i),
-                                      color=color_dict[atk],
-                                      label=atk,
-                                      markerfacecolor=color_dict[atk],
-                                      markersize=15)
-                               for atk in set(scenario_data[manager][attacker]["ATKS"])]
+    def overlay_scatter_plot(self,
+                             axs,
+                             scenario_data,
+                             manager,
+                             attacker,
+                             manager_i,
+                             write_json):
+        """Overlays error bars with worst case attacker colors"""
 
-            self.second_legend = legend_elements
+        # Get list of colors
+        color_dict = self.get_worst_case_atk_color_dict()
+        colors = [color_dict[atk_name] for atk_name in
+                  scenario_data[manager][attacker]["ATKS"]]
+        axs.scatter(scenario_data[manager][attacker]["X"],
+                    scenario_data[manager][attacker]["Y"],
+                    c=colors,
+                    s=40,
+                    zorder=3,
+                    marker=self.markers(manager_i))
 
+        # Sort worst case attacker by freq
+        atk_freq_dict = {}
+        for atk in scenario_data[manager][attacker]["ATKS"]:
+            atk_freq_dict[atk] = atk_freq_dict.get(atk, 0) + 1
+        atks = list(reversed(sorted(atk_freq_dict, key=atk_freq_dict.get)))
+
+        legend_elements = [Line2D([0],
+                                  [0],
+                                  marker=self.markers(manager_i),
+                                  color=color_dict[atk],
+                                  label=atk,
+                                  markerfacecolor=color_dict[atk],
+                                  markersize=15)
+                           for atk in atks]
+
+        self.second_legend = legend_elements
 
     def get_worst_case_atk_color_dict(self):
         """Returns a dictionary of attacker to colors"""
@@ -351,7 +365,6 @@ class Combination_Grapher(Base_Grapher):
                   "deeppink", "lightpink", "chocolate", "darkkhaki",
                   "powderblue"]
 
-        
         new_colors_needed = len(Attacker.runnable_attackers) - len(colors)
         assert new_colors_needed <= 0, f"Add {new_colors_needed} more colors"
         return {attacker.__name__: colors[i]
@@ -367,11 +380,18 @@ class Combination_Grapher(Base_Grapher):
         handles, labels = axs.get_legend_handles_labels()
 
         # Put a legend to the right of the current axis
-        first = axs.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
+        first = axs.legend(handles,
+                           labels,
+                           loc='center left',
+                           bbox_to_anchor=(1, 0.5))
+
+        # If we are adding a second legend for worst case attacker colors
         if hasattr(self, "second_legend"):
             # https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
             # https://matplotlib.org/3.1.1/gallery/text_labels_and_annotations/custom_legends.html
-            axs.legend(handles=self.second_legend, loc='upper right', bbox_to_anchor=(1, 1))
+            axs.legend(handles=self.second_legend,
+                       loc='upper right',
+                       bbox_to_anchor=(1, 1))
             axs.add_artist(first)
 
     def write_json(self, graph_path, scenario_data):

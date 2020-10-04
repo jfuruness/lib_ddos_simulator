@@ -52,15 +52,9 @@ class DDOS_Simulator:
         utils.config_logging(stream_level)
 
         self.good_users = [User(x) for x in range(num_users)]
-        # This allows us to take mixes of attackers
-        if isinstance(attacker_cls, Mixed_Attacker):
-            # get_mix returns a list of attacker classes
-            self.attackers = [X(i+len(self.good_users)) for i, X in
-                              enumerate(attacker_cls.get_mix(num_attackers))]
-        # If it is not a mixed attacker, simply initialize attackers
-        else:
-            self.attackers = [attacker_cls(x + len(self.good_users))
-                              for x in range(num_attackers)]
+
+        self.attackers = self.get_attackers(num_attackers, attacker_cls)
+
         self.users = self.good_users + self.attackers
         # Shuffle so attackers are not at the end
         random.shuffle(self.users)
@@ -81,9 +75,8 @@ class DDOS_Simulator:
         for manager in self.managers:
             sim_args = [manager, num_rounds, animate, graph_trials]
 
-            # If you are confused by this and aren't doing animations,
-            # then ignore this first case
             if animate:
+                # Animates sim
                 animater = self.animate_sim(*sim_args)
             # TYPICAL USE CASE BELOW
             else:
@@ -94,6 +87,14 @@ class DDOS_Simulator:
         return self.grapher.graph(graph_trials, self.attacker_cls)
 
     def animate_sim(self, *sim_args):
+        """Animates simulation
+
+        Note that sim is run twice
+        The first time it records stats for sim
+        Second time it simulates
+        Not efficient, but it takes 1 sec to run so whatevs
+        """
+
         [manager, num_rounds, animate, graph_trials] = sim_args
         # Sets up animator and turns
         random_seed = random.random()
@@ -103,6 +104,24 @@ class DDOS_Simulator:
         animater.run_animation(num_rounds - 1)
         return animater
 
+    def init_and_run_sim(self,
+                         manager,
+                         num_rounds,
+                         animate,
+                         graph_trials,
+                         random_seed=None,
+                         i=None):
+        """Initializes sim for a single manager and runs"""
+
+        # Sets up animator and turns
+        animater, turns = self.init_sim(manager,
+                                        num_rounds,
+                                        animate,
+                                        graph_trials,
+                                        random_seed,
+                                        i)
+        self.run_sim(turns, manager, i, animater)
+        return animater
 
     def init_sim(self,
                  manager,
@@ -111,7 +130,10 @@ class DDOS_Simulator:
                  graph_trials,
                  seed=None,
                  i=None):
-        """Sets up animator and turn list"""
+        """Sets up animator and turn list
+
+        Seeds sim if animating so that each
+        of the two runs is the same"""
 
         animater = None
 
@@ -126,8 +148,8 @@ class DDOS_Simulator:
         # If we are graphing for just one manager
         # Print and turn on tqdm
         if graph_trials:
-            algo_name = manager.__class__.__name__
-            turns = trange(num_rounds, desc=f"Running {algo_name}")
+            turns = trange(num_rounds,
+                           desc=f"Running {manager.__class__.__name__}")
         # If we are comparing managers, multiprocessing is used
         # So no tqdm as to not have garbled output
         else:
@@ -135,20 +157,9 @@ class DDOS_Simulator:
 
         return animater, turns
 
-    def user_actions(self, manager, turn):
-        """Attackers attack, adds 1 to user lifetime"""
-
-        manager.get_animation_statistics()
-        for user in manager.users:
-            user.take_action(manager, turn)
-
-    def record(self, turn, manager, animate, animater):
-        # Record statistics
-        self.grapher.capture_data(turn, manager, self.attackers)
-        if animater is not None and animate == 1:
-            animater.capture_data(manager)
-
     def run_sim(self, turns, manager, i, animater):
+        """Runs actual simulation"""
+
         for turn in turns:
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
@@ -158,20 +169,33 @@ class DDOS_Simulator:
             # Then reset buckets to not attacked
             manager.take_action(turn)
 
-    def init_and_run_sim(self,
-                         manager,
-                         num_rounds,
-                         animate,
-                         graph_trials,
-                         random_seed,
-                         i):
-        # Sets up animator and turns
-        animater, turns = self.init_sim(manager,
-                                        num_rounds,
-                                        animate,
-                                        graph_trials,
-                                        random_seed,
-                                        i)
-        self.run_sim(turns, manager, i, animater)
-        return animater
+########################
+### Helper Functions ###
+########################
 
+    def user_actions(self, manager, turn):
+        """Attackers attack, adds 1 to user lifetime"""
+
+        manager.get_animation_statistics()
+        for user in manager.users:
+            user.take_action(manager, turn)
+
+    def record(self, turn, manager, animate, animater):
+        """Records statistics for graphs"""
+
+        self.grapher.capture_data(turn, manager, self.attackers)
+        if animater is not None and animate == 1:
+            animater.capture_data(manager)
+
+    def get_attackers(self, num_attackers, attacker_cls):
+        """Initializes attackers for sim"""
+
+        # This allows us to take mixes of attackers
+        if isinstance(attacker_cls, Mixed_Attacker):
+            # get_mix returns a list of attacker classes
+            return [X(i+len(self.good_users)) for i, X in
+                    enumerate(attacker_cls.get_mix(num_attackers))]
+        # If it is not a mixed attacker, simply initialize attackers
+        else:
+            return [attacker_cls(x + len(self.good_users))
+                    for x in range(num_attackers)]

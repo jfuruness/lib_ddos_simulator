@@ -15,8 +15,8 @@ from .dose_attack_event import DOSE_Attack_Event
 
 from ..manager import Manager
 
-from ...simulation_objects import Bucket
 from ...utils import split_list
+
 
 class DOSE_Manager(Manager):
     """Simulates a manager for a DDOS attack
@@ -50,6 +50,11 @@ class DOSE_Manager(Manager):
         self.dose_atk_events = []
 
     def record_dose_events(self):
+        """Keep track of all attacks
+
+        This allows us to remove attacks when ready
+        """
+
         for bucket in self.attacked_buckets:
             self.dose_atk_events.append(DOSE_Attack_Event(bucket))
 

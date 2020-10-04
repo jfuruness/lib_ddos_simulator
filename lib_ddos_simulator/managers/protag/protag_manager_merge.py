@@ -14,8 +14,6 @@ __status__ = "Development"
 
 from .protag_manager_base import Protag_Manager_Base
 
-from ...simulation_objects import Bucket
-from ...utils import split_list
 
 class Protag_Manager_Merge(Protag_Manager_Base):
     """Simulates a manager for a DDOS attack
@@ -29,10 +27,11 @@ class Protag_Manager_Merge(Protag_Manager_Base):
     runnable = True
 
     def combine_buckets(self):
+        """Merge all non attacked buckets"""
+
         users = []
         for bucket in self.non_attacked_buckets:
             users.extend(bucket.users)
             bucket.users = []
         merged_bucket = self.get_new_bucket()
         merged_bucket.reinit(users)
-        self.buckets.append(merged_bucket)
