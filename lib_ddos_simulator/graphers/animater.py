@@ -75,7 +75,7 @@ class Animater(Base_Grapher):
         super(Animater, self).__init__(**kwargs)
         self.low_dpi = 200
         if self.high_res:
-            self.high_dpi = 1800
+            self.high_dpi = 1200
             # https://stackoverflow.com/a/51955985/8903959
             mpl.rcParams['figure.dpi'] = self.high_dpi
             matplotlib.rcParams['figure.dpi'] = self.high_dpi
@@ -211,7 +211,7 @@ class Animater(Base_Grapher):
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
-            bitrate = 6000 if self.high_res else 1000
+            bitrate = 3000 if self.high_res else 1000
 
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
