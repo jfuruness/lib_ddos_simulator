@@ -211,7 +211,7 @@ class Animater(Base_Grapher):
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
-            bitrate = 10000 if self.high_res else 1000
+            bitrate = 6000 if self.high_res else 1000
 
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
