@@ -219,7 +219,7 @@ class Animater(Base_Grapher):
             dpi=1200
 
             # assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
-            FFwriter=animation.FFMpegFileWriter(dpi=dpi, bitrate=bitrate)
+            FFwriter=animation.FFMpegFileWriter(bitrate=bitrate)
             # https://stackoverflow.com/a/14666461/8903959
             #anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
             anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate, writer=FFwriter)
