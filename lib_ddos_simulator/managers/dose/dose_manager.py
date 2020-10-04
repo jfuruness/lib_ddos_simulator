@@ -11,6 +11,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from .dose_attack_event import DOSE_Attack_Event
 
 from ..manager import Manager
 
@@ -47,6 +48,10 @@ class DOSE_Manager(Manager):
         super(DOSE_Manager, self).__init__(*args, **kwargs)
         # Inner list of (users_set (includes attackers), dose_atk_added)
         self.dose_atk_events = []
+
+    def record_dose_events(self):
+        for bucket in self.attacked_buckets:
+            self.dose_atk_events.append(DOSE_Attack_Event(bucket))
 
     def detect_and_shuffle(self, turn_num: int):
         """DOSE algorithm"""

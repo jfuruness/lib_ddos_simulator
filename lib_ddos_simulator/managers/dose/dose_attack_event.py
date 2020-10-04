@@ -12,7 +12,7 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-from .dose_manager import DOSE_Manager
+from . import dose_manager
 
 
 class DOSE_Attack_Event:
@@ -26,7 +26,7 @@ class DOSE_Attack_Event:
         self.uids = set(x.id for x in bucket.users)
         # 3 is from their matplotlib code
         # This is CRPA val
-        self.sus_added = DOSE_Manager.dose_atk_sus_to_add(bucket)
+        self.sus_added = dose_manager.DOSE_Manager.dose_atk_sus_to_add(bucket)
 
     def reduce_sus(self):
         for user in self.users:

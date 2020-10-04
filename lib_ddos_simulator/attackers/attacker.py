@@ -37,6 +37,13 @@ class Attacker(User):
         if cls.runnable and not cls.lone:
             cls.runnable_attackers.append(cls)
 
+    def take_action(self, manager, turn):
+        """Action that user takes every round"""
+
+        User.take_action(self, manager, turn)
+        self.attack(turn)
+        assert self.bucket in manager.buckets
+
     def attack(self, turn):
         """Attacks the bucket it's in"""
 

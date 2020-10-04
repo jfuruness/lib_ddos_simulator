@@ -86,6 +86,19 @@ class Manager:
                       max_users_y=self.max_users_y,
                       max_buckets=self.max_buckets)
 
+    def take_action(self, turn):
+        """Actions to take every turn"""
+
+        self.record_dose_events()
+        # Detects and removes suspicious users, then shuffles
+        self.detect_and_shuffle(turn)
+        # All buckets are no longer attacked for the next round
+        self.reset_buckets()
+
+    def record_dose_events(self):
+        """Only DOSE does this, ignore"""
+        pass
+
     def get_new_bucket(self):
         try:
             return self.non_used_buckets[0]

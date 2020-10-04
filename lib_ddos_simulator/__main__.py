@@ -55,7 +55,7 @@ def main():
                        Manager.runnable_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,
-                       high_res=args.high_res).run(args.rounds, animate=True)
+                       high_res=args.high_res).run(args.rounds, animate=True, graph_trials=False)
     elif args.graph_combos:
         Combination_Grapher(graph_dir=args.graph_dir,
                             tikz=args.tikz,

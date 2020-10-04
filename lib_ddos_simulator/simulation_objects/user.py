@@ -43,6 +43,13 @@ class User:
         self.conn_lt = 0
         self.dose_atk_risk = 0
 
+    def take_action(self, manager, turn):
+        """Action that user takes every round"""
+
+        # Used in DOSE for connection lifetime
+        self.conn_lt += 1
+
+
     # For animations, since dose has it's own suspicion of sorts
     def get_suspicion(self):
         if self.suspicion > 0:

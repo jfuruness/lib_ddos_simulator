@@ -22,3 +22,4 @@ from .random_attacker import Fifty_Percent_Attacker
 from .random_attacker import Fifty_Percent_Lone_Attacker
 from .random_attacker import Ten_Percent_Attacker
 from .random_attacker import Ten_Percent_Lone_Attacker
+from .x_turns_straight_attacker import *

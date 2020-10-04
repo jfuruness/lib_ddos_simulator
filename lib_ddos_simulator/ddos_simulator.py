@@ -79,49 +79,50 @@ class DDOS_Simulator:
         """Runs simulation"""
 
         for manager in self.managers:
-            # Sets up animator and turns
-            random_seed = random.random()
-            # Animations runs this twice to know how large to make anims
-            for i in range(2):
-                # Sets up animator and turns
-                animater, turns = self.init_sim(manager,
-                                                num_rounds,
-                                                animate,
-                                                graph_trials,
-                                                random_seed,
-                                                i)
+            sim_args = [manager, num_rounds, animate, graph_trials]
 
-                for turn in turns:
-                    # Attackers attack
-                    self.attack_buckets_incriment_lt(manager, turn)
-                    # Record statistics
-                    self.grapher.capture_data(turn, manager, self.attackers)
-                    if animate and i == 1:
-                        animater.capture_data(manager)
-                    # Manager detects and removes suspicious users, then shuffles
-                    
-                    manager.detect_and_shuffle(turn)
-                    # All buckets are no longer attacked for the next round
-                    manager.reset_buckets()
-                if animate:
-                    if i == 1:
-                        animater.run_animation(turn)
-                # If we are not animating, not reason to run again
-                else:
-                    break
-            if not animate:
-                # Returns latest utility, used for combination graphing
-                return self.grapher.graph(graph_trials, self.attacker_cls)
+            # If you are confused by this and aren't doing animations,
+            # then ignore this first case
+            if animate:
+                animater = self.animate_sim(*sim_args)
+            # TYPICAL USE CASE BELOW
+            else:
+                # Animater is None
+                animater = self.init_and_run_sim(*sim_args)
 
-    def init_sim(self, manager, num_rounds, animate, graph_trials, seed, i):
+        # Returns latest utility, used for combination graphing
+        return self.grapher.graph(graph_trials, self.attacker_cls)
+
+    def animate_sim(self, *sim_args):
+        [manager, num_rounds, animate, graph_trials] = sim_args
+        # Sets up animator and turns
+        random_seed = random.random()
+        # Animations runs this twice to know how large to make anims
+        for i in range(2):
+           animater = self.init_and_run_sim(*sim_args, random_seed, i)
+        animater.run_animation(num_rounds - 1)
+        return animater
+
+
+    def init_sim(self,
+                 manager,
+                 num_rounds,
+                 animate,
+                 graph_trials,
+                 seed=None,
+                 i=None):
         """Sets up animator and turn list"""
 
-        # Seeded so that exactly the same trial is run twice
-        random.seed(seed)
-        manager.reinit()
-        # We can only animate one manager at a time
-        animater = Animater(manager,
-                            **self.graph_kwargs) if animate and i else None
+        animater = None
+
+        if seed is not None:
+            # Seeded so that exactly the same trial is run twice
+            random.seed(seed)
+            manager.reinit()
+            if i == 1:
+                # We can only animate one manager at a time
+                animater = Animater(manager, **self.graph_kwargs)
+
         # If we are graphing for just one manager
         # Print and turn on tqdm
         if graph_trials:
@@ -134,18 +135,43 @@ class DDOS_Simulator:
 
         return animater, turns
 
-    def attack_buckets_incriment_lt(self, manager, turn):
+    def user_actions(self, manager, turn):
         """Attackers attack, adds 1 to user lifetime"""
 
         manager.get_animation_statistics()
         for user in manager.users:
-            # Used in DOSE for connection lifetime
-            user.conn_lt += 1
-            if isinstance(user, Attacker):
-                user.attack(turn)
-                assert user.bucket in manager.buckets
+            user.take_action(manager, turn)
 
-        if isinstance(manager, managers.DOSE_Manager):
-            for bucket in manager.attacked_buckets:
-                manager.dose_atk_events.append(
-                    managers.DOSE_Attack_Event(bucket))
+    def record(self, turn, manager, animate, animater):
+        # Record statistics
+        self.grapher.capture_data(turn, manager, self.attackers)
+        if animater is not None and animate == 1:
+            animater.capture_data(manager)
+
+    def run_sim(self, turns, manager, i, animater):
+        for turn in turns:
+            # Attackers attack, users record stats
+            self.user_actions(manager, turn)
+            # Record data
+            self.record(turn, manager, i, animater)
+            # Manager detects and removes suspicious users, then shuffles
+            # Then reset buckets to not attacked
+            manager.take_action(turn)
+
+    def init_and_run_sim(self,
+                         manager,
+                         num_rounds,
+                         animate,
+                         graph_trials,
+                         random_seed,
+                         i):
+        # Sets up animator and turns
+        animater, turns = self.init_sim(manager,
+                                        num_rounds,
+                                        animate,
+                                        graph_trials,
+                                        random_seed,
+                                        i)
+        self.run_sim(turns, manager, i, animater)
+        return animater
+
