@@ -7,7 +7,8 @@ This package contains functionality to simulate, graph, and animate various atta
 * [Usage](#usage)
     * [Running One Scenario](#running-one-scenario)
     * [Running Manager Comparisons](#running-manager-comparisons)
-    * [API (currently in development)](#api)
+    * [Running Animations](#running-animations)
+    * [API](#api)
 * [Installation](#installation)
 * [Testing](#testing)
 * [Development/Contributing](#developmentcontributing)
@@ -45,10 +46,11 @@ This package contains functionality to simulate, graph, and animate various atta
         * Bucket
     * Utils
         * Logging
+    * API
 ## Package Description
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 
-There are 5 main sections to this python package. Managers, Graphers, Attackers, Users, and Utils. Manager is the term used to describe a defense technique - essentially, the manager of the system. Graphers collect data from the simulation and turn it into a readable format. Attackers contain the different types of attackers. Users contain the different types of users. Utils contains auxiliary functions that may be useful across all categories.
+There are 6 main sections to this python package. Managers, Graphers, Attackers, Users, API, and Utils. Manager is the term used to describe a defense technique - essentially, the manager of the system. Graphers collect data from the simulation and turn it into a readable format. Attackers contain the different types of attackers. Users contain the different types of users. Utils contains auxiliary functions that may be useful across all categories. The API contains functionality to call the managers shuffle functions.
 
 The simulator is the main script in the package, called ddos_simulator. You can pass several arguments into the simulator that will allow you to run any attack or defense scenario. You can also use the graphers, which call the simulator several times to compare statistics for many scenarios. Usage details below.
 
@@ -74,16 +76,21 @@ Assumptions:
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 
 There are three ways to run this package. 
+NOTE: greater utility = better manager
 
-1. Gather statistics per round (cost, percent serviced, utility, percent detected), for each manager specified
+1. Gather statistics per round (cost, percent serviced, utility (users/bucket), percent detected), for each manager specified
 2. At the end of all the rounds, gather the utility of the manager and compare it with all other managers
-3. Use the API to manage live users (and protect from DDOS attacks)
+3. Animate the simulator for each manager one at a time
+4. Use the API to manage live users (and protect from DDOS attacks)
 
 ### Running One Scenario
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 * [Usage](#usage)
 
 This way of running the simulator will chart (for each manager) cost, percent serviced, utility, percent detected, etc. for every round.
+
+NOTE: greater utility = better manager
+
 
 #### From the command line:
 ```bash
@@ -103,8 +110,11 @@ lib_ddos_simulator --num_users 9 --num_attackers 1 --num_buckets 3 --debug
 | threshold      | 10       | Threshold for suspicion removal. Legacy code.                                          |
 | rounds         | 20       | Number of rounds to run |
 | debug          | False    | Display debug info   |
-| animate        | False    | Save animations (not used here)|
-| graph_combos   | False    | Compares manager's utilities (not used here)|
+| tikz           | False    | Saves plots as tikz|
+| save           | False    | Stores graphs or shows them |
+| high_res       | False    | Uses higher resolution (slower) |
+| graph_dir      | "/tmp/lib_ddos_simulator" | graph_dir |
+
 
 
 #### From a script:
@@ -125,7 +135,7 @@ manager_child_classes = [Protag_Manager]
 # The following options are the defaults, you can omit
 # these or change them if you wish
 stream_level = logging.INFO
-graph_path = "/tmp/lib_ddos"
+graph_dir = "/tmp/lib_ddos_simulator"
 # The type of attacker. See attacker section for a list
 attacker_cls = Basic_Attacker
 sim = DDOS_Simulator(num_users,
@@ -134,11 +144,85 @@ sim = DDOS_Simulator(num_users,
                      threshold,
                      manager_child_classes,
                      stream_level=stream_level,
-                     graph_path=graph_path,
-                     attacker_cls=attacker_cls)
+                     graph_dir=graph_dir,
+                     attacker_cls=attacker_cls,
+                     save=False,
+                     high_res=False)
 # Num rounds can be changed as needed
 num_rounds = 10
 sim.run(num_rounds)
+```
+
+### Running Animations
+* [lib\_ddos\_simulator](#lib_ddos_simulator)
+* [Usage](#usage)
+
+This way of running the simulator will animate the simulations
+
+***WARNING***: Don't crash your computer by rendering a simulation that is too heavy. Only show simulations that are small. Only save simulations low resolution (that should also be small).
+
+#### From the command line:
+```bash
+lib_ddos_simulator --animate
+```
+with some additional parameters:
+```bash
+lib_ddos_simulator --num_users 9 --num_attackers 1 --num_buckets 3 --debug --save --high_res
+```
+
+#### Optional command line parameters:
+| Parameter  | Default                    | Description                                                                                        |
+|------------|----------------------------|----------------------------------------------------------------------------------------------------|
+| num_users      | 1000     | Number of good users |
+| num_attackers  | 10       | Number of attackers  |
+| num_buckets    | 100      | Number of buckets    |
+| threshold      | 10       | Threshold for suspicion removal. Legacy code.                                          |
+| rounds         | 20       | Number of rounds to run |
+| debug          | False    | Display debug info   |
+| animate        | False    | Save animations |
+| save           | False    | Stores graphs or shows them |
+| high_res       | False    | Uses higher resolution (slower) |
+| graph_dir      | "/tmp/lib_ddos_simulator" | graph_dir |
+
+A note on these parameters:
+* If you choose to not save the animations and instead let it run, the animation will have lower dpi and quality because that is meant for debugging purposes. I turned off several moving parts for this to speed things up.
+* If you choose to save the animations it will take much longer to run
+* If you choose to save the animations with high res, it will take quite a long time depending on the simulation you are running and how many users/buckets you have in your simulation (and how long it takes). Note that when I run this for large simulations, it takes up to 15GB of RAM.
+
+#### From a script:
+
+> Note the optional parameters included below
+> These are all the possible parameters to supply
+
+```python
+import logging
+from lib_ddos_simulator import DDOS_Simulator, Protag_Manager
+num_users = 10
+num_attackers = 1
+num_buckets = 5
+# Threshold is legacy code
+threshold = .1
+# All the managers to run. See manager section for a list
+manager_child_classes = [Protag_Manager]
+# The following options are the defaults, you can omit
+# these or change them if you wish
+stream_level = logging.INFO
+graph_dir = "/tmp/lib_ddos_simulator"
+# The type of attacker. See attacker section for a list
+attacker_cls = Basic_Attacker
+sim = DDOS_Simulator(num_users,
+                     num_attackers,
+                     num_buckets,
+                     threshold,
+                     manager_child_classes,
+                     stream_level=stream_level,
+                     graph_dir=graph_dir,
+                     attacker_cls=attacker_cls,
+                     save=False,
+                     high_res=False)
+# Num rounds can be changed as needed
+num_rounds = 10
+sim.run(num_rounds, animate=True, graph_trials=False)
 ```
 
 
@@ -149,6 +233,8 @@ sim.run(num_rounds)
 
 This way of running the simulator will chart (for each scenario) the utility over all the rounds, and will chart all managers on one plot. The X axis will be percentage of users that are attackers.
 
+Note, higher utility = better manager
+
 #### From the command line:
 ```bash
 lib_ddos_simulator --graph_combos
@@ -157,7 +243,14 @@ To display debug info:
 ```bash
 lib_ddos_simulator --debug
 ```
-There are no optional parameters other than debugging for command line, they seemed unnecessary
+#### Optional command line parameters:
+| Parameter  | Default                    | Description                                                                                        |
+|------------|----------------------------|----------------------------------------------------------------------------------------------------|
+| debug          | False    | Display debug info   |
+| tikz           | False    | Saves plots as tikz|
+| save           | False    | Stores graphs or shows them |
+| high_res       | False    | Uses higher resolution (slower) |
+| graph_dir      | "/tmp/lib_ddos_simulator" | graph_dir |
 
 #### From a script:
 
@@ -170,7 +263,10 @@ from lib_ddos_simulator import Combination_Grapher, Sieve_Manager, Attacker
 
 # stream_level and graph_path defaults, can be omitted
 grapher = Comination_Grapher(stream_level=logging.INFO,
-                             graph_path="/tmp/lib_ddos")
+                             graph_dir="/tmp/lib_ddos_simulator",
+                             tikz=False,
+                             save=False,
+                             high_res=False)
 
 # For the full list of managers that is run by default, see Managers section
 grapher.run(managers=Sieve_Manager.runnable_managers,
@@ -194,8 +290,28 @@ grapher.run(managers=Sieve_Manager.runnable_managers,
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 * [Usage](#usage)
 
-Currently in development
+Runs a ***STATEFUL*** API. Note that this should ***NEVER*** be run in a production environment. Also note that you use this ***AT YOUR OWN RISK***. Just assume it's broken.
 
+To see commands, go to http://localhost:5000/apidocs/
+
+#### From the command line:
+```bash
+lib_ddos_simulator --api
+```
+To display debug info:
+```bash
+lib_ddos_simulator --debug
+```
+
+#### From a script:
+
+
+```python
+from lib_ddos_simulator import create_app
+create_app().run(debug=False)
+```
+
+I don't want to duplicate documentation, so to see endpoints, go to http://localhost:5000/apidocs/
 
 
 ## Installation
@@ -265,6 +381,7 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+    * 0.0.1 - Added APIs, multiple managers, animations, etc
    * 0.0.0 - Basic simulation capabilities, no API
 
 ## Credits
@@ -309,4 +426,4 @@ See [Jira Board](https://wkkbgp.atlassian.net/jira/software/projects/PYTHON/boar
 Q: More links to some research
 
 A: Read these:
-
+https://docs.google.com/spreadsheets/d/1hPFv0D3reEMh3A0HkpFyjji--vEQn2IOt_zDqPcVSIg/edit?fbclid=IwAR0394glMKAoEU06RtrISo_sNhmzyBJM4vXVGNuUTDwT39Yk7eVo_AfWCmY#gid=0
