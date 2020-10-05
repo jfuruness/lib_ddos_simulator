@@ -453,4 +453,6 @@ For later
 * api is stateful due to complexity of the managers
 * You must call the api at equivalent intervals, even if no buckets where attacked to track user stats
 * NEVER append or manipulate in any way self.buckets. Use self.get_new_bucket() to get a new bucket. To reset, set the users to be []. Use self.used_buckets. Never remove empty buckets. Never add new ones.
+* Never remove or create buckets - call self.get_new_bucket()
+* Never remove or create users - move to self.eliminated_users
 * If logging isn't here, it was removed due to mp issues
