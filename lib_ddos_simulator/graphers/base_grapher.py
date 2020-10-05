@@ -63,14 +63,14 @@ class Base_Grapher:
         markers += markers.copy()[::-1]
         return markers[index]
 
-    def save_graph(self, path, plt):
+    def save_graph(self, path, plt, fig=None):
         """Saves graph either as tikz or matplotlib"""
 
         if self.save:
             if self.tikz:
                 self.save_tikz(path.replace(".png", ".tex"))
             else:
-                self.save_matplotlib(path, plt)
+                self.save_matplotlib(path, plt, fig=fig)
         else:
             plt.show()
 
@@ -79,8 +79,10 @@ class Base_Grapher:
 
         tikzplotlib.save(path)
 
-    def save_matplotlib(self, path, plt):
+    def save_matplotlib(self, path, plt, fig=None):
         """Saves matplotlib"""
 
         plt.savefig(path)
+        if fig is not None:
+            plt.close(fig)
         plt.close()

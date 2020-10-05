@@ -46,9 +46,9 @@ class Combination_Grapher(Base_Grapher):
     def run(self,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
-            num_buckets_list=[10],
-            users_per_bucket_list=[10 ** i for i in range(1, 3)],
-            num_rounds_list=[10 ** i for i in range(1, 3)],
+            num_buckets_list=[10 ** i for i in range(1, 3)],
+            users_per_bucket_list=[10 ** i for i in range(1, 5)],
+            num_rounds_list=[10 ** i for i in range(1, 5)],
             trials=50):
         """Runs in parallel every possible scenario
 
@@ -248,7 +248,7 @@ class Combination_Grapher(Base_Grapher):
 
         graph_dir = self.get_attacker_graph_dir(attacker)
         graph_path = os.path.join(graph_dir, f"{title}.png")
-        self.save_graph(os.path.join(graph_dir, f"{title}.png"), plt)
+        self.save_graph(os.path.join(graph_dir, f"{title}.png"), plt, fig=fig)
 
         if write_json:
             self.write_json(graph_path, scenario_data)
