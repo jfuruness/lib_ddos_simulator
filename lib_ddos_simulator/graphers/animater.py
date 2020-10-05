@@ -73,7 +73,7 @@ class Animater(Base_Grapher):
 
 
         super(Animater, self).__init__(**kwargs)
-        self.low_dpi = 15
+        self.low_dpi = 60
         if self.high_res:
             # Anything higher than 600 and you need to drastically increase bitrate
             # But increasing bitrate causes it to crash on other machines
