@@ -20,6 +20,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 # Importing all due to large number of attacker types
 from .attackers import *
+from .api import create_app
 
 from .ddos_simulator import DDOS_Simulator
 from .graphers import Animater, Combination_Grapher, Grapher

@@ -10,68 +10,18 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com"
 __status__ = "Development"
 
-import functools
-import logging
-import os
-import random
-import sys
-
 from flasgger import Swagger, swag_from
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
-from .simulation_objects import User
-from .managers import Manager
-from .utils import config_logging
+from .api_utils import format_json, init_sim, complete_turn
 
-def format_json(desc=""):
-    """Try catch around api calls"""
+from ..managers import Manager
 
-    def my_decorator(func):
-        @functools.wraps(func)
-        def function_that_runs_func(*args2, **kwargs):
-            # Inside the decorator
-            try:
-                metadata = {"metadata": {"desc": desc,
-                                         "url": request.url}}
-                # Get the results from the function
-                return jsonify({**{"data": func(*args2, **kwargs)},
-                                **metadata})
-            except Exception as e:
-                if "pytest" in sys.modules:
-                    raise e
-                # Never allow the API to crash. This should record errors
-                print(e)
-                return jsonify({"ERROR": f"{e} Please contact jfuruness@gmail.com"})
-        return function_that_runs_func
-    return my_decorator
-
-def init_sim(app, user_ids, bucket_ids, manager_cls):
-    """inits simulation"""
-    config_logging(logging.INFO)
-    users = [User(x) for x in user_ids]
-    random.shuffle(users)
-    # Threshold is 0, legay
-    app.manager = manager_cls(len(bucket_ids), users, -123)
-    for bucket, _id in zip(app.manager.buckets, bucket_ids):
-        bucket.id = int(_id)
-    app.manager.bucket_id = max(bucket_ids) + 1
-   
-def complete_turn(app, downed_bucket_ids):
-    for user in app.manager.users:
-        user.take_action()
-    if len(downed_bucket_ids) > 0:
-        for bucket in app.manager.get_buckets_by_ids(downed_bucket_ids):
-            bucket.attacked = True
-    app.manager.take_action(turn=-1)
 
 def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__)
     swagger = Swagger(app)
-
-    app.app_dir = "/tmp/lib_ddos_simulator"
-    if not os.path.exists(app.app_dir):
-        os.makedirs(app.app_dir)
 
     @app.route("/")
     @app.route("/home")
@@ -109,7 +59,7 @@ def create_app():
         """Takes a turn. Input downed buckets"""
 
         # http://0.0.0.0:5000/bids=1,2,3
-        if request.args.get("bids") is not None and len(request.args.get("bids")) > 0:
+        if len(request.args.get("bids", [])) > 0:
             bucket_ids = [int(x) for x in request.args.get("bids").split(",")]
         else:
             bucket_ids = []
@@ -121,6 +71,6 @@ def create_app():
     @format_json(desc="List of runnable managers")
     def runnable_managers():
         return {"managers": ([x.__name__ for x in
-                                 Manager.runnable_managers])}
+                              Manager.runnable_managers])}
 
     return app

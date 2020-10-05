@@ -41,7 +41,6 @@ def main():
     parser.add_argument("--trials", type=int, dest="trials", default=100)
     parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
     parser.add_argument("--api", dest="api", default=False, action="store_true")
-    parser.add_argument("--json", dest="json", default=False, action="store_true")
 
 
     args = parser.parse_args()

@@ -109,7 +109,7 @@ class Animater(Base_Grapher):
 
         if self.high_res:
             # 3 is difference between low res and high res dpi
-            fontsize = fontsize / math.sqrt(self.high_dpi / self.low_dpi)
+            fontsize = fontsize / 4
 
         matplotlib.rcParams.update({'font.size': fontsize})
 
@@ -370,7 +370,7 @@ class Animater(Base_Grapher):
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   fontsize=12 if not self.high_res else 12 / (self.high_dpi / self.low_dpi),
+                                   fontsize=12 if not self.high_res else 3,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
@@ -462,7 +462,7 @@ class Animater(Base_Grapher):
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   fontsize=12 if not self.high_res else 12 / (self.high_dpi / self.low_dpi),
+                                   fontsize=12 if not self.high_res else 3,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')

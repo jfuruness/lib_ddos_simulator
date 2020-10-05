@@ -8,6 +8,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from random import shuffle
+
 from ..attackers import Attacker
 from ..simulation_objects import Bucket, User
 from ..utils import split_list
