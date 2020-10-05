@@ -36,7 +36,7 @@ import math
 
 import matplotlib
 import matplotlib as mpl
-dpi = 200
+dpi = 120
 # https://stackoverflow.com/a/51955985/8903959
 mpl.rcParams['figure.dpi'] = dpi
 import matplotlib
@@ -73,43 +73,50 @@ class Animater(Base_Grapher):
 
 
         super(Animater, self).__init__(**kwargs)
-        self.low_dpi = 200
+        self.low_dpi = 15
         if self.high_res:
             # Anything higher than 600 and you need to drastically increase bitrate
             # But increasing bitrate causes it to crash on other machines
-            self.high_dpi = 800
+            self.high_dpi = 120
             # https://stackoverflow.com/a/51955985/8903959
             mpl.rcParams['figure.dpi'] = self.high_dpi
             matplotlib.rcParams['figure.dpi'] = self.high_dpi
 
-
-        self.row_cutoff = 30
+        if manager.max_users_y >= 40:
+            self.row_cutoff = 100
+        else:
+            self.row_cutoff = 32
         assert self.tikz is False, "Can't save animation as tikz afaik"
         self.manager = manager
         self.ogbuckets = deepcopy(manager.buckets)
         self.max_users, self.fig, self.ax = self._format_graph()
-        assert self.save or len(manager.users) <= 40,\
-            "Matplotlib can't handle that many users"
+        #assert self.save or len(manager.users) <= 40,\
+        #    "Matplotlib can't handle that many users"
         self.ogusers = deepcopy(manager.users)
 
-        fontsize = 10
+        fontsize = 12
         matplotlib.rcParams.update({'font.size': 10})
 
 
         if manager.max_buckets > 10:
-            fontsize = 7
+            fontsize -= 3
 
 
-        if manager.max_users_y > 10 or self.high_res:
-            fontsize = 5
+        if manager.max_users_y > 10:
+            fontsize -= 3
             matplotlib.rcParams.update({'font.size': 5})
 
         if manager.max_buckets > 20:
-            fontsize = 3
+            fontsize -= 2
+        if manager.max_buckets >= 100:
+            fontsize -= 4
+        if ("dose" in manager.__class__.__name__.lower()
+            or "sieve" in manager.__class__.__name__.lower()):
+            fontsize -= 2.5
 
         if self.high_res:
             # 3 is difference between low res and high res dpi
-            fontsize = fontsize / 4
+            fontsize = fontsize / 1
 
         matplotlib.rcParams.update({'font.size': fontsize})
 
@@ -213,7 +220,8 @@ class Animater(Base_Grapher):
             path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
-            bitrate = 6000 if self.high_res else 1000
+            # NOTE: bitrate barely impacts the speed that it saves
+            bitrate = 12000 if self.high_res else 12000
 
             # assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
             # FFwriter=animation.FFMpegFileWriter(bitrate=bitrate)
@@ -240,7 +248,7 @@ class Animater(Base_Grapher):
         # Should prob be removed
         fig = plt.figure()
         # NOTE: Increasing figure size makes it take way longer
-        fig.set_size_inches(12, 6)
+        fig.set_size_inches(16, 9)
         
 
         max_users = self.manager.max_users_y
@@ -320,7 +328,7 @@ class Animater(Base_Grapher):
                     user.horns = plt.Polygon(0 * self.get_horn_array(user),
                                              fc=user.og_face_color,
                                              **dict(ec="k"))
-                    user.horns.set_linewidth(.1 if self.high_res else .5)
+                    user.horns.set_linewidth(.4 if self.high_res else .5)
 
                 user.text = plt.text(bucket.patch_center(),
                                      5,
@@ -370,7 +378,7 @@ class Animater(Base_Grapher):
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
                                    f"{self.name}: Round 0",
-                                   fontsize=12 if not self.high_res else 3,
+                                   fontsize=12 if self.high_res else 12,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
@@ -397,7 +405,7 @@ class Animater(Base_Grapher):
         for user in self.users:
             current_point = user.points[i // self.frames_per_round]
             future_point = user.points[(i // self.frames_per_round) + 1]
-            if current_point != future_point:
+            if current_point != future_point or i % self.frames_per_round != 0:
                 remainder = i - ((i // self.frames_per_round)
                                  * self.frames_per_round)
                 next_point_x1_contr = current_point[0] * (
@@ -462,7 +470,7 @@ class Animater(Base_Grapher):
                                    self.ax.get_ylim()[1] - .5,
                                    (f"{self.name}: "
                                     f"Round {i // self.frames_per_round}"),
-                                   fontsize=12 if not self.high_res else 3,
+                                   fontsize=12 if self.high_res else 12,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
