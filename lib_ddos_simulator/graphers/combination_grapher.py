@@ -10,7 +10,6 @@ __status__ = "Development"
 
 import logging
 import os
-import sys
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -92,7 +91,8 @@ class Combination_Grapher(Base_Grapher):
         # If we are debugging, no multiprocessing
         # https://stackoverflow.com/a/1987484/8903959
         if (logging.getLogger().getEffectiveLevel() == logging.DEBUG
-            or "pytest" in sys.modules):
+            # https://stackoverflow.com/a/58866220/8903959
+            or "PYTEST_CURRENT_TEST" in os.environ):
             for i in range(total):
                 try:
                     current_args = [x[i] for x in full_args]
@@ -127,7 +127,7 @@ class Combination_Grapher(Base_Grapher):
 
         for attacker in attackers:
             self.print_progress(attacker, total_num)
-            percent_attackers_list = [i / 100 for i in range(1, 50)]
+            percent_attackers_list = [i / 100 for i in range(1, 52, 5)]
 
             for manager in managers:
                 manager_data = scenario_data[manager][attacker]
@@ -173,6 +173,7 @@ class Combination_Grapher(Base_Grapher):
                      manager):
         """Runs a trial for simulation"""
 
+        print("Running scenario", attacker, num_buckets, users_per_bucket, num_rounds, percent_attackers, manager)
         users = num_buckets * users_per_bucket
         attackers = int(users * percent_attackers)
         good_users = users - attackers
@@ -293,7 +294,7 @@ class Combination_Grapher(Base_Grapher):
         # https://stackoverflow.com/a/16910957/8903959
         cpt = sum([len([x for x in files if "json" not in x.lower()])
                    for r, d, files in os.walk(self.graph_dir)])
-        print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
+        print(f"Starting: {cpt + 1}/{total_num}")#, end="      \r")
 
     def populate_axs(self,
                      axs,

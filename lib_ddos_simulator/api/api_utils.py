@@ -10,8 +10,8 @@ __status__ = "Development"
 
 import functools
 import logging
+import os
 import random
-import sys
 
 from flask import request, jsonify
 
@@ -35,7 +35,7 @@ def format_json(desc=""):
                 return jsonify({**{"data": func(*args2, **kwargs)},
                                 **metadata})
             except Exception as e:
-                if "pytest" in sys.modules:
+                if "PYTEST_CURRENT_TEST" in os.environ:
                     raise e
                 # Never allow the API to crash. This should record errors
                 return jsonify({"ERROR":

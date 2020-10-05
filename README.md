@@ -392,7 +392,8 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
-    * 0.0.1 - Added APIs, multiple managers, animations, etc
+   * 0.0.2 - Fixed bug where it always through pytest was running - multiprocessing now works correctly
+   * 0.0.1 - Added APIs, multiple managers, animations, etc
    * 0.0.0 - Basic simulation capabilities, no API
 
 ## Credits
@@ -416,6 +417,10 @@ Many thanks to all the stack overflow questions and sites that have helped in de
 * https://stackoverflow.com/a/26305286/8903959
 * https://stackoverflow.com/a/1987484/8903959
 * https://stackoverflow.com/a/14666461/8903959
+* https://stackoverflow.com/a/58866220/8903959
+* https://stackoverflow.com/a/29127933/8903959
+* https://medium.com/@george.shuklin/mocking-complicated-init-in-python-6ef9850dd202
+* https://flask.palletsprojects.com/en/1.1.x/testing/
 
 Also thanks to the pathos library. Amazing way to multiprocess.
 
@@ -438,3 +443,14 @@ Q: More links to some research
 
 A: Read these:
 https://docs.google.com/spreadsheets/d/1hPFv0D3reEMh3A0HkpFyjji--vEQn2IOt_zDqPcVSIg/edit?fbclid=IwAR0394glMKAoEU06RtrISo_sNhmzyBJM4vXVGNuUTDwT39Yk7eVo_AfWCmY#gid=0
+
+## Developer Notes
+* [lib\_ddos\_simulator](#lib_ddos_simulator)
+
+TO BE WRITTEN
+
+For later
+* api is stateful due to complexity of the managers
+* You must call the api at equivalent intervals, even if no buckets where attacked to track user stats
+* NEVER append or manipulate in any way self.buckets. Use self.get_new_bucket() to get a new bucket. To reset, set the users to be []. Use self.used_buckets. Never remove empty buckets. Never add new ones.
+* If logging isn't here, it was removed due to mp issues
