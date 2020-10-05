@@ -342,6 +342,11 @@ sudo apt-get install ffmpeg
 ```
 
 To test the development package, cd into the root directory and run pytest.
+To test from pip install:
+```bash
+pip3 install wheel
+pip3 install lib_ddos_simulator --install-option test
+```
 
 
 ## Testing
@@ -355,6 +360,12 @@ To test a specific submodule, run pytest --markers. Then you can run pytest -m <
 Also note that slow tests are marked as slow. So you can not run slow tests by doing pytest -m "not slow".
 
 All the skipped tests are for the interns to fill in. I have completed these tests manually and am confident they will succeed, and I have been told by my bosses to move on to other tasks.
+
+To test from pip install:
+```bash
+pip3 install wheel
+pip3 install lib_ddos_simulator --install-option test
+```
 
 ## Development/Contributing
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
