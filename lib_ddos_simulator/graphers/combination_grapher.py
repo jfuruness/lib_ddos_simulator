@@ -49,7 +49,7 @@ class Combination_Grapher(Base_Grapher):
             num_buckets_list=[10],
             users_per_bucket_list=[10 ** i for i in range(1, 3)],
             num_rounds_list=[10 ** i for i in range(1, 3)],
-            trials=100):
+            trials=50):
         """Runs in parallel every possible scenario
 
         Looks complicated, but no real way to simplify it
@@ -173,7 +173,6 @@ class Combination_Grapher(Base_Grapher):
                      manager):
         """Runs a trial for simulation"""
 
-        print("Running scenario", attacker, num_buckets, users_per_bucket, num_rounds, percent_attackers, manager)
         users = num_buckets * users_per_bucket
         attackers = int(users * percent_attackers)
         good_users = users - attackers
@@ -294,7 +293,7 @@ class Combination_Grapher(Base_Grapher):
         # https://stackoverflow.com/a/16910957/8903959
         cpt = sum([len([x for x in files if "json" not in x.lower()])
                    for r, d, files in os.walk(self.graph_dir)])
-        print(f"Starting: {cpt + 1}/{total_num}")#, end="      \r")
+        print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
 
     def populate_axs(self,
                      axs,
