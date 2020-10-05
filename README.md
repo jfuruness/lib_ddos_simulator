@@ -124,14 +124,14 @@ lib_ddos_simulator --num_users 9 --num_attackers 1 --num_buckets 3 --debug
 
 ```python
 import logging
-from lib_ddos_simulator import DDOS_Simulator, Protag_Manager, Basic_Attacker
+from lib_ddos_simulator import DDOS_Simulator, Protag_Manager_Merge, Basic_Attacker
 num_users = 10
 num_attackers = 1
 num_buckets = 5
 # Threshold is legacy code
 threshold = .1
 # All the managers to run. See manager section for a list
-manager_child_classes = [Protag_Manager]
+manager_child_classes = [Protag_Manager_Merge]
 # The following options are the defaults, you can omit
 # these or change them if you wish
 stream_level = logging.INFO
@@ -196,14 +196,14 @@ A note on these parameters:
 
 ```python
 import logging
-from lib_ddos_simulator import DDOS_Simulator, Protag_Manager
+from lib_ddos_simulator import DDOS_Simulator, Protag_Manager_Merge, Basic_Attacker
 num_users = 10
 num_attackers = 1
 num_buckets = 5
 # Threshold is legacy code
 threshold = .1
 # All the managers to run. See manager section for a list
-manager_child_classes = [Protag_Manager]
+manager_child_classes = [Protag_Manager_Merge]
 # The following options are the defaults, you can omit
 # these or change them if you wish
 stream_level = logging.INFO
@@ -259,19 +259,19 @@ lib_ddos_simulator --debug
 
 ```python
 import logging
-from lib_ddos_simulator import Combination_Grapher, Sieve_Manager, Attacker
+from lib_ddos_simulator import Combination_Grapher, Sieve_Manager_Base, Attacker
 
 # stream_level and graph_path defaults, can be omitted
-grapher = Comination_Grapher(stream_level=logging.INFO,
-                             graph_dir="/tmp/lib_ddos_simulator",
-                             tikz=False,
-                             save=False,
-                             high_res=False)
+grapher = Combination_Grapher(stream_level=logging.INFO,
+                              graph_dir="/tmp/lib_ddos_simulator",
+                              tikz=False,
+                              save=False,
+                              high_res=False)
 
 # For the full list of managers that is run by default, see Managers section
-grapher.run(managers=Sieve_Manager.runnable_managers,
+grapher.run(managers=Sieve_Manager_Base.runnable_managers,
             attackers=Attacker.runnable_attackers,
-            num_bucket_list=[10],
+            num_buckets_list=[10],
             users_per_bucket_list=[10 ** i for i in range(1,3)],
             num_rounds_list=[10 ** i for i in range(1,3)],
             trials=100)
