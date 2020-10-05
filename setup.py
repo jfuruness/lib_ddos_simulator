@@ -1,14 +1,19 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name='lib_ddos_simulator',
     packages=find_packages(),
-    version='0.0.0',
+    version='0.0.1',
     author='Justin Furuness and Anna Gorbenko',
-    author_email=['jfuruness@gmail.com', 'agorbenko97@gmail.com'],
-    url='https://github.com/agorbenko/lib_ddos_simulator.git',
-    download_url='https://github.com/agorbenko/lib_ddos.git',
+    author_email='jfuruness@gmail.com, agorbenko97@gmail.com',
+    url='https://github.com/jfuruness/lib_ddos_simulator.git',
+    download_url='https://github.com/jfuruness/lib_ddos.git',
+    description="DDOS simulator",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     keywords=['Furuness', 'Gorbenko', 'DDOS', 'DOS', 'Simulation',
               'Sieve', 'Protag', 'KPO', 'DOSE',
               'Distributed Denial of Service',
