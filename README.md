@@ -251,6 +251,7 @@ lib_ddos_simulator --debug
 | save           | False    | Stores graphs or shows them |
 | high_res       | False    | Uses higher resolution (slower) |
 | graph_dir      | "/tmp/lib_ddos_simulator" | graph_dir |
+| trials         | 50       | Number of trials to run |
 
 #### From a script:
 
@@ -274,7 +275,7 @@ grapher.run(managers=Sieve_Manager_Base.runnable_managers,
             num_buckets_list=[10],
             users_per_bucket_list=[10 ** i for i in range(1,3)],
             num_rounds_list=[10 ** i for i in range(1,3)],
-            trials=100)
+            trials=50)
 
 # NOTE: If you are confused by these lists, what gets graphed is essentially:
 # for num_buckets in num_buckets_list:
@@ -392,6 +393,7 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.3 - README updates, default trial change
    * 0.0.2 - Fixed bug where it always through pytest was running - multiprocessing now works correctly. Moved conftest.py and added other credits.
    * 0.0.1 - Added APIs, multiple managers, animations, etc
    * 0.0.0 - Basic simulation capabilities, no API
