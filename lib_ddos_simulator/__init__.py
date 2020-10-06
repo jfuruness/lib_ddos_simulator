@@ -14,9 +14,9 @@ random.seed(0)
 
 # http://matplotlib.1069221.n5.nabble.com/How-to-turn-off-matplotlib-DEBUG-msgs-td48822.html
 import matplotlib
-import logging
-mpl_logger = logging.getLogger('matplotlib')
-mpl_logger.setLevel(logging.WARNING)
+# Removed because logging inhibits multiprocessing
+#mpl_logger = logging.getLogger('matplotlib')
+#mpl_logger.setLevel(logging.WARNING)
 
 # Importing all due to large number of attacker types
 from .attackers import *

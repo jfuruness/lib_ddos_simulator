@@ -123,7 +123,7 @@ class Animater(Base_Grapher):
         self._create_bucket_patches()
         self._create_user_patches()
         self.name = manager.__class__.__name__
-        self.frames_per_round = 100
+        self.frames_per_round = 50
         if self.save:
             self.frames_per_round = 100
         self.total_rounds = 0
@@ -293,19 +293,15 @@ class Animater(Base_Grapher):
         for bucket_row in reversed(ordered_bucket_rows):
             for bucket in bucket_row:
                 kwargs = {"fc": bucket.og_face_color}
-                if self.save:
-                    patch_type = FancyBboxPatch
-                    kwargs["boxstyle"] = "round,pad=0.1"
-                else:
-                    patch_type = plt.Rectangle
+                patch_type = FancyBboxPatch
+                kwargs["boxstyle"] = "round,pad=0.1"
 
                 bucket.patch = patch_type((x, y),
                                           Bucket.patch_width,
                                           self.max_users * User.patch_length(),
                                           **kwargs)
 
-                if self.save:
-                    bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+                bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
 
                 x += Bucket.patch_length()
                 self.bucket_patches.append(bucket.patch)
@@ -345,12 +341,11 @@ class Animater(Base_Grapher):
         for bucket in self.buckets:
             self.ax.add_patch(bucket.patch)
             bucket.patch.set_zorder(1)
-            if self.save:
-                if bucket.states[0] == Bucket_States.UNUSED:
-                    bucket.patch.set_alpha(0)
-                elif bucket.states[0] == Bucket_States.ATTACKED:
-                    # Change this to not be hardcoded
-                    bucket.patch.set_facecolor("y")
+            if bucket.states[0] == Bucket_States.UNUSED:
+                bucket.patch.set_alpha(0)
+            elif bucket.states[0] == Bucket_States.ATTACKED:
+                # Change this to not be hardcoded
+                bucket.patch.set_facecolor("y")
         zorder = 2
         max_sus = 0
         for user in self.users:
@@ -396,8 +391,7 @@ class Animater(Base_Grapher):
         """
 
         self.animate_users(i)
-        if self.save:
-            self.animate_buckets(i)
+        self.animate_buckets(i)
         self.animate_round_text(i)
         return self.return_animation_objects(i)
 
@@ -480,8 +474,7 @@ class Animater(Base_Grapher):
 
         objs = [x.patch for x in self.users] + [x.text for x in self.users]
         objs += [self.round_text] + horns
-        if self.save:
-            objs += [x.patch for x in self.buckets]
+        objs += [x.patch for x in self.buckets]
         return objs
 
     def get_horn_array(self, user):

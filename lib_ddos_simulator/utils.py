@@ -9,7 +9,7 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-import logging
+from enum import Enum
 import sys
 
 
@@ -45,14 +45,9 @@ def split_list(list_to_split: list, num_chunks: int):
 
     return chunks
 
-
-def config_logging(level):
-    """Configures logging"""
-
-    if len(logging.root.handlers) <= 0:
-        logging.root.handlers = []
-        logging.basicConfig(level=level,
-                            format='%(asctime)s-%(levelname)s: %(message)s',
-                            handlers=[logging.StreamHandler()])
-
-        logging.captureWarnings(True)
+class Log_Levels(Enum):
+    DEBUG = 10
+    INFO = 20
+    WARNING = 30
+    ERROR = 40
+    CRITICAL = 50

@@ -9,7 +9,6 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from copy import deepcopy
-import logging
 import os
 import random
 
@@ -34,7 +33,7 @@ class DDOS_Simulator:
                  num_buckets: int,
                  threshold: int,
                  Manager_Child_Classes: list,
-                 stream_level=logging.INFO,
+                 stream_level=utils.Log_Levels.INFO,
                  # The graph kwargs
                  graph_dir: str = os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
@@ -48,8 +47,6 @@ class DDOS_Simulator:
                              "tikz": tikz,
                              "save": save,
                              "high_res": high_res}
-
-        utils.config_logging(stream_level)
 
         self.good_users = [User(x) for x in range(num_users)]
 

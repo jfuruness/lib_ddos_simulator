@@ -8,13 +8,12 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-import logging
 import os
 
 import shutil
 import tikzplotlib
 
-from ..utils import config_logging
+from ..utils import Log_Levels
 
 
 class Base_Grapher:
@@ -23,14 +22,13 @@ class Base_Grapher:
     __slots__ = ["stream_level", "graph_dir", "tikz", "save", "high_res"]
   
     def __init__(self,
-                 stream_level=logging.INFO,
+                 stream_level=Log_Levels.INFO,
                  graph_dir=os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
                  save=False,
                  high_res=False):
         """Initializes simulation"""
 
-        config_logging(stream_level)
         self.stream_level = stream_level
         self.graph_dir = graph_dir
         self.make_graph_dir()

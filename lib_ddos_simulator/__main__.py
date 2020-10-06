@@ -9,14 +9,13 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from argparse import ArgumentParser
-from logging import DEBUG
 import os
 from sys import argv
 
 from .api import create_app
 from .ddos_simulator import DDOS_Simulator
 from .managers import Manager
-from .utils import config_logging
+from .utils import Log_Levels
 from .graphers import Combination_Grapher
 
 def main():
@@ -44,8 +43,6 @@ def main():
 
 
     args = parser.parse_args()
-    if args.debug:
-        config_logging(DEBUG)
 
     if args.api:
         create_app().run(debug=True)
@@ -59,9 +56,11 @@ def main():
                        Manager.runnable_managers,
                        graph_dir=args.graph_dir,
                        save=args.save,
+                       stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                        high_res=args.high_res).run(args.rounds, animate=True, graph_trials=False)
     elif args.graph_combos:
-        Combination_Grapher(graph_dir=args.graph_dir,
+        Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
+                            graph_dir=args.graph_dir,
                             tikz=args.tikz,
                             save=args.save,
                             high_res=args.high_res).run(trials=args.trials)
@@ -71,6 +70,7 @@ def main():
                        args.num_buckets,
                        args.threshold,
                        Manager.runnable_managers,
+                       stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                        graph_dir=args.graph_dir,
                        save=args.save,
                        tikz=args.tikz,

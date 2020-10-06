@@ -9,14 +9,12 @@ __email__ = "jfuruness@gmail.com"
 __status__ = "Development"
 
 import functools
-import logging
 import os
 import random
 
 from flask import request, jsonify
 
 from ..simulation_objects import User
-from ..utils import config_logging
 
 from . import tests
 
@@ -47,7 +45,6 @@ def format_json(desc=""):
 def init_sim(app, user_ids, bucket_ids, manager_cls):
     """inits simulation"""
 
-    config_logging(logging.INFO)
     users = [User(x) for x in user_ids]
     random.shuffle(users)
     # Threshold is used in test code

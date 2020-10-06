@@ -405,6 +405,8 @@ Many thanks to Anna Gorbenko for helping code the managers with me as well as ot
 
 Many thanks to Amir Herzberg for direction in research and help with DDOS theory as well as coming up with many improvements
 
+HUGE Credits to Cameron Morris for helping me fix video resolution problems
+
 Thanks to the Nikhil for working with us to test out the API portion of this library for deployment
 
 Many thanks to all the stack overflow questions and sites that have helped in development of this package:

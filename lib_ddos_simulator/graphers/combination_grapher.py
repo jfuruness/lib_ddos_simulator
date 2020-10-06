@@ -8,7 +8,6 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-import logging
 import os
 
 import matplotlib.pyplot as plt
@@ -25,7 +24,7 @@ from ..attackers import Attacker
 # Done this way to avoid circular imports
 from .. import ddos_simulator
 from ..managers import Manager
-
+from ..utils import Log_Levels
 
 class Worst_Case_Attacker:
     """placeholder
@@ -47,8 +46,8 @@ class Combination_Grapher(Base_Grapher):
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10 ** i for i in range(1, 3)],
-            users_per_bucket_list=[10 ** i for i in range(1, 5)],
-            num_rounds_list=[10 ** i for i in range(1, 5)],
+            users_per_bucket_list=[10 ** i for i in range(1, 4)],
+            num_rounds_list=[10 ** i for i in range(1, 4)],
             trials=50):
         """Runs in parallel every possible scenario
 
@@ -90,7 +89,7 @@ class Combination_Grapher(Base_Grapher):
 
         # If we are debugging, no multiprocessing
         # https://stackoverflow.com/a/1987484/8903959
-        if (logging.getLogger().getEffectiveLevel() == logging.DEBUG
+        if (self.stream_level == Log_Levels.DEBUG
             # https://stackoverflow.com/a/58866220/8903959
             or "PYTEST_CURRENT_TEST" in os.environ):
             for i in range(total):
@@ -101,6 +100,7 @@ class Combination_Grapher(Base_Grapher):
                     print(current_args)
                     raise e
         else:
+            input(len(full_args[0]))
             p.map(self.get_graph_data, *full_args)
             p.close()
             p.join()
