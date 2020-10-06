@@ -51,3 +51,11 @@ class Log_Levels(Enum):
     WARNING = 30
     ERROR = 40
     CRITICAL = 50
+
+    def __eq__(self, other):
+        if isinstance(other, Log_Levels):
+            return self.value == other.value
+        elif isinstance(other, int):
+            return self.value == other
+        else:
+            return False

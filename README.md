@@ -393,7 +393,11 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
-   * 0.0.3 - README updates, default trial change
+   * 0.0.3
+     * README updates
+     * default trial change
+     * logging removed due to inhibiting mp
+     * animation resolution fixed, animation bug where users don't go into buckets fixed
    * 0.0.2 - Fixed bug where it always through pytest was running - multiprocessing now works correctly. Moved conftest.py and added other credits.
    * 0.0.1 - Added APIs, multiple managers, animations, etc
    * 0.0.0 - Basic simulation capabilities, no API
