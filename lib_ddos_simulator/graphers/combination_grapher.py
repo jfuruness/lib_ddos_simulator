@@ -100,7 +100,6 @@ class Combination_Grapher(Base_Grapher):
                     print(current_args)
                     raise e
         else:
-            input(len(full_args[0]))
             p.map(self.get_graph_data, *full_args)
             p.close()
             p.join()
