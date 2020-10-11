@@ -393,6 +393,8 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.4
+     * Fixed broken flasgger
    * 0.0.3
      * README updates
      * default trial change
