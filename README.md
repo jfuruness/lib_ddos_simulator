@@ -293,7 +293,7 @@ grapher.run(managers=Sieve_Manager_Base.runnable_managers,
 
 Runs a ***STATEFUL*** API. Note that this should ***NEVER*** be run in a production environment. Also note that you use this ***AT YOUR OWN RISK***. Just assume it's broken.
 
-To see commands, go to http://localhost:5000/apidocs/
+To see endpoints, run the API using the commands below and go to http://localhost:5000/apidocs/
 
 #### From the command line:
 ```bash
