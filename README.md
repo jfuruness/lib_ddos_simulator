@@ -393,6 +393,10 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.6
+     * Updated because version wasn't shown correctly in pypi
+   * 0.0.5b
+     * Fixed install bug - needed manifest.in and incude_data=True for yml
    * 0.0.5
      * Fixed flasgger bug from pip install
      * Fixed console scripts (I hope)
