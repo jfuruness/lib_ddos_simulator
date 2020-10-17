@@ -346,6 +346,9 @@ To test the development package, cd into the root directory and run pytest.
 To test from pip install:
 ```bash
 pip3 install wheel
+# janky but whatever. Done to install deps
+pip3 install lib_ddos_simulator
+pip3 uninstall lib_ddos_simulator
 pip3 install lib_ddos_simulator --install-option test
 ```
 
@@ -354,7 +357,8 @@ pip3 install lib_ddos_simulator --install-option test
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
 
 You can test the package if in development by moving/cd into the directory where setup.py is located and running:
-```sudo python3 setup.py test```
+(Note that you must have all dependencies installed first)
+```python3 setup.py test```
 
 To test a specific submodule, run pytest --markers. Then you can run pytest -m <submodule_name> and only tests from that submodule will be run.
 
@@ -365,6 +369,9 @@ All the skipped tests are for the interns to fill in. I have completed these tes
 To test from pip install:
 ```bash
 pip3 install wheel
+# janky but whatever. Done to install deps
+pip3 install lib_ddos_simulator
+pip3 uninstall lib_ddos_simulator
 pip3 install lib_ddos_simulator --install-option test
 ```
 
