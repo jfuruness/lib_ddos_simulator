@@ -6,7 +6,8 @@ with open("README.md", "r") as fh:
 setup(
     name='lib_ddos_simulator',
     packages=find_packages(),
-    version='0.0.5',
+    include_package_data=True,
+    version='0.0.5b',
     author='Justin Furuness and Anna Gorbenko',
     author_email='jfuruness@gmail.com, agorbenko97@gmail.com',
     url='https://github.com/jfuruness/lib_ddos_simulator.git',

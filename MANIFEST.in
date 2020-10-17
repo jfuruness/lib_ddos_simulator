@@ -1,0 +1,1 @@
+include lib_ddos_simulator/api/flasgger_docs/*.yml
