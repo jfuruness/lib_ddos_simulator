@@ -393,6 +393,9 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.5
+     * Fixed flasgger bug from pip install
+     * Fixed console scripts (I hope)
    * 0.0.4
      * Fixed broken flasgger
    * 0.0.3

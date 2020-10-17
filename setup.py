@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='lib_ddos_simulator',
     packages=find_packages(),
-    version='0.0.4',
+    version='0.0.5',
     author='Justin Furuness and Anna Gorbenko',
     author_email='jfuruness@gmail.com, agorbenko97@gmail.com',
     url='https://github.com/jfuruness/lib_ddos_simulator.git',
@@ -35,7 +35,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3'],
     entry_points={
-        'console_scripts': 'lib_ddos_simulator = lib_ddos_simulator.__main__:main'},
+        'console_scripts': ['lib_ddos_simulator = lib_ddos_simulator.__main__:main']},
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
 )
