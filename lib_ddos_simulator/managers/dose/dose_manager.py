@@ -32,6 +32,61 @@ class DOSE_Manager(Manager):
     number of relays can 16X with just one attacker/1k users?
     potentially more with more users (or attackers?)
     with RPR set to 1, lone drone cost forces 1 user to a bucket?
+    
+    more verbosely written:
+    Here is a list of some of the flaws we discovered from DOSE.
+    There were more, but after reading/running their code and becoming
+    thoroughly convinced their results were fabricated/wrong,
+    I stopped recording them.
+    
+    CRPA and RPR were hardcoded in their code, even though you can accept
+    them as a parameter. In other words, if you pass in a parameter to set
+    the CRPA or RPR, behind the scenes they would always be changed to be
+    hardcoded
+    
+    The lone drone risk is not accounted for in figures 4, 5
+    and it is in 6. However, their algorithm clearly states
+    the lone drone risk is supposed to be factored into their
+    suspicion. If you always consider lone drone risk, with
+    the parameters they have in their own code their algorithm
+    has terrible results (which aren't shown in their graphs,
+    since they omitted this when convenient). Every user will
+    have to go into their own bucket. Their code clearly does
+    not function the way they wrote their paper. Even
+    theoretically/mathematically, the graphs they present are
+    not possible to produce with the way their algorithm is
+    written. They simply pick and choose to use lone drone risk
+    whenever it is convenient to their results.
+    
+    Attackers attack with 1/8 chance, however I don't see this
+    mentioned in their paper. Their algorithm doesn't care if
+    the attacker attacks every round or not, so this essentially
+    just boosts their stats and makes their results seem better
+    than they are.
+    
+    With just 1 attacker per 1000 users, the number of
+    relays/buckets increases by a factor of 16 (I think this
+    was figure four) and maintain these buckets for multiple
+    rounds? With more attackers or more users this number would
+    be even higher. That seems like a very expensive way to catch
+    just one attacker.
+    
+    They never state how they combine buckets. In fact, their code
+    does not do it. Even when we run their code to produce the
+    graphs they have in the paper, they produce graphs that do not
+    have combined buckets. It would appear as if they simply added
+    an extra data point for this that was not represented in their
+    code. So as far as I can tell their algorithm does not specify
+    how to combine buckets and there is no implementation for it.
+    This matters, since multiple attackers attacking in different
+    combinations make simple combining algorithms perform poorly.
+    
+    The graphs we got when we ran their code seemed to indicate they
+    added data points they didn't have, and had no implementation to get.
+    
+    Their code was written horribly, with little to no documentation,
+    hard coded variables, hundreds of lines of discarded code.
+    Ripe for errors.
     """
 
     __slots__ = ["dose_atk_events"]
