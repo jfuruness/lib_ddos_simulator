@@ -16,10 +16,12 @@ class Patient_Attacker(Attacker):
 
     runnable = False
 
+    __slots__ = ["starting_users", "total_additions"]
+
     def add_additions(self, turn):
         """Records number of times their bucket size increased"""
 
-        if turn == 0:
+        if not hasattr(self, "starting_users"):
             self.starting_users = len(self.bucket)
             self.total_additions = 0
         if len(self.bucket.users) > self.starting_users:
