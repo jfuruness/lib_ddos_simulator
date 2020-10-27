@@ -10,3 +10,4 @@ __status__ = "Development"
 
 from .bucket import Bucket
 from .user import User
+from .user_status import User_Status

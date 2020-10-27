@@ -39,7 +39,7 @@ class Grapher(Base_Grapher):
                                       "utility": []}}
                       for manager in managers}
 
-    def capture_data(self, round_num: int, manager: Manager, attackers: list):
+    def capture_data(self, round_num: int, manager: Manager):
         """Captures data for the round
 
         round_num, num_buckets, total_serviced, percent_serviced
@@ -60,15 +60,8 @@ class Grapher(Base_Grapher):
         cur_data["total_serviced"].append(serviced)
 
         # Percentage serviced
-        percent_serviced = serviced * 100 / len(manager.users)
+        percent_serviced = serviced * 100 / len(manager.connected_users)
         cur_data["percent_serviced"].append(percent_serviced)
-
-        # Percent detected
-        if len(attackers) == 0:
-            percent_detected = 100
-        else:
-            percent_detected = manager.attackers_detected * 100 / len(attackers)
-        cur_data["percent_detected"].append(percent_detected)
 
         # Utility: total number ever serviced / total number of buckets used
         total_ever_serviced = sum(cur_data["total_serviced"])

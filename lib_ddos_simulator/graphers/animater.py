@@ -92,7 +92,7 @@ class Animater(Base_Grapher):
         self.max_users, self.fig, self.ax = self._format_graph()
         #assert self.save or len(manager.users) <= 40,\
         #    "Matplotlib can't handle that many users"
-        self.ogusers = deepcopy(manager.users)
+        self.ogusers = deepcopy(manager.users.values + manager.will_be_connected_users)
 
         fontsize = 12
         matplotlib.rcParams.update({'font.size': 10})
@@ -154,7 +154,7 @@ class Animater(Base_Grapher):
 
     @property
     def users(self):
-        return self.manager.users + self.manager.eliminated_users
+        return self.manager.users.values() + self.manager.will_be_connected_users
 
     @property
     def buckets(self):
@@ -185,6 +185,14 @@ class Animater(Base_Grapher):
         for user in manager.eliminated_users:
             user.points.append(self.detected_location)
             user.detected = True
+            user.suspicions.append(0)
+
+        for user in manager.disconnected_users:
+            user.points.append(self.disconnected_location)
+            user.suspicions.append(0)
+
+        for user in manager.will_be_connected_users:
+            user.points.append(self.will_be_connected_location)
             user.suspicions.append(0)
 
 
@@ -315,23 +323,21 @@ class Animater(Base_Grapher):
         """Creates patches of users"""
 
         self.user_patches = []
-        for bucket in self.buckets:
-            for user in bucket.users:
-                user.patch = plt.Circle((bucket.patch_center(), 5),
-                                        User.patch_radius,
-                                        fc=user.og_face_color)
-                if isinstance(user, Attacker):
-                    user.horns = plt.Polygon(0 * self.get_horn_array(user),
-                                             fc=user.og_face_color,
-                                             **dict(ec="k"))
-                    user.horns.set_linewidth(.4 if self.high_res else .5)
-
-                user.text = plt.text(bucket.patch_center(),
-                                     5,
-                                     f"{user.id}",
-                                     horizontalalignment='center',
-                                     verticalalignment='center')
-                self.user_patches.append(user.patch)
+        for user in self.users:
+            user.patch = plt.Circle((bucket.patch_center(), 5),
+                                    User.patch_radius,
+                                    fc=user.og_face_color)
+            if isinstance(user, Attacker):
+                user.horns = plt.Polygon(0 * self.get_horn_array(user),
+                                         fc=user.og_face_color,
+                                         **dict(ec="k"))
+                user.horns.set_linewidth(.4 if self.high_res else .5)
+            user.text = plt.text(bucket.patch_center(),
+                                 5,
+                                 f"{user.id}",
+                                 horizontalalignment='center',
+                                 verticalalignment='center')
+            self.user_patches.append(user.patch)
 
     def init(self):
         """inits the animation
@@ -422,6 +428,11 @@ class Animater(Base_Grapher):
                 and i % self.frames_per_round== 0):
                 user.text.set_text("Detected")
                 user.patch.set_facecolor("grey")
+            elif (future_point == self.disconnected_location
+                  and current_point != self.disconnected_location
+                  and i % self.frames_per_round== 0):
+                  user.text.set_text("Disconnected")
+                  user.patch.set_facecolor("purple")
             else:
                 if self.track_suspicions and i % self.frames_per_round == 0:
                     text = f"{user.suspicions[(i//self.frames_per_round) + 1]:.1f}"

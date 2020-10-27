@@ -25,7 +25,8 @@ class DDOS_Simulator:
     """Simulates a DDOS attack"""
 
     __slots__ = ["graph_kwargs", "good_users", "attackers", "users",
-                 "managers", "grapher", "attacker_cls"]
+                 "managers", "grapher", "attacker_cls", "next_unused_user_id",
+                 "user_cls"]
 
     def __init__(self,
                  num_users: int,
@@ -39,7 +40,8 @@ class DDOS_Simulator:
                  tikz=False,
                  save=False,
                  high_res=False,
-                 attacker_cls=Basic_Attacker):
+                 attacker_cls=Basic_Attacker,
+                 user_cls=User):
         """Initializes simulation"""
 
         self.graph_kwargs = {"stream_level": stream_level,
@@ -48,11 +50,13 @@ class DDOS_Simulator:
                              "save": save,
                              "high_res": high_res}
 
-        self.good_users = [User(x) for x in range(num_users)]
+        self.good_users = [user_cls(x) for x in range(num_users)]
 
         self.attackers = self.get_attackers(num_attackers, attacker_cls)
 
         self.users = self.good_users + self.attackers
+
+        self.next_unused_user_id = len(self.users)
         # Shuffle so attackers are not at the end
         random.shuffle(self.users)
         # Creates manager and distributes users evenly across buckets
@@ -65,6 +69,7 @@ class DDOS_Simulator:
                                len(self.attackers),
                                **self.graph_kwargs)
         self.attacker_cls = attacker_cls
+        self.user_cls = user_cls
 
     def run(self, num_rounds: int, animate=False, graph_trials=True):
         """Runs simulation"""
@@ -165,6 +170,7 @@ class DDOS_Simulator:
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
             manager.take_action(turn)
+            self.connect_disconnect_users(turn)
 
 ########################
 ### Helper Functions ###
@@ -180,7 +186,7 @@ class DDOS_Simulator:
     def record(self, turn, manager, animate, animater):
         """Records statistics for graphs"""
 
-        self.grapher.capture_data(turn, manager, self.attackers)
+        self.grapher.capture_data(turn, manager)
         if animater is not None and animate == 1:
             animater.capture_data(manager)
 
@@ -196,3 +202,39 @@ class DDOS_Simulator:
         else:
             return [attacker_cls(x + len(self.good_users))
                     for x in range(num_attackers)]
+
+    def connect_disconnect_users(self, round_num):
+        """Connects and disconnects users"""
+
+        user_cls = User
+
+        # Gets users that are disconnecting
+        disconnected_user_ids = []
+        for user in manager.users.values():
+            if user.disconnect(round_num):
+                disconnected_user_ids.append(user.id)
+
+        # Gets users that are connecting
+        newly_connected_user_ids = []
+        newly_connected_user_ids.extend(self.add_users()
+                                        + self.add_attackers())
+        random.shuffle(newly_connected_user_ids)
+
+        # Manager connects and disconnects users all at once
+        manager.connect_disconnect(newly_connected_user_ids,
+                                   disconnected_user_ids,
+                                   user_cls)
+
+    def add_users(self, round_num):
+        """Adds users to sim (connects them). Override this method
+
+        Should return a list of user ids to add"""
+
+        return []
+
+    def add_attackers(self, round_num):
+        """Adds attackers to sim (connects them). Override this method
+
+        Should return a list of attackers to add"""
+
+        return []

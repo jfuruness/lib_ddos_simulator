@@ -92,6 +92,7 @@ class Combination_Grapher(Base_Grapher):
         if (self.stream_level == Log_Levels.DEBUG
             # https://stackoverflow.com/a/58866220/8903959
             or "PYTEST_CURRENT_TEST" in os.environ):
+
             for i in range(total):
                 try:
                     current_args = [x[i] for x in full_args]
@@ -387,13 +388,14 @@ class Combination_Grapher(Base_Grapher):
                            bbox_to_anchor=(1, 0.5))
 
         # If we are adding a second legend for worst case attacker colors
-        if hasattr(self, "second_legend"):
+        if hasattr(self, "second_legend") and self.second_legend is not None:
             # https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
             # https://matplotlib.org/3.1.1/gallery/text_labels_and_annotations/custom_legends.html
             axs.legend(handles=self.second_legend,
                        loc='upper right',
                        bbox_to_anchor=(1, 1))
             axs.add_artist(first)
+            self.second_legend = None
 
     def write_json(self, graph_path, scenario_data):
         """Writes json file"""

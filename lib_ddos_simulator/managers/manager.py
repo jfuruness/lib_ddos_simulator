@@ -57,22 +57,23 @@ class Manager:
                  max_buckets=0):
         """inits buckets and stores threshold"""
 
+        self.users = {x.id: x for x in users}
         # NOTE: should prob change this and have self.users
         # NOTE: be a property iterating over self.buckets
-        self.users = users
-        self.og_user_order = [x.id for x in self.users]
+        self.og_user_order = [x.id for x in users]
         self._threshold = threshold
         self.og_num_buckets = num_buckets
         self.buckets = []
         # Divide users evenly among buckets
-        for _id, user_chunk in enumerate(split_list(self.users, num_buckets)):
+        for _id, user_chunk in enumerate(split_list(users,
+                                                    num_buckets)):
             self.buckets.append(Bucket(user_chunk, _id))
         self.bucket_id = _id + 1
 
         if max_buckets > 0:
             self.add_additional_buckets(max_buckets)
         self.attackers_detected = 0
-        self.eliminated_users = []
+
         # Simple error checks
         self.validate()
 
@@ -81,19 +82,31 @@ class Manager:
         self.max_buckets = max_buckets
         self.get_animation_statistics()
 
+        self.will_be_connected_users = {}
+        self.next_unused_id = max(x.id for x in users) + 1
+        assert False, "Set user status to be connected"
+
     def reinit(self):
-        users_dict = {x.id: x for x in self.users + self.eliminated_users}
+        users_dict = {x.id: x for x in self.users}
         for user in users_dict.values():
             user.suspicion = 0
             user.conn_lt = 0
             user.dose_atk_risk = 0
+            user.status = None
         self.__init__(self.og_num_buckets,
                       # Reorder users to how they were originally
                       [users_dict[x] for x in self.og_user_order],
                       self._threshold,
                       max_users_y=self.max_users_y,
                       max_buckets=self.max_buckets)
-
+        og_ids = set(self.og_user_order)
+        self.will_be_connected_users = {}
+        for _id, user in users_dict:
+            if _id not in og_ids:
+                self.will_be_connected_users[user.__class__] =\
+                    self.will_be_connected_users.get(user.__class__, [])
+                self.will_be_connected_users[user.__class__].append(user)
+                
     def take_action(self, turn=0):
         """Actions to take every turn"""
 
@@ -115,6 +128,29 @@ class Manager:
             self.bucket_id += 1
             return self.buckets[-1]
 
+    def get_new_user(self, user_cls, user_id=None):
+        """Tries to get user out of will be connected users
+
+        if not exists, returns a new instance
+        """
+
+        try:
+            if user_id is None:
+                user_list = self.will_be_connected_users[user_cls]
+                user = user_list.pop(0)
+                return user
+            else:
+                for i, user in self.will_be_connected_users[user_cls]:
+                    if i == user_id:
+                        break
+                user = user_list.pop(i)
+                return user
+        except IndexError, KeyError:
+            user = user_cls(user_id if user_id is not None
+                            else self.next_unused_id)
+            self.next_unused_id += 1
+            return user
+
     def add_additional_buckets(self, max_buckets):
         """Must add additional buckets depending on algo"""
 
@@ -125,7 +161,7 @@ class Manager:
         """Simple error checks"""
 
         assert len(self.users) > 0, "No users? Surely a bug?"
-        for user in self.users:
+        for user in self.users.values():
             assert user.bucket in self.buckets
 
     @property
@@ -163,15 +199,11 @@ class Manager:
         for bucket in self.buckets:
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
-                self.eliminated_users.extend(bucket.users)
+                for user in bucket.users:
+                    assert False, "Set status to eliminated"
                 caught_attackers.extend(bucket.users)
                 bucket.users = []
                 bucket.attacked = True
-
-        # Prob not needed, just in case
-        self.users = []
-        for bucket in self.buckets:
-            self.users.extend(bucket.users)
 
         return caught_attackers
 
@@ -179,7 +211,7 @@ class Manager:
     def attackers(self):
         """Returns all attackers"""
 
-        return [x for x in self.users if isinstance(x, Attacker)]
+        return [x for x in self.users.values() if isinstance(x, Attacker)]
 
     @property
     def used_buckets(self):
@@ -202,19 +234,49 @@ class Manager:
         self.max_users_y = max(cur_max_users_y, self.max_users_y)
         self.max_buckets = max(len(self.buckets), self.max_buckets)
 
-    def add_user(self, user: User):
-        """Adds user to lowest bucket.
+    def connect_disconnect(self,
+                           newly_connected_user_ids,
+                           disconnected_user_ids,
+                           user_cls):
+        """Adds and removes user from sim"""
 
-        If no buckets are accepting new users, then redistribute buckets
+        if len(newly_connected_user_ids) > 0:
+            self.connect_users(newly_connected_user_ids, user_cls)
+        if len(disconnected_user_ids) > 0:
+            self.disconnect_users(disconnected_user_ids)
 
-        For larger scale simulation, a better sorting algo should
-        be used. But for now we don't call it
+    def connect_users(self, ids_to_conn, user_cls):
+        """Add users to bucket. Set status to connected.
 
-        NOTE that a sorting algo must be used because sometimes buckets
-        lose users since the manager detects them as an attacker
-        """
+        Makes sure user user isn't connected or eliminated"""
 
-        assert False, "Not yet implimented"
+        for _id in ids_to_conn:
+            if _id in self.users:
+                assert False, "Check for status eliminated"
+                if self.users[_id].status == "eliminated":
+                    logging.info("User eliminated, not adding")
+                elif self.users[_id].status == "disconnected":
+                    self.connect_user(self.users[_id])
+                    assert isinstance(self.users[_id], user_cls)
+                elif self.users[_id].status == "connected":
+                    raise Exception("connecting a connected user")
+                else:
+                    raise Exception("Unkown user status type")
+            else:
+               self.connect_user(self.get_new_user(user_cls, user_id=_id))
+        assert False, "Not yet implimented. NOTE: Check to make sure old user doesn't exist first"
+
+    def connect_user(self, user):
+        self.used_buckets[-1].users.append(user)
+
+    def disconnect_users(self, disconnect_user_ids):
+        """Disconnect users. Set status to disconnected"""
+
+        for _id in disconnect_user_ids:
+            user = self.users[_id]
+            assert user.status == "conn NOTE this will fail change to be conn val"
+            user.bucket.users.remove(user)
+            assert False, "Set user status to disconnected"
 
     @property
     def json(self):
@@ -231,3 +293,18 @@ class Manager:
         """Returns a list of buckets by ids"""
 
         return [x for x in self.buckets if x.id in set(ids)]
+
+    @property
+    def connected_users(self):
+        assert False, "Get equal to connected users"
+        return [x for x in self.users.values() if x.status == "connected"]
+
+    @property
+    def eliminated_users(self):
+        assert False, "Get equal to eliminated users"
+        return [x for x in self.users.values() if x.status == "eliminated"]
+
+    @property
+    def disconnected_users(self):
+        assert False, "Get equal to disconnecetd users"
+        return [x for x in self.users.values() if x.status == "disconn"]
