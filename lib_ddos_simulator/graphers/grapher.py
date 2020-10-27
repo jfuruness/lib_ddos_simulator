@@ -35,7 +35,6 @@ class Grapher(Base_Grapher):
                                 "Y": {"num_buckets": [],
                                       "total_serviced": [],
                                       "percent_serviced": [],
-                                      "percent_detected": [],
                                       "utility": []}}
                       for manager in managers}
 
@@ -103,6 +102,9 @@ class Grapher(Base_Grapher):
         # Title
         fig.suptitle(f"{self.good_users} users, {self.attackers} attackers")
 
+        from pprint import pprint
+        pprint(self._data)
+        input("Done")
         # For each manager
         for manager, manager_data in self._data.items():
             # For each stat tracked

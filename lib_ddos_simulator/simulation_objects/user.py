@@ -17,7 +17,7 @@ class User:
     # patch, text used in animations
     __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
                  "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk",
-                 "track_suspicion"]
+                 "track_suspicion", "status"]
 
     # Used in animations
     patch_radius = 1
@@ -49,6 +49,11 @@ class User:
 
         # Used in DOSE for connection lifetime
         self.conn_lt += 1
+
+    def disconnect(self, round_num):
+        """Inherit to include when user will disconnect"""
+
+        return False
 
     # For animations, since dose has it's own suspicion of sorts
     def get_suspicion(self):

@@ -8,10 +8,10 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from random import shuffle
+import random
 
 from ..attackers import Attacker
-from ..simulation_objects import Bucket, User
+from ..simulation_objects import Bucket, User, User_Status
 from ..utils import split_list
 
 
@@ -19,9 +19,9 @@ class Manager:
     """Simulates a manager for a DDOS attack"""
 
     __slots__ = ["users", "_threshold", "buckets", "attackers_detected",
-                 "eliminated_users", "og_num_buckets", "max_users_y",
+                 "og_num_buckets", "max_users_y",
                  "max_buckets", "og_user_order", "bucket_id", "og_json",
-                 "downed_json"]
+                 "downed_json", "will_be_connected_users", "next_unused_id"]
 
     runnable_managers = []
 
@@ -84,7 +84,8 @@ class Manager:
 
         self.will_be_connected_users = {}
         self.next_unused_id = max(x.id for x in users) + 1
-        assert False, "Set user status to be connected"
+        for user in users:
+            user.status = User_Status.CONNECTED
 
     def reinit(self):
         users_dict = {x.id: x for x in self.users}
@@ -145,7 +146,7 @@ class Manager:
                         break
                 user = user_list.pop(i)
                 return user
-        except IndexError, KeyError:
+        except (IndexError, KeyError):
             user = user_cls(user_id if user_id is not None
                             else self.next_unused_id)
             self.next_unused_id += 1
@@ -200,7 +201,7 @@ class Manager:
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 for user in bucket.users:
-                    assert False, "Set status to eliminated"
+                    user.status = User_Status.ELIMINATED
                 caught_attackers.extend(bucket.users)
                 bucket.users = []
                 bucket.attacked = True
@@ -236,47 +237,75 @@ class Manager:
 
     def connect_disconnect(self,
                            newly_connected_user_ids,
-                           disconnected_user_ids,
-                           user_cls):
+                           user_cls,
+                           newly_connected_attacker_ids,
+                           attacker_cls,
+                           disconnected_user_ids):
         """Adds and removes user from sim"""
 
         if len(newly_connected_user_ids) > 0:
-            self.connect_users(newly_connected_user_ids, user_cls)
+            self.connect_users(newly_connected_user_ids,
+                               user_cls,
+                               newly_connected_attacker_ids,
+                               attacker_cls)
         if len(disconnected_user_ids) > 0:
             self.disconnect_users(disconnected_user_ids)
 
-    def connect_users(self, ids_to_conn, user_cls):
+    def connect_users(self,
+                      user_ids_to_conn,
+                      user_cls,
+                      attacker_ids_to_conn,
+                      attacker_cls):
         """Add users to bucket. Set status to connected.
 
         Makes sure user user isn't connected or eliminated"""
 
-        for _id in ids_to_conn:
-            if _id in self.users:
-                assert False, "Check for status eliminated"
-                if self.users[_id].status == "eliminated":
-                    logging.info("User eliminated, not adding")
-                elif self.users[_id].status == "disconnected":
-                    self.connect_user(self.users[_id])
-                    assert isinstance(self.users[_id], user_cls)
-                elif self.users[_id].status == "connected":
-                    raise Exception("connecting a connected user")
+        users = []
+
+        for id_list, user_type in zip([user_ids_to_conn, attacker_ids_to_conn],
+                                      [user_cls, attacker_cls]):
+            for _id in id_list:
+                input(f"connecting {_id}")
+                if _id in self.users:
+                    if self.users[_id].status == User_Status.ELIMINATED:
+                        logging.info("User eliminated, not adding")
+                    elif self.users[_id].status == User_Status.DISCONNECTED:
+                        users.append(self.users[_id])
+                        assert isinstance(self.users[_id], user_type)
+                    elif self.users[_id].status == User_Status.CONNECTED:
+                        raise Exception("connecting a connected user")
+                    else:
+                        raise Exception("Unkown user status type")
                 else:
-                    raise Exception("Unkown user status type")
-            else:
-               self.connect_user(self.get_new_user(user_cls, user_id=_id))
-        assert False, "Not yet implimented. NOTE: Check to make sure old user doesn't exist first"
+                    users.append(self.get_new_user(user_type, user_id=_id))
+
+        random.shuffle(users)
+        for user in users:
+            self.connect_user(user)
+        from pprint import pprint
+        pprint(self.json)
+        input("cont")
 
     def connect_user(self, user):
+        # SHOULD REALLY be changed to add from a bucket func
         self.used_buckets[-1].users.append(user)
+        user.bucket = self.used_buckets[-1]
+        if user.id not in self.users:
+            self.users[user.id] = user
+        user.status = User_Status.CONNECTED
 
     def disconnect_users(self, disconnect_user_ids):
         """Disconnect users. Set status to disconnected"""
 
         for _id in disconnect_user_ids:
+            input(f"disconnecting {_id}")
             user = self.users[_id]
-            assert user.status == "conn NOTE this will fail change to be conn val"
+            assert user.status == User_Status.CONNECTED
             user.bucket.users.remove(user)
-            assert False, "Set user status to disconnected"
+            user.status = User_Status.DISCONNECTED
+        from pprint import pprint
+        pprint(self.json)
+        input("cont")
 
     @property
     def json(self):
@@ -284,9 +313,11 @@ class Manager:
 
         buckets = {bucket.id: list(sorted([x.id for x in bucket.users]))
                    for bucket in self.used_buckets}
-        eliminated = list(sorted(x.id for x in self.eliminated_users)),
+        eliminated = list(sorted(x.id for x in self.eliminated_users))
+        disconnected = list(sorted(x.id for x in self.disconnected_users))
         return {"bucket_mapping": buckets,
                 "eliminated_users": eliminated,
+                "disconnected_users": disconnected,
                 "manager": self.__class__.__name__}
 
     def get_buckets_by_ids(self, ids):
@@ -296,15 +327,15 @@ class Manager:
 
     @property
     def connected_users(self):
-        assert False, "Get equal to connected users"
-        return [x for x in self.users.values() if x.status == "connected"]
+        return [x for x in self.users.values()
+                if x.status == User_Status.CONNECTED]
 
     @property
     def eliminated_users(self):
-        assert False, "Get equal to eliminated users"
-        return [x for x in self.users.values() if x.status == "eliminated"]
+        return [x for x in self.users.values()
+                if x.status == User_Status.ELIMINATED]
 
     @property
     def disconnected_users(self):
-        assert False, "Get equal to disconnecetd users"
-        return [x for x in self.users.values() if x.status == "disconn"]
+        return [x for x in self.users.values()
+                if x.status == User_Status.DISCONNECTED]

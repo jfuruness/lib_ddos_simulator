@@ -170,7 +170,10 @@ class DDOS_Simulator:
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
             manager.take_action(turn)
-            self.connect_disconnect_users(turn)
+            self.connect_disconnect_users(manager, turn)
+            from pprint import pprint
+            pprint(manager.json)
+            input("cont")
 
 ########################
 ### Helper Functions ###
@@ -180,7 +183,7 @@ class DDOS_Simulator:
         """Attackers attack, adds 1 to user lifetime"""
 
         manager.get_animation_statistics()
-        for user in manager.users:
+        for user in manager.connected_users:
             user.take_action(manager, turn)
 
     def record(self, turn, manager, animate, animater):
@@ -203,27 +206,23 @@ class DDOS_Simulator:
             return [attacker_cls(x + len(self.good_users))
                     for x in range(num_attackers)]
 
-    def connect_disconnect_users(self, round_num):
+    def connect_disconnect_users(self, manager, round_num):
         """Connects and disconnects users"""
 
         user_cls = User
 
         # Gets users that are disconnecting
         disconnected_user_ids = []
-        for user in manager.users.values():
+        for user in manager.connected_users:
             if user.disconnect(round_num):
                 disconnected_user_ids.append(user.id)
 
-        # Gets users that are connecting
-        newly_connected_user_ids = []
-        newly_connected_user_ids.extend(self.add_users()
-                                        + self.add_attackers())
-        random.shuffle(newly_connected_user_ids)
-
         # Manager connects and disconnects users all at once
-        manager.connect_disconnect(newly_connected_user_ids,
-                                   disconnected_user_ids,
-                                   user_cls)
+        manager.connect_disconnect(self.add_users(round_num),
+                                   user_cls,
+                                   self.add_attackers(round_num),
+                                   self.attacker_cls,
+                                   disconnected_user_ids)
 
     def add_users(self, round_num):
         """Adds users to sim (connects them). Override this method
