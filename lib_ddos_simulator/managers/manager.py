@@ -127,11 +127,24 @@ class Manager:
 
     def get_new_bucket(self):
         try:
+            bucket = self.non_used_buckets[0]
             return self.non_used_buckets[0]
         except IndexError:
             self.buckets.append(Bucket(id=self.bucket_id))
             self.bucket_id += 1
             return self.buckets[-1]
+
+    def get_new_buckets(self, num_to_get):
+        buckets = []
+        non_used_buckets = self.non_used_buckets
+        for i in range(num_to_get):
+            try:
+                buckets.append(non_used_buckets[i])
+            except IndexError:
+                self.buckets.append(Bucket(id=self.bucket_id))
+                self.bucket_id += 1
+                buckets.append(self.buckets[-1])
+        return buckets
 
     def get_new_user(self, user_cls, user_id=None):
         """Tries to get user out of will be connected users

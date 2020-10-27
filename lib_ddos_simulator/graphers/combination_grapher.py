@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from copy import deepcopy
 import os
 
 import matplotlib.pyplot as plt
@@ -32,7 +33,6 @@ class Worst_Case_Attacker:
     Later used to graph the worst case attacker graph"""
     pass
 
-
 class Combination_Grapher(Base_Grapher):
     """Compares managers against each other
 
@@ -43,42 +43,52 @@ class Combination_Grapher(Base_Grapher):
     __slots__ = ["second_legend"]
 
     def run(self,
+            ddos_sim_cls_list=None,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
-            num_buckets_list=[10 ** i for i in range(1, 3)],
-            users_per_bucket_list=[10 ** i for i in range(1, 4)],
-            num_rounds_list=[10 ** i for i in range(1, 4)],
+            num_buckets_list=[10],#[10 ** i for i in range(1, 3)],
+            users_per_bucket_list=[10],#[10 ** i for i in range(1, 4)],
+            num_rounds_list=[10],#[10 ** i for i in range(1, 4)],
             trials=50):
         """Runs in parallel every possible scenario
 
         Looks complicated, but no real way to simplify it
         so deal with it"""
 
+        if ddos_sim_cls_list is None:
+            ddos_sim_cls_list =\
+                ddos_simulator.DDOS_Simulator.runnable_simulators[1:]
+
         # Initializes graph path
         self.make_graph_dir(destroy=True)
 
         # Total number of scenarios
-        pbar_total = (len(num_buckets_list) *
+        pbar_total = (len(ddos_sim_cls_list) *
+                      len(num_buckets_list) *
                       len(users_per_bucket_list) *
                       len(num_rounds_list) *
                       (len(attackers) + 1))  # Add 1 to attacker for worst case
 
+        _pathos_simulators_list = []
         _pathos_num_buckets_list = []
         _pathos_users_per_bucket = []
         _pathos_num_rounds = []
-        for num_buckets in num_buckets_list:
-            for users_per_bucket in users_per_bucket_list:
-                for num_rounds in num_rounds_list:
-                    for attacker in attackers + [Worst_Case_Attacker]:
-                        self.get_attacker_graph_dir(attacker)
+        for sim_cls in ddos_sim_cls_list:
+            for num_buckets in num_buckets_list:
+                for users_per_bucket in users_per_bucket_list:
+                    for num_rounds in num_rounds_list:
+                        for attacker in attackers + [Worst_Case_Attacker]:
+                            self.get_attacker_graph_dir(attacker)
 
-                    _pathos_num_buckets_list.append(num_buckets)
-                    _pathos_users_per_bucket.append(users_per_bucket)
-                    _pathos_num_rounds.append(num_rounds)
+                        _pathos_simulators_list.append(sim_cls)
+                        _pathos_num_buckets_list.append(num_buckets)
+                        _pathos_users_per_bucket.append(users_per_bucket)
+                        _pathos_num_rounds.append(num_rounds)
 
         p = ProcessingPool(nodes=cpu_count())
         total = len(_pathos_num_rounds)
-        full_args = [[attackers] * total,
+        full_args = [_pathos_simulators_list,
+                     [attackers] * total,
                      _pathos_num_buckets_list,
                      _pathos_users_per_bucket,
                      _pathos_num_rounds,
@@ -98,7 +108,8 @@ class Combination_Grapher(Base_Grapher):
                     current_args = [x[i] for x in full_args]
                     self.get_graph_data(*current_args)
                 except Exception as e:
-                    print(current_args)
+                    from pprint import pprint
+                    pprint(current_args)
                     raise e
         else:
             p.map(self.get_graph_data, *full_args)
@@ -109,6 +120,7 @@ class Combination_Grapher(Base_Grapher):
         print()
 
     def get_graph_data(self,
+                       ddos_sim_cls,
                        attackers,
                        num_buckets,
                        users_per_bucket,
@@ -118,6 +130,10 @@ class Combination_Grapher(Base_Grapher):
                        num,
                        total_num):
         """Gets data for graphing and graphs it"""
+
+        ddos_sim_cls = deepcopy(ddos_sim_cls)
+        attackers = deepcopy(attackers)
+        managers = deepcopy(managers)
 
         scenario_data = {manager: {attacker: {"X": [],
                                               "Y": [],
@@ -132,12 +148,15 @@ class Combination_Grapher(Base_Grapher):
             for manager in managers:
                 manager_data = scenario_data[manager][attacker]
                 for percent_attackers in percent_attackers_list:
+                    manager = deepcopy(manager)
+                    attacker = deepcopy(attacker)
                     manager_data["X"].append(percent_attackers)
                     Y = []
                     # TRIALS
                     for _ in range(trials):
                         # Get the utility for each trail and append it
-                        Y.append(self.run_scenario(attacker,
+                        Y.append(self.run_scenario(ddos_sim_cls,
+                                                   attacker,
                                                    num_buckets,
                                                    users_per_bucket,
                                                    num_rounds,
@@ -165,6 +184,7 @@ class Combination_Grapher(Base_Grapher):
                             write_json=True)
 
     def run_scenario(self,
+                     ddos_sim_cls,
                      attacker,
                      num_buckets,
                      users_per_bucket,
@@ -178,16 +198,16 @@ class Combination_Grapher(Base_Grapher):
         good_users = users - attackers
         # No longer used, but maybe in the future
         threshold = 0
-        sim = ddos_simulator.DDOS_Simulator(good_users,
-                                            attackers,
-                                            num_buckets,
-                                            threshold,
-                                            [manager],
-                                            stream_level=self.stream_level,
-                                            graph_dir=self.graph_dir,
-                                            tikz=self.tikz,
-                                            save=self.save,
-                                            attacker_cls=attacker)
+        sim = ddos_sim_cls(good_users,
+                           attackers,
+                           num_buckets,
+                           threshold,
+                           [manager],
+                           stream_level=self.stream_level,
+                           graph_dir=self.graph_dir,
+                           tikz=self.tikz,
+                           save=self.save,
+                           attacker_cls=attacker)
         # dict of {manager: final utility}
         utilities_dict = sim.run(num_rounds, graph_trials=False)
         return utilities_dict[manager]

@@ -52,7 +52,7 @@ class Sieve_Manager_Base(Manager):
         if len(buckets) > 0:
             self._reorder_buckets(buckets)
             self._sort_buckets(buckets)
-
+ 
 
     def _reorder_buckets(self, buckets):
         if len(buckets) == 0:
@@ -98,7 +98,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_0(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.buckets:
+        for bucket in self.used_buckets:
             multiplier = 1 if bucket.attacked else 0
             for user in bucket.users:
                 user.suspicion += (1 / len(bucket)) * multiplier
@@ -106,7 +106,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_1(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.buckets:
+        for bucket in self.used_buckets:
             multiplier = 1 if bucket.attacked else 0
             for user in bucket.users:
                 user.suspicion += multiplier
@@ -114,7 +114,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_2(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.buckets:
+        for bucket in self.used_buckets:
             multiplier = 1 if bucket.attacked else -1
             for user in bucket.users:
                 user.suspicion += (1 / len(bucket)) * multiplier

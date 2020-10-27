@@ -27,9 +27,7 @@ class Sieve_Manager_KPO(Sieve_Manager_Base):
             buckets_to_add = 1
         else:
             buckets_to_add = 0
-        return self.attacked_buckets + [self.get_new_bucket()
-                                        for _ in range(buckets_to_add)]
-    
+        return self.attacked_buckets + self.get_new_buckets(buckets_to_add)  
 
 
 class Sieve_Manager_KPO_S0(Sieve_Manager_KPO):

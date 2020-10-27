@@ -28,6 +28,16 @@ class DDOS_Simulator:
                  "managers", "grapher", "attacker_cls", "next_unused_user_id",
                  "user_cls", "og_unused_user_id"]
 
+    runnable_simulators = []
+
+    # https://stackoverflow.com/a/43057166/8903959
+    def __init_subclass__(cls, **kwargs):
+        """This method essentially creates a list of all subclasses"""
+
+        super().__init_subclass__(**kwargs)
+
+        cls.runnable_simulators.append(cls)
+
     def __init__(self,
                  num_users: int,
                  num_attackers: int,
@@ -237,3 +247,6 @@ class DDOS_Simulator:
         Should return a list of attackers to add"""
 
         return []
+
+if len(DDOS_Simulator.runnable_simulators) == 0:
+    DDOS_Simulator.runnable_simulators.insert(0, DDOS_Simulator)
