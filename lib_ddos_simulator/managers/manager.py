@@ -86,6 +86,7 @@ class Manager:
         self.next_unused_id = max(x.id for x in users) + 1
         for user in users:
             user.status = User_Status.CONNECTED
+            user.conn_lt = 0
 
     def reinit(self):
         users_dict = self.users.copy()
@@ -107,10 +108,13 @@ class Manager:
                 self.will_be_connected_users[user.__class__] =\
                     self.will_be_connected_users.get(user.__class__, [])
                 self.will_be_connected_users[user.__class__].append(user)
+        for user_cls, user_list in self.will_be_connected_users.items():
+            self.will_be_connected_users[user_cls] = list(sorted(user_list))
                 
     def take_action(self, turn=0):
         """Actions to take every turn"""
 
+        self.get_animation_statistics()
         self.record_dose_events()
         # Detects and removes suspicious users, then shuffles
         self.detect_and_shuffle(turn)
@@ -139,19 +143,19 @@ class Manager:
             if user_id is None:
                 user_list = self.will_be_connected_users[user_cls]
                 user = user_list.pop(0)
-                return user
             else:
+                index = None
                 for i, user in enumerate(self.will_be_connected_users[user_cls]):
                     if user.id == user_id:
-                        break
-                user = self.will_be_connected_users[user_cls].pop(i)
-                return user
+                        index = i
+                user = self.will_be_connected_users[user_cls].pop(index)
         except (IndexError, KeyError):
             user = user_cls(user_id if user_id is not None
                             else self.next_unused_id)
             if user_id is not None:
                 self.next_unused_id += 1
-            return user
+
+        return user
 
     def add_additional_buckets(self, max_buckets):
         """Must add additional buckets depending on algo"""
@@ -252,6 +256,7 @@ class Manager:
                                attacker_cls)
         if len(disconnected_user_ids) > 0:
             self.disconnect_users(disconnected_user_ids)
+        self.get_animation_statistics()
 
     def connect_users(self,
                       user_ids_to_conn,
@@ -291,6 +296,7 @@ class Manager:
         if user.id not in self.users:
             self.users[user.id] = user
         user.status = User_Status.CONNECTED
+        user.conn_lt = 0
 
     def disconnect_users(self, disconnect_user_ids):
         """Disconnect users. Set status to disconnected"""

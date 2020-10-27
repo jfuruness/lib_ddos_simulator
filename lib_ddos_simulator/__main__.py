@@ -13,8 +13,7 @@ import os
 from sys import argv
 
 from .api import create_app
-from .ddos_simulator import DDOS_Simulator
-from .fluid_ddos_simulator import Fluid_DDOS_Simulator
+from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
 from .managers import Manager, Protag_Manager_No_Merge
 from .utils import Log_Levels
 from .graphers import Combination_Grapher
@@ -57,7 +56,7 @@ def main():
                 4,#args.num_attackers,  # number of attackers
                 8,#args.num_buckets,  # number of buckets
                 args.threshold,  # Threshold
-                [Protag_Manager_No_Merge],#Manager.runnable_managers,
+                Manager.runnable_managers,
                 graph_dir=args.graph_dir,
                 save=args.save,
                 stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,

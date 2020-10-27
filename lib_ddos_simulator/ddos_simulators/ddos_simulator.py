@@ -14,11 +14,11 @@ import random
 
 from tqdm import trange
 
-from .graphers import Animater, Grapher
-from .attackers import Attacker, Basic_Attacker, Mixed_Attacker
-from . import managers
-from .simulation_objects import User
-from . import utils
+from ..graphers import Animater, Grapher
+from ..attackers import Attacker, Basic_Attacker, Mixed_Attacker
+from .. import managers
+from ..simulation_objects import User
+from .. import utils
 
 
 class DDOS_Simulator:
@@ -26,7 +26,7 @@ class DDOS_Simulator:
 
     __slots__ = ["graph_kwargs", "good_users", "attackers", "users",
                  "managers", "grapher", "attacker_cls", "next_unused_user_id",
-                 "user_cls"]
+                 "user_cls", "og_unused_user_id"]
 
     def __init__(self,
                  num_users: int,
@@ -57,6 +57,7 @@ class DDOS_Simulator:
         self.users = self.good_users + self.attackers
 
         self.next_unused_user_id = len(self.users)
+        self.og_unused_user_id = self.next_unused_user_id
         # Shuffle so attackers are not at the end
         random.shuffle(self.users)
         # Creates manager and distributes users evenly across buckets
@@ -142,6 +143,7 @@ class DDOS_Simulator:
         if seed is not None:
             # Seeded so that exactly the same trial is run twice
             random.seed(seed)
+            self.next_unused_user_id = self.og_unused_user_id
             manager.reinit()
             if i == 1:
                 # We can only animate one manager at a time
@@ -163,9 +165,6 @@ class DDOS_Simulator:
         """Runs actual simulation"""
 
         for turn in turns:
-            from pprint import pprint
-            pprint(manager.json)
-            input("start of turn, cont")
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
             # Record data

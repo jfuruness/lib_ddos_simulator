@@ -40,7 +40,7 @@ class Bounded_Manager(Manager):
             # Move attackers into # attacked_buckets - guess
             self.case_1()
         # Number of buckets < attacker guess * 3
-        elif len(self.buckets) < self.num_attackers_guess * 3:
+        elif len(self.used_buckets) < self.num_attackers_guess * 3:
             # Move attackers into # attacked buckets + 1
             self.case_2()
         # Number of buckets >= attacker_guess * 3
@@ -89,6 +89,8 @@ class Bounded_Manager(Manager):
                 users = sorted_buckets[i].users
                 users += sorted_buckets[i + 1].users
                 sorted_buckets[i].users = users
+                for user in users:
+                    user.bucket = sorted_buckets[i]
                 sorted_buckets[i + 1].users = []
             # last bucket
             except IndexError:

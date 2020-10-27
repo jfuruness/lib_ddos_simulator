@@ -8,18 +8,9 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from copy import deepcopy
-import os
-import random
-
-from tqdm import trange
-
 from .ddos_simulator import DDOS_Simulator
-from .graphers import Animater, Grapher
-from .attackers import Attacker, Basic_Attacker, Mixed_Attacker
-from . import managers
-from .simulation_objects import User, Fluid_User
-from . import utils
+
+from ..simulation_objects import Fluid_User
 
 
 class Fluid_DDOS_Simulator(DDOS_Simulator):

@@ -24,8 +24,7 @@ from .attackers import Basic_Attacker, Even_Turn_Attacker
 from .api import create_app
 
 
-from .ddos_simulator import DDOS_Simulator
-from .fluid_ddos_simulator import Fluid_DDOS_Simulator
+from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
 from .graphers import Animater, Combination_Grapher, Grapher
 
 # Importing all due to large number of manager types

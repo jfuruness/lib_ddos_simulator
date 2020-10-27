@@ -22,7 +22,7 @@ from .base_grapher import Base_Grapher
 
 from ..attackers import Attacker
 # Done this way to avoid circular imports
-from .. import ddos_simulator
+from ..ddos_simulators import ddos_simulator
 from ..managers import Manager
 from ..utils import Log_Levels
 

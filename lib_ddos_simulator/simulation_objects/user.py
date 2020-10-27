@@ -78,7 +78,10 @@ class User:
         """Comparison operator for users"""
 
         if isinstance(other, User):
-            return self.suspicion < other.suspicion
+            if self.suspicion == other.suspicion:
+                return self.id < other.id
+            else:
+                return self.suspicion < other.suspicion
 
     def __repr__(self):
         """For printing"""
