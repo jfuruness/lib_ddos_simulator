@@ -173,6 +173,7 @@ class DDOS_Simulator:
            
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
+            manager.take_action(turn)
             self.connect_disconnect_users(manager, turn)
 
 ########################
