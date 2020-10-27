@@ -88,7 +88,7 @@ class Manager:
             user.status = User_Status.CONNECTED
 
     def reinit(self):
-        users_dict = {x.id: x for x in self.users}
+        users_dict = self.users.copy()
         for user in users_dict.values():
             user.suspicion = 0
             user.conn_lt = 0
@@ -102,7 +102,7 @@ class Manager:
                       max_buckets=self.max_buckets)
         og_ids = set(self.og_user_order)
         self.will_be_connected_users = {}
-        for _id, user in users_dict:
+        for _id, user in users_dict.items():
             if _id not in og_ids:
                 self.will_be_connected_users[user.__class__] =\
                     self.will_be_connected_users.get(user.__class__, [])
@@ -141,22 +141,25 @@ class Manager:
                 user = user_list.pop(0)
                 return user
             else:
-                for i, user in self.will_be_connected_users[user_cls]:
-                    if i == user_id:
+                for i, user in enumerate(self.will_be_connected_users[user_cls]):
+                    if user.id == user_id:
                         break
-                user = user_list.pop(i)
+                user = self.will_be_connected_users[user_cls].pop(i)
                 return user
         except (IndexError, KeyError):
             user = user_cls(user_id if user_id is not None
                             else self.next_unused_id)
-            self.next_unused_id += 1
+            if user_id is not None:
+                self.next_unused_id += 1
             return user
 
     def add_additional_buckets(self, max_buckets):
         """Must add additional buckets depending on algo"""
 
         new_buckets = max_buckets - len(self.buckets)
-        self.buckets += [Bucket() for _ in range(new_buckets)]
+        for _ in range(new_buckets):
+            self.buckets.append(Bucket(id=self.bucket_id))
+            self.bucket_id += 1
 
     def validate(self):
         """Simple error checks"""
@@ -197,7 +200,7 @@ class Manager:
         """Removes buckets and attackers if bucket is attacker and len is 1"""
 
         caught_attackers = []
-        for bucket in self.buckets:
+        for bucket in self.used_buckets:
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 for user in bucket.users:
@@ -205,7 +208,6 @@ class Manager:
                 caught_attackers.extend(bucket.users)
                 bucket.users = []
                 bucket.attacked = True
-
         return caught_attackers
 
     @property
@@ -224,7 +226,7 @@ class Manager:
     def unused_buckets(self):
         """Returns all unused buckets"""
 
-        return [x for x in self.buckets if len(x) == 0]
+        return [x for x in self.buckets if len(x.users) == 0]
 
     @property
     def non_used_buckets(self):
@@ -265,7 +267,6 @@ class Manager:
         for id_list, user_type in zip([user_ids_to_conn, attacker_ids_to_conn],
                                       [user_cls, attacker_cls]):
             for _id in id_list:
-                input(f"connecting {_id}")
                 if _id in self.users:
                     if self.users[_id].status == User_Status.ELIMINATED:
                         logging.info("User eliminated, not adding")
@@ -282,9 +283,6 @@ class Manager:
         random.shuffle(users)
         for user in users:
             self.connect_user(user)
-        from pprint import pprint
-        pprint(self.json)
-        input("cont")
 
     def connect_user(self, user):
         # SHOULD REALLY be changed to add from a bucket func
@@ -298,14 +296,10 @@ class Manager:
         """Disconnect users. Set status to disconnected"""
 
         for _id in disconnect_user_ids:
-            input(f"disconnecting {_id}")
             user = self.users[_id]
             assert user.status == User_Status.CONNECTED
             user.bucket.users.remove(user)
             user.status = User_Status.DISCONNECTED
-        from pprint import pprint
-        pprint(self.json)
-        input("cont")
 
     @property
     def json(self):

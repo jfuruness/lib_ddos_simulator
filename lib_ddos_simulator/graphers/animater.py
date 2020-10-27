@@ -73,6 +73,9 @@ class Animater(Base_Grapher):
 
 
         super(Animater, self).__init__(**kwargs)
+
+        self.disconnected_location = (-20, -20)
+
         self.low_dpi = 60
         if self.high_res:
             # Anything higher than 600 and you need to drastically increase bitrate
@@ -92,7 +95,7 @@ class Animater(Base_Grapher):
         self.max_users, self.fig, self.ax = self._format_graph()
         #assert self.save or len(manager.users) <= 40,\
         #    "Matplotlib can't handle that many users"
-        self.ogusers = deepcopy(manager.users.values + manager.will_be_connected_users)
+        self.ogusers = deepcopy(self.users)
 
         fontsize = 12
         matplotlib.rcParams.update({'font.size': 10})
@@ -128,6 +131,7 @@ class Animater(Base_Grapher):
             self.frames_per_round = 100
         self.total_rounds = 0
         self.detected_location = (-10, -10,)
+
         # Frames left before turning non attacked to attacked
         self.percent_left_before_change = .2
 
@@ -154,7 +158,10 @@ class Animater(Base_Grapher):
 
     @property
     def users(self):
-        return self.manager.users.values() + self.manager.will_be_connected_users
+        will_be_conn = []
+        for user_list in self.manager.will_be_connected_users.values():
+            will_be_conn.extend(user_list)
+        return list(self.manager.users.values()) + will_be_conn
 
     @property
     def buckets(self):
@@ -191,9 +198,10 @@ class Animater(Base_Grapher):
             user.points.append(self.disconnected_location)
             user.suspicions.append(0)
 
-        for user in manager.will_be_connected_users:
-            user.points.append(self.will_be_connected_location)
-            user.suspicions.append(0)
+        for user_list in manager.will_be_connected_users.values():
+            for user in user_list:
+                user.points.append(self.disconnected_location)
+                user.suspicions.append(0)
 
 
     def run_animation(self, total_rounds):
@@ -324,7 +332,11 @@ class Animater(Base_Grapher):
 
         self.user_patches = []
         for user in self.users:
-            user.patch = plt.Circle((bucket.patch_center(), 5),
+            if user.bucket.patch is None:
+                bucket_patch_center = self.disconnected_location[0]
+            else:
+                bucket_patch_center = user.bucket.patch_center()
+            user.patch = plt.Circle((bucket_patch_center, 5),
                                     User.patch_radius,
                                     fc=user.og_face_color)
             if isinstance(user, Attacker):
@@ -332,7 +344,7 @@ class Animater(Base_Grapher):
                                          fc=user.og_face_color,
                                          **dict(ec="k"))
                 user.horns.set_linewidth(.4 if self.high_res else .5)
-            user.text = plt.text(bucket.patch_center(),
+            user.text = plt.text(bucket_patch_center,
                                  5,
                                  f"{user.id}",
                                  horizontalalignment='center',

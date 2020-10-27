@@ -163,17 +163,17 @@ class DDOS_Simulator:
         """Runs actual simulation"""
 
         for turn in turns:
+            from pprint import pprint
+            pprint(manager.json)
+            input("start of turn, cont")
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
             # Record data
             self.record(turn, manager, i, animater)
+           
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
-            manager.take_action(turn)
             self.connect_disconnect_users(manager, turn)
-            from pprint import pprint
-            pprint(manager.json)
-            input("cont")
 
 ########################
 ### Helper Functions ###

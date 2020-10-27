@@ -14,7 +14,8 @@ from sys import argv
 
 from .api import create_app
 from .ddos_simulator import DDOS_Simulator
-from .managers import Manager
+from .fluid_ddos_simulator import Fluid_DDOS_Simulator
+from .managers import Manager, Protag_Manager_No_Merge
 from .utils import Log_Levels
 from .graphers import Combination_Grapher
 
@@ -40,24 +41,29 @@ def main():
     parser.add_argument("--trials", type=int, dest="trials", default=50)
     parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
     parser.add_argument("--api", dest="api", default=False, action="store_true")
+    parser.add_argument("--fluid", dest="fluid", default=False, action="store_true")
 
 
     args = parser.parse_args()
+
+    sim_cls = DDOS_Simulator if not args.fluid else Fluid_DDOS_Simulator
 
     if args.api:
         create_app().run(debug=True)
     elif args.animate:
         # NOTE: for optimal animations,
         # use 24, 4, 8, 10 for users, attackers, buckets, threshold
-        DDOS_Simulator(args.num_users,  # number of users
-                       args.num_attackers,  # number of attackers
-                       args.num_buckets,  # number of buckets
-                       args.threshold,  # Threshold
-                       Manager.runnable_managers,
-                       graph_dir=args.graph_dir,
-                       save=args.save,
-                       stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                       high_res=args.high_res).run(args.rounds, animate=True, graph_trials=False)
+        sim_cls(24,#args.num_users,  # number of users
+                4,#args.num_attackers,  # number of attackers
+                8,#args.num_buckets,  # number of buckets
+                args.threshold,  # Threshold
+                [Protag_Manager_No_Merge],#Manager.runnable_managers,
+                graph_dir=args.graph_dir,
+                save=args.save,
+                stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
+                high_res=args.high_res).run(10,#args.rounds,
+                                            animate=True,
+                                            graph_trials=False)
     elif args.graph_combos:
         Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                             graph_dir=args.graph_dir,
@@ -65,13 +71,13 @@ def main():
                             save=args.save,
                             high_res=args.high_res).run(trials=args.trials)
     else:
-        DDOS_Simulator(args.num_users,
-                       args.num_attackers,
-                       args.num_buckets,
-                       args.threshold,
-                       Manager.runnable_managers,
-                       stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                       graph_dir=args.graph_dir,
-                       save=args.save,
-                       tikz=args.tikz,
-                       high_res=args.high_res).run(args.rounds)
+        sim_cls(args.num_users,
+                args.num_attackers,
+                args.num_buckets,
+                args.threshold,
+                Manager.runnable_managers,
+                stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
+                graph_dir=args.graph_dir,
+                save=args.save,
+                tikz=args.tikz,
+                high_res=args.high_res).run(args.rounds)

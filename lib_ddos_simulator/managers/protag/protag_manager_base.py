@@ -43,7 +43,7 @@ class Protag_Manager_Base(Manager):
         self.combine_buckets()
 
         bucks = self.attacked_buckets
-        for bucket in self.attacked_buckets:
+        for bucket in bucks:
             # Attacked with more than one user, split in two
             user_chunk1, user_chunk2 = split_list(bucket.users, 2)
             bucket.reinit(user_chunk1)
