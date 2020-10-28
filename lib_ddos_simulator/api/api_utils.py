@@ -10,16 +10,20 @@ __status__ = "Development"
 
 import functools
 import os
+import pkg_resources
 import random
 
 from flask import request, jsonify
 
+from ..attackers import Attacker
 from ..simulation_objects import User
 
 from . import tests
 
+# https://stackoverflow.com/a/32965521/8903959
+version = pkg_resources.get_distribution('lib_ddos_simulator').version
 
-def format_json(desc=""):
+def format_json(desc="", req_args=[], version=version):
     """Try catch around api calls that formats json with matadata"""
 
     def my_decorator(func):
@@ -28,7 +32,12 @@ def format_json(desc=""):
             # Inside the decorator
             try:
                 metadata = {"metadata": {"desc": desc,
-                                         "url": request.url}}
+                                         "url": request.url,
+                                         "system_id": request.args.get("sys_id"),
+                                         "version": version}}
+                for arg in req_args:
+                    if request.args.get(arg) is None:
+                        raise Exception(f"{arg} is None but is required")
                 # Get the results from the function
                 return jsonify({**{"data": func(*args2, **kwargs)},
                                 **metadata})
@@ -36,31 +45,43 @@ def format_json(desc=""):
                 if "PYTEST_CURRENT_TEST" in os.environ:
                     raise e
                 # Never allow the API to crash. This should record errors
+                print(e)
                 return jsonify({"ERROR":
                                 f"{e} Please contact jfuruness@gmail.com"})
         return function_that_runs_func
     return my_decorator
 
 
-def init_sim(app, user_ids, bucket_ids, manager_cls):
+def init_sim(app, user_ids, num_buckets, manager_cls, system_id):
     """inits simulation"""
 
     users = [User(x) for x in user_ids]
     random.shuffle(users)
     # Threshold is used in test code
-    app.manager = manager_cls(len(bucket_ids), users, tests.Test_API.test_threshold)
-    for bucket, _id in zip(app.manager.buckets, bucket_ids):
-        bucket.id = int(_id)
-    app.manager.bucket_id = max(bucket_ids) + 1
+    app.managers[system_id] = manager_cls(num_buckets,
+                                          users,
+                                          tests.Test_API.test_threshold)
 
 
-def complete_turn(app, downed_bucket_ids):
+def complete_turn(app, downed_bucket_ids, system_id):
     """Records stats and manager takes actions"""
 
-    for user in app.manager.users:
+    manager = app.managers[system_id]
+
+    for user in manager.connected_users:
         user.take_action()
     if len(downed_bucket_ids) > 0:
-        for bucket in app.manager.get_buckets_by_ids(downed_bucket_ids):
+        for bucket in manager.get_buckets_by_ids(downed_bucket_ids):
             bucket.attacked = True
     # Turn is used in test code
-    app.manager.take_action(turn=tests.Test_API.test_turn)
+    manager.take_action(turn=tests.Test_API.test_turn)
+
+def connect_disconnect_uids(app, connecting_uids, disconnecting_uids, sys_id):
+    """Connects and disconnects users"""
+
+    app.managers[sys_id].connect_disconnect(connecting_uids,
+                                            User,
+                                            [],  # Connecting Attackers
+                                            None,  # Attacker cls
+                                            disconnecting_uids,
+                                            test_kwarg=True)

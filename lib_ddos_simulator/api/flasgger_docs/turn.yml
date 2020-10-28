@@ -1,6 +1,11 @@
 Manager detects attackers and shuffles users, incriments user stats
 ---
 parameters:
+  - name: sys_id
+    in: query
+    type: integer
+    description: id of system
+    required: true
   - name: bids
     in: query
     type: string
@@ -9,29 +14,3 @@ parameters:
 responses:
   200:
     description: Manager detects attackers and shuffles users, incriments user stats
-    examples:
-        {
-          "data": {
-            "bucket_mapping": {
-              "1": [
-                3
-              ],
-              "2": [
-                1
-              ],
-              "3": [
-                4
-              ]
-            },
-            "eliminated_users": [
-              [
-                2
-              ]
-            ],
-            "manager": "Protag_Manager_No_Merge"
-          },
-          "metadata": {
-            "desc": "Manager detects and shuffles users, incriments users stats",
-            "url": "http://localhost:5000/init?uids=1,2,3,4&bids=1,2,3&manager=protag_manager_no_merge"
-          }
-        }

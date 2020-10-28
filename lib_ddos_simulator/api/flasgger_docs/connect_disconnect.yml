@@ -1,0 +1,22 @@
+Manager connects and disconnects users
+---
+parameters:
+  - name: sys_id
+    in: query
+    type: integer
+    description: id of system
+    required: true
+  - name: cuids
+    in: query
+    type: string
+    description: Comma separated connecting user ids
+    required: false
+  - name: duids
+    in: query
+    type: string
+    description: Comma separated disconnecting user ids
+    required: false
+
+responses:
+  200:
+    description: Manager connects and disconnects users

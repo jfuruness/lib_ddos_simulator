@@ -26,7 +26,7 @@ class DDOS_Simulator:
 
     __slots__ = ["graph_kwargs", "good_users", "attackers", "users",
                  "managers", "grapher", "attacker_cls", "next_unused_user_id",
-                 "user_cls", "og_unused_user_id"]
+                 "user_cls", "og_unused_user_id", "og_num_attackers", "og_num_users"]
 
     runnable_simulators = []
 
@@ -54,6 +54,8 @@ class DDOS_Simulator:
                  user_cls=User):
         """Initializes simulation"""
 
+        self.og_num_attackers = num_attackers
+        self.og_num_users = num_users
         self.graph_kwargs = {"stream_level": stream_level,
                              "graph_dir": graph_dir,
                              "tikz": tikz,
@@ -232,20 +234,20 @@ class DDOS_Simulator:
                 disconnected_user_ids.append(user.id)
 
         # Manager connects and disconnects users all at once
-        manager.connect_disconnect(self.add_users(round_num),
+        manager.connect_disconnect(self.add_users(manager, round_num),
                                    user_cls,
-                                   self.add_attackers(round_num),
+                                   self.add_attackers(manager, round_num),
                                    self.attacker_cls,
                                    disconnected_user_ids)
 
-    def add_users(self, round_num):
+    def add_users(self, *args, **kwargs):
         """Adds users to sim (connects them). Override this method
 
         Should return a list of user ids to add"""
 
         return []
 
-    def add_attackers(self, round_num):
+    def add_attackers(self, *args, **kwargs):
         """Adds attackers to sim (connects them). Override this method
 
         Should return a list of attackers to add"""

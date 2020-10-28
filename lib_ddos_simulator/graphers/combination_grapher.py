@@ -50,10 +50,10 @@ class Combination_Grapher(Base_Grapher):
             ddos_sim_cls_list=None,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
-            num_buckets_list=[10],#[10 ** i for i in range(1, 3)],
-            users_per_bucket_list=[10, 100],#[10 ** i for i in range(1, 4)],
-            num_rounds_list=[10],#[10 ** i for i in range(1, 4)],
-            trials=50):
+            num_buckets_list=[10 ** i for i in range(1, 3)],
+            users_per_bucket_list=[10 ** i for i in range(1, 3)],
+            num_rounds_list=[10 ** i for i in range(1, 3)],
+            trials=10):
         """Runs in parallel every possible scenario
 
         Looks complicated, but no real way to simplify it

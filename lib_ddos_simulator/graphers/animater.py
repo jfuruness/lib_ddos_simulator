@@ -460,6 +460,14 @@ class Animater(Base_Grapher):
                     user.text.set_text(f"{user.id:2.0f}:{text}")
                 if i == 0:
                     user.patch.set_facecolor(user.og_face_color)
+                if (current_point not in [self.disconnected_location, self.detected_location]
+                    and future_point not in [self.disconnected_location, self.detected_location]):
+                    user.patch.set_facecolor(user.og_face_color)
+                    text = user.text.get_text().lower()
+                    # String comparisons no!!!
+                    if "disconnected" in text or "detected" in text:
+                        text = str(user.id)
+                        user.text.set_text(text)
 
     def animate_buckets(self, i):
         for bucket in self.buckets:

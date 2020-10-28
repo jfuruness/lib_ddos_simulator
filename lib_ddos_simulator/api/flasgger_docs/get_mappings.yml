@@ -1,0 +1,12 @@
+Gets bucket to users mappings and user to buckets mappings
+---
+parameters:
+  - name: sys_id
+    in: query
+    type: integer
+    description: id of system
+    required: true
+
+responses:
+  200:
+    description: Gets all mappings

@@ -13,7 +13,10 @@ __status__ = "Development"
 from flasgger import Swagger, swag_from
 from flask import Flask, request
 
-from .api_utils import format_json, init_sim, complete_turn
+from .api_utils import format_json
+from .api_utils import init_sim
+from .api_utils import complete_turn
+from .api_utils import connect_disconnect_uids
 
 from ..managers import Manager
 
@@ -21,6 +24,7 @@ from ..managers import Manager
 def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__)
+    app.managers = {}
     swagger = Swagger(app)
 
     @app.route("/")
@@ -30,15 +34,17 @@ def create_app():
 
     @app.route("/init")
     @swag_from("flasgger_docs/init_sim.yml")
-    @format_json(desc="Initializes simulation")
+    @format_json(desc="Initializes simulation",
+                 req_args=["uids", "num_buckets", "manager", "sys_id"])
     def init():
         """Initializes app
 
         input user ids, bucket ids, and manager name"""
 
-        # http://0.0.0.0:5000/init?uids=1,2,3,4&bids=1,2,3&manager=protag_manager_merge
+        # http://0.0.0.0:5000/init?uids=1,2,3,4&num_buckets=3&manager=protag_manager_merge
         user_ids = [int(x) for x in request.args.get("uids", "").split(",")]
-        bucket_ids = [int(x) for x in request.args.get("bids", "").split(",")]
+
+        num_buckets = int(request.args.get("num_buckets"))
 
         manager_str = request.args.get("manager", "")
         manager_cls = None
@@ -46,25 +52,71 @@ def create_app():
             if manager_str.lower() == manager.__name__.lower():
                 manager_cls = manager
 
-        assert manager_cls is not None
+        assert manager_cls is not None, "Manager class is not correct"
+
+        sys_id = int(request.args.get("sys_id"))
 
         # init here
-        init_sim(app, user_ids, bucket_ids, manager_cls)
-        return app.manager.json
+        init_sim(app, user_ids, num_buckets, manager_cls, sys_id)
+        return app.managers[sys_id].json
 
-    @app.route("/turn")
+    @app.route("/round")
     @swag_from("flasgger_docs/turn.yml")
-    @format_json(desc="Cause simulation to take actions")
-    def turn():
+    @format_json(desc="Cause simulation to take actions",
+                 req_args=["sys_id"])
+    def round():
         """Takes a turn. Input downed buckets"""
 
-        # http://0.0.0.0:5000/bids=1,2,3
+        # http://0.0.0.0:5000/round?bids=1,2,3
         if len(request.args.get("bids", [])) > 0:
             bucket_ids = [int(x) for x in request.args.get("bids").split(",")]
         else:
             bucket_ids = []
-        complete_turn(app, bucket_ids)
-        return app.manager.json
+
+        sys_id = int(request.args.get("sys_id"))
+
+        complete_turn(app, bucket_ids, sys_id)
+        return app.managers[sys_id].json
+
+    @app.route("/connect_disconnect")
+    @swag_from("flasgger_docs/connect_disconnect.yml")
+    @format_json(desc="Connect and disconnect users",
+                 req_args=["sys_id"])
+    def connect_disconnect():
+        """Connects and disconnects users."""
+
+        # http://0.0.0.0:5000/connect_disconnect?cuids=1,2,3&duids=4,5,6
+        if len(request.args.get("cuids", [])) > 0:
+            connecting_uids = [int(x) for x in
+                               request.args.get("cuids").split(",")]
+        else:
+            connecting_uids = []
+ 
+        if len(request.args.get("duids", [])) > 0:
+            disconnecting_uids = [int(x) for x in
+                               request.args.get("duids").split(",")]
+        else:
+            disconnecting_uids = []
+
+        sys_id = int(request.args.get("sys_id"))
+
+        connect_disconnect_uids(app,
+                                connecting_uids,
+                                disconnecting_uids,
+                                sys_id)
+        return app.managers[sys_id].json
+
+    @app.route("/get_mappings")
+    @swag_from("flasgger_docs/get_mappings.yml")
+    @format_json(desc="Gets mappings", req_args=["sys_id"])
+    def get_mappings():
+        """Gets mappings of users"""
+
+        # http://0.0.0.0:5000/get_mappings
+        sys_id = int(request.args.get("sys_id"))
+        return app.managers[sys_id].json
+
+
 
     @app.route("/runnable_managers")
     @swag_from("flasgger_docs/runnable_managers.yml")

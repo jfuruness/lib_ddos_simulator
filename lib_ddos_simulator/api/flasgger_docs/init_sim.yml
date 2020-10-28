@@ -1,15 +1,20 @@
 Initializes simulation with user ids, bucket ids, and manager
 ---
 parameters:
+  - name: sys_id
+    in: query
+    type: integer
+    description: id of system
+    required: true
   - name: uids
     in: query
     description: Comma separated user ids
     type: string
     required: true
-  - name: bids
+  - name: num_buckets
     in: query
-    type: string
-    description: Comma separated bucket ids
+    type: integer
+    description: Number of buckets (int)
     required: true
   - name: manager
     in: query

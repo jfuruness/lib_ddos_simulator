@@ -445,6 +445,8 @@ Many thanks to all the stack overflow questions and sites that have helped in de
 * https://stackoverflow.com/a/29127933/8903959
 * https://medium.com/@george.shuklin/mocking-complicated-init-in-python-6ef9850dd202
 * https://flask.palletsprojects.com/en/1.1.x/testing/
+* https://stackoverflow.com/a/54565257/8903959
+* https://stackoverflow.com/a/32965521/8903959
 
 Also thanks to the pathos library. Amazing way to multiprocess.
 

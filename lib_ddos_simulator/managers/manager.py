@@ -259,10 +259,11 @@ class Manager:
                            user_cls,
                            newly_connected_attacker_ids,
                            attacker_cls,
-                           disconnected_user_ids):
+                           disconnected_user_ids,
+                           test_kwarg=False):
         """Adds and removes user from sim"""
 
-        if len(newly_connected_user_ids) > 0:
+        if len(newly_connected_user_ids) > 0 or len(newly_connected_attacker_ids) > 0:
             self.connect_users(newly_connected_user_ids,
                                user_cls,
                                newly_connected_attacker_ids,
@@ -270,6 +271,7 @@ class Manager:
         if len(disconnected_user_ids) > 0:
             self.disconnect_users(disconnected_user_ids)
         self.get_animation_statistics()
+        return newly_connected_user_ids
 
     def connect_users(self,
                       user_ids_to_conn,
@@ -326,9 +328,13 @@ class Manager:
 
         buckets = {bucket.id: list(sorted([x.id for x in bucket.users]))
                    for bucket in self.used_buckets}
+        users = {user.id: user.bucket.id for user in
+                list(sorted(self.connected_users))}
+                 
         eliminated = list(sorted(x.id for x in self.eliminated_users))
         disconnected = list(sorted(x.id for x in self.disconnected_users))
         return {"bucket_mapping": buckets,
+                "user_mapping": users,
                 "eliminated_users": eliminated,
                 "disconnected_users": disconnected,
                 "manager": self.__class__.__name__}
