@@ -10,7 +10,7 @@ parameters:
     in: query
     type: string
     description: Comma separated attacked bucket ids
-    required: true
+    required: false
 responses:
   200:
     description: Manager detects attackers and shuffles users, incriments user stats
