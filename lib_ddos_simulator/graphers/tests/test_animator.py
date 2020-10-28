@@ -10,7 +10,7 @@ __status__ = "Development"
 
 import pytest
 
-from ...ddos_simulator import DDOS_Simulator
+from ...ddos_simulators import DDOS_Simulator
 from ...managers import Sieve_Manager_V0_S0
 
 

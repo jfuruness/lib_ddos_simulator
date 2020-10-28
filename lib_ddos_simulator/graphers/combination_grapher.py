@@ -412,13 +412,6 @@ class Combination_Grapher(Base_Grapher):
         # If we are adding a second legend for worst case attacker colors
         if len(self.second_legend) > 0:
             color_dict = self.get_worst_case_atk_color_dict()
-#            legend_elements = [Line2D([0],
-#                                      [0],
-#                                      marker=".",
-#                                      color=color_dict[atk],
-#                                      label=atk,
-#                                      markerfacecolor=color_dict[atk],
-#                                      markersize=10)
             legend_elements = [mpatches.Patch(color=color_dict[atk], label=atk)
                                for atk in set(self.second_legend)]
 

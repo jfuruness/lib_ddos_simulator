@@ -12,7 +12,7 @@ from itertools import product
 
 import pytest
 
-from ...ddos_simulator import DDOS_Simulator
+from ...ddos_simulators import DDOS_Simulator
 from ...managers.manager import Manager
 
 
