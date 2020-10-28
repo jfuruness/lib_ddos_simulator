@@ -400,6 +400,8 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.8
+     * Changed combination grapher to iterate over sim classes in most inner for loop
    * 0.0.7
      * Fixed worst case attacker bug. Added api endpoints, metadata. Added fluid users throughout.
    * 0.0.6

@@ -38,7 +38,7 @@ class User:
         self.suspicions = []
         # Expected connection lifetime
         # This was hardcoded in DOSE paper
-        self.exp_conn_lt = 20
+        self.exp_conn_lt = 100
         # Connection lifetime (incriments each round)
         self.conn_lt = 0
         self.dose_atk_risk = 0

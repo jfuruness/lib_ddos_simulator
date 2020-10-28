@@ -77,11 +77,11 @@ class Combination_Grapher(Base_Grapher):
         _pathos_num_buckets_list = []
         _pathos_users_per_bucket = []
         _pathos_num_rounds = []
-        for sim_cls in ddos_sim_cls_list:
-            for num_buckets in num_buckets_list:
-                for users_per_bucket in users_per_bucket_list:
-                    for num_rounds in num_rounds_list:
-                        for attacker in attackers + [Worst_Case_Attacker]:
+        for num_buckets in num_buckets_list:
+            for users_per_bucket in users_per_bucket_list:
+                for num_rounds in num_rounds_list:
+                    for attacker in attackers + [Worst_Case_Attacker]:
+                        for sim_cls in ddos_sim_cls_list:
                             self.get_attacker_graph_dir(attacker)
 
                         _pathos_simulators_list.append(sim_cls)
