@@ -38,7 +38,7 @@ class Fluid_DDOS_Simulator(DDOS_Simulator):
 
 
         if random.random() > og_percent_users or current_percent_users < og_percent_users:
-            if len(manager.disconnected_users) > 2:
+            if len(manager.disconnected_users) > 2 and random.random() > .5:
                 return [manager.disconnected_users[0].id]
             else:
                 _id = self.next_unused_user_id
