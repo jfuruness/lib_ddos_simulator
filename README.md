@@ -402,6 +402,7 @@ To be written
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
    * 0.0.9
      * Fixed worst case attacker legend
+     * Fixed broken import on unit test
    * 0.0.8
      * Changed combination grapher to iterate over sim classes in most inner for loop
      * Updated flasgger required args
