@@ -47,7 +47,7 @@ def main():
     if args.api:
         create_app().run(debug=True)
     elif args.animate:
-        for sim_cls in DDOS_Simulator.runnable_simulators:
+        for sim_cls in reversed(DDOS_Simulator.runnable_simulators):
             # NOTE: for optimal animations,
             # use 24, 4, 8, 10 for users, attackers, buckets, threshold
             sim_cls(args.num_users,  # number of users
