@@ -13,6 +13,7 @@ import os
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import matplotlib.patches as mpatches
 from statistics import mean, variance
 from math import sqrt
 from multiprocessing import cpu_count
@@ -170,7 +171,8 @@ class Combination_Grapher(Base_Grapher):
                     err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
                     manager_data["YERR"].append(err_length)
 
-            self.graph_scenario(scenario_data,
+            self.graph_scenario(ddos_sim_cls,
+                                scenario_data,
                                 num_buckets,
                                 users_per_bucket,
                                 num_rounds,
@@ -180,7 +182,8 @@ class Combination_Grapher(Base_Grapher):
         worst_case_data = self.worst_case_data(managers,
                                                scenario_data,
                                                attackers)
-        self.graph_scenario(worst_case_data,
+        self.graph_scenario(ddos_sim_cls,
+                            worst_case_data,
                             num_buckets,
                             users_per_bucket,
                             num_rounds,
@@ -248,6 +251,7 @@ class Combination_Grapher(Base_Grapher):
         return worst_case_scenario_data
 
     def graph_scenario(self,
+                       ddos_sim_cls,
                        scenario_data,
                        num_buckets,
                        users_per_bucket,
@@ -255,7 +259,8 @@ class Combination_Grapher(Base_Grapher):
                        attacker,
                        write_json=False):
 
-        fig, axs, title = self._get_formatted_fig_axs(scenario_data,
+        fig, axs, title = self._get_formatted_fig_axs(ddos_sim_cls,
+                                                      scenario_data,
                                                       num_buckets,
                                                       users_per_bucket,
                                                       num_rounds, attacker)
@@ -278,6 +283,7 @@ class Combination_Grapher(Base_Grapher):
             self.write_json(graph_path, scenario_data)
 
     def _get_formatted_fig_axs(self,
+                               sim_cls,
                                scenario_data,
                                num_buckets,
                                users_per_bucket,
@@ -286,7 +292,8 @@ class Combination_Grapher(Base_Grapher):
         """Creates and formats axes"""
 
         fig, axs = plt.subplots(figsize=(20, 10))
-        title = (f"Scenario: buckets: {num_buckets}, "
+        title = (f"Sim: {sim_cls.__name__}, "
+                 f"Scenario: buckets: {num_buckets}, "
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__}")
         fig.suptitle(title)
@@ -334,7 +341,7 @@ class Combination_Grapher(Base_Grapher):
                      label=f"{manager.__name__}",
                      ls=self.styles(manager_i),
                      # https://stackoverflow.com/a/26305286/8903959
-                     marker=None if write_json else self.markers(manager_i))
+                     marker=self.markers(manager_i))
         # This means we are graphing worst case
         if write_json:
             self.overlay_scatter_plot(axs,
@@ -370,16 +377,7 @@ class Combination_Grapher(Base_Grapher):
             atk_freq_dict[atk] = atk_freq_dict.get(atk, 0) + 1
         atks = list(reversed(sorted(atk_freq_dict, key=atk_freq_dict.get)))
 
-        legend_elements = [Line2D([0],
-                                  [0],
-                                  marker=self.markers(manager_i),
-                                  color=color_dict[atk],
-                                  label=atk,
-                                  markerfacecolor=color_dict[atk],
-                                  markersize=10)
-                           for atk in atks]
-
-        self.second_legend.extend(legend_elements)
+        self.second_legend.extend(atks)
 
     def get_worst_case_atk_color_dict(self):
         """Returns a dictionary of attacker to colors"""
@@ -413,9 +411,20 @@ class Combination_Grapher(Base_Grapher):
 
         # If we are adding a second legend for worst case attacker colors
         if len(self.second_legend) > 0:
+            color_dict = self.get_worst_case_atk_color_dict()
+#            legend_elements = [Line2D([0],
+#                                      [0],
+#                                      marker=".",
+#                                      color=color_dict[atk],
+#                                      label=atk,
+#                                      markerfacecolor=color_dict[atk],
+#                                      markersize=10)
+            legend_elements = [mpatches.Patch(color=color_dict[atk], label=atk)
+                               for atk in set(self.second_legend)]
+
             # https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
             # https://matplotlib.org/3.1.1/gallery/text_labels_and_annotations/custom_legends.html
-            axs.legend(handles=self.second_legend,
+            axs.legend(handles=legend_elements,
                        loc='upper right',
                        bbox_to_anchor=(1, 1))
             axs.add_artist(first)
