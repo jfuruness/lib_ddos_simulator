@@ -400,6 +400,8 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.7
+     * Fixed worst case attacker bug. Added api endpoints, metadata. Added fluid users throughout.
    * 0.0.6
      * Updated because version wasn't shown correctly in pypi
    * 0.0.5b
