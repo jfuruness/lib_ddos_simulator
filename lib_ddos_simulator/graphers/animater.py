@@ -68,11 +68,20 @@ class Animater(Base_Grapher):
                  "detected_location", "blue_to_yellow",
                  "yellow_to_blue", "track_suspicions"]
 
-    def __init__(self, manager, **kwargs):
+    def __init__(self,
+                 manager,
+                 sim_cls,
+                 user_cls,
+                 attacker_cls,
+                 **kwargs):
         """Initializes simulation"""
 
 
         super(Animater, self).__init__(**kwargs)
+
+        self.sim_cls = sim_cls
+        self.user_cls = user_cls
+        self.attacker_cls = attacker_cls
 
         self.disconnected_location = (-20, -20)
 
@@ -390,7 +399,7 @@ class Animater(Base_Grapher):
 
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
-                                   f"{self.name}: Round 0",
+                                   self._get_round_text(0),
                                    fontsize=12 if self.high_res else 12,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
@@ -485,8 +494,7 @@ class Animater(Base_Grapher):
         # This is why it works best with that sizing
         self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
                                    self.ax.get_ylim()[1] - .5,
-                                   (f"{self.name}: "
-                                    f"Round {i // self.frames_per_round}"),
+                                   self._get_round_text(i),
                                    fontsize=12 if self.high_res else 12,
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
@@ -517,6 +525,14 @@ class Animater(Base_Grapher):
                          user.patch.center
                          ])
         return horn_array
+
+    def _get_round_text(self, round_num):
+        return (f"{self.name}: "
+                f"Round {round_num // self.frames_per_round}     "
+                f"{self.sim_cls.__name__}|||"
+                f"{self.user_cls.__name__}|||"
+                f"{self.attacker_cls.__name__}")
+ 
 
 
 # Basically just makes the colors pretty

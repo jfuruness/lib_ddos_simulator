@@ -157,7 +157,11 @@ class DDOS_Simulator:
             manager.reinit()
             if i == 1:
                 # We can only animate one manager at a time
-                animater = Animater(manager, **self.graph_kwargs)
+                animater = Animater(manager,
+                                    self.__class__,
+                                    self.attacker_cls,
+                                    self.user_cls,
+                                    **self.graph_kwargs)
 
         # If we are graphing for just one manager
         # Print and turn on tqdm

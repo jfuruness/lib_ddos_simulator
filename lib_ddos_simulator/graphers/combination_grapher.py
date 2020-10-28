@@ -42,12 +42,16 @@ class Combination_Grapher(Base_Grapher):
 
     __slots__ = ["second_legend"]
 
+    def __init__(self, *args, **kwargs):
+        super(Combination_Grapher, self).__init__(*args, **kwargs)
+        self.second_legend = []
+
     def run(self,
             ddos_sim_cls_list=None,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             num_buckets_list=[10],#[10 ** i for i in range(1, 3)],
-            users_per_bucket_list=[10],#[10 ** i for i in range(1, 4)],
+            users_per_bucket_list=[10, 100],#[10 ** i for i in range(1, 4)],
             num_rounds_list=[10],#[10 ** i for i in range(1, 4)],
             trials=50):
         """Runs in parallel every possible scenario
@@ -356,7 +360,7 @@ class Combination_Grapher(Base_Grapher):
         axs.scatter(scenario_data[manager][attacker]["X"],
                     scenario_data[manager][attacker]["Y"],
                     c=colors,
-                    s=40,
+                    s=45,
                     zorder=3,
                     marker=self.markers(manager_i))
 
@@ -372,10 +376,10 @@ class Combination_Grapher(Base_Grapher):
                                   color=color_dict[atk],
                                   label=atk,
                                   markerfacecolor=color_dict[atk],
-                                  markersize=15)
+                                  markersize=10)
                            for atk in atks]
 
-        self.second_legend = legend_elements
+        self.second_legend.extend(legend_elements)
 
     def get_worst_case_atk_color_dict(self):
         """Returns a dictionary of attacker to colors"""
@@ -408,14 +412,14 @@ class Combination_Grapher(Base_Grapher):
                            bbox_to_anchor=(1, 0.5))
 
         # If we are adding a second legend for worst case attacker colors
-        if hasattr(self, "second_legend") and self.second_legend is not None:
+        if len(self.second_legend) > 0:
             # https://riptutorial.com/matplotlib/example/32429/multiple-legends-on-the-same-axes
             # https://matplotlib.org/3.1.1/gallery/text_labels_and_annotations/custom_legends.html
             axs.legend(handles=self.second_legend,
                        loc='upper right',
                        bbox_to_anchor=(1, 1))
             axs.add_artist(first)
-            self.second_legend = None
+            self.second_legend = []
 
     def write_json(self, graph_path, scenario_data):
         """Writes json file"""
