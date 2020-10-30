@@ -10,6 +10,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com"
 __status__ = "Development"
 
+import pkg_resources
+
 from flasgger import Swagger, swag_from
 from flask import Flask, request
 
@@ -25,7 +27,32 @@ def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__)
     app.managers = {}
-    swagger = Swagger(app)
+    # https://stackoverflow.com/a/32965521/8903959
+    version = pkg_resources.get_distribution('lib_ddos_simulator').version
+
+    template = {
+      "swagger": "2.0",
+      "info": {
+        "title": "lib_ddos_simulator API",
+        "description": "Provides access to a number of shuffling algorithms for DDOS mitigation",
+        "contact": {
+          "responsibleOrganization": "Justin Furuness",
+          "responsibleDeveloper": "Justin Furuness",
+          "email": "jfuruness@gmail.com",
+          "url": "https://github.com/jfuruness/lib_ddos_simulator#lib_ddos_simulator",
+        },
+        "termsOfService": "https://github.com/jfuruness/lib_ddos_simulator/blob/master/LICENSE",
+        "version": version,
+      },
+      # "host": "lib_ddos_simulator_api.com",  # overrides localhost:500
+      # "basePath": "/api",  # base bash for blueprint registration
+      "schemes": [
+        "http",
+        "https"
+      ],
+      "operationId": "getmyData"
+    }
+    swagger = Swagger(app, template=template)
 
     @app.route("/")
     @app.route("/home")
