@@ -32,3 +32,4 @@ from .managers import Manager, Bounded_Manager, Sieve_Manager_Base
 from .managers import Sieve_Manager_KPO_S0, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
 from .managers import Protag_Manager_Base, Protag_Manager_Merge
 from .managers import Protag_Manager_No_Merge
+from .managers import Motag_Manager
