@@ -200,7 +200,7 @@ class Animater(Base_Grapher):
 
         for user in manager.eliminated_users:
             user.points.append(self.detected_location)
-            user.detected = True
+            #user.detected = True
             user.suspicions.append(0)
 
         for user in manager.disconnected_users:
@@ -341,7 +341,7 @@ class Animater(Base_Grapher):
 
         self.user_patches = []
         for user in self.users:
-            if user.bucket.patch is None:
+            if user.bucket is None or user.bucket.patch is None:
                 bucket_patch_center = self.disconnected_location[0]
             else:
                 bucket_patch_center = user.bucket.patch_center()

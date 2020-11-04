@@ -110,6 +110,8 @@ class Manager:
                 self.will_be_connected_users[user.__class__].append(user)
         for user_cls, user_list in self.will_be_connected_users.items():
             self.will_be_connected_users[user_cls] = list(sorted(user_list))
+            for user in user_list:
+                user.bucket = None
                 
     def take_action(self, turn=0):
         """Actions to take every turn"""
@@ -283,6 +285,8 @@ class Manager:
         Makes sure user user isn't connected or eliminated"""
 
         users = []
+        assert user_ids_to_conn is not None
+        assert attacker_ids_to_conn is not None
 
         for id_list, user_type in zip([user_ids_to_conn, attacker_ids_to_conn],
                                       [user_cls, attacker_cls]):
@@ -321,6 +325,14 @@ class Manager:
             assert user.status == User_Status.CONNECTED
             user.bucket.users.remove(user)
             user.status = User_Status.DISCONNECTED
+
+    def eliminate_users_list(self, user_ids):
+        for _id in user_ids:
+            user = self.users[_id]
+            assert user.status == User_Status.CONNECTED
+            user.bucket.users.remove(user)
+            user.status = User_Status.ELIMINATED
+
 
     @property
     def json(self):

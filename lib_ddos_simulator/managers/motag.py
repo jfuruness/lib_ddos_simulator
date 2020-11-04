@@ -8,13 +8,24 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from math import comb
 import random
 
-from .attackers import Attacker
 from .manager import Manager
 
+from ..attackers import Attacker
 from ..utils import split_list
+
+
+import operator as op
+from functools import reduce
+
+# https://stackoverflow.com/a/4941932/8903959
+# Not python3.8, normally just use math.comb
+def ncr(n, r):
+    r = min(r, n-r)
+    numer = reduce(op.mul, range(n, n-r, -1), 1)
+    denom = reduce(op.mul, range(1, r+1), 1)
+    return numer // denom  # or / in Python 2
 
 
 class Motag_Manager(Manager):
@@ -25,12 +36,27 @@ class Motag_Manager(Manager):
     __slots__ = []
 
     runnable = True
-    prox = 30
+    prox = 20
+    percent_users_to_save = .95
 
     def detect_and_shuffle(self, *args):
         """Bounded Manager algorithm"""
 
-        self.greed_assign()
+
+
+
+
+        serviced_users = sum([len(x) for x in self.non_attacked_buckets])
+        # LOL just drop the buckets
+        if serviced_users / len(self.connected_users) > self.percent_users_to_save:
+            for bucket in self.attacked_buckets:
+                self.eliminate_users_list([x.id for x in bucket.users])
+
+        else:
+            self.greedy_assign()
+
+
+
 
     def greedy_assign(self, num_insiders=None, attacked_users=None, prox=None):
         """Greedy algorithm from motag paper"""
@@ -39,16 +65,19 @@ class Motag_Manager(Manager):
          attacked_users,
          prox) = self.get_greedy_init_vals(num_insiders, attacked_users, prox)
 
-        if attacked_users <= prox:
+        if len(attacked_users) <= prox:
             for user in attacked_users:
                 self.get_new_bucket().reinit([user])
-        elif prox = 1:
+
+        elif prox == 1:
             self.get_new_bucket().reinit(attacked_users)
-        elif num_insiders = 0:
+
+        elif num_insiders == 0:
             if len(attacked_users) > 0:
                 user_chunks = split_list(attacked_users, prox)
                 for user_chunk in user_chunks:
                     self.get_new_bucket().reinit(user_chunk)
+
         else:
             w = self.max_proxy(len(attacked_users),
                                len(attacked_users) - 1,
@@ -64,9 +93,10 @@ class Motag_Manager(Manager):
             for _ in range(prox_to_fill):
                 users_to_add = attacked_users[:w]
                 attacked_users = attacked_users[w:]
-                self.get_new_bucket.reinit(users_to_add)
-            self.greedy_assign(attacked_users,
-                               remaining_insiders,
+                self.get_new_bucket().reinit(users_to_add)
+
+            self.greedy_assign(remaining_insiders,
+                               attacked_users,
                                remaining_prox)
 
     def get_greedy_init_vals(self, num_insiders, attacked_users, prox):
@@ -80,8 +110,9 @@ class Motag_Manager(Manager):
             for bucket in self.attacked_buckets:
                 attacked_users.extend(bucket.users)
                 bucket.users = []
+            random.shuffle(attacked_users)
         if prox is None:
-            prox = self.prox
+            prox = self.prox - len(self.non_attacked_buckets)
         return num_insiders, attacked_users, prox
 
     def get_approx_insiders(self, buckets):
@@ -103,7 +134,7 @@ class Motag_Manager(Manager):
         _max = 0
         max_assign = 0
         for i in range(upper_bound + 1):
-            save = comb(client - i, insider) * i / comb(client, insider)
+            save = ncr(client - i, insider) * i / ncr(client, insider)
             if save > _max:
                 _max = save
                 max_assign = i

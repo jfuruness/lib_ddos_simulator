@@ -225,8 +225,6 @@ class DDOS_Simulator:
     def connect_disconnect_users(self, manager, round_num):
         """Connects and disconnects users"""
 
-        user_cls = User
-
         # Gets users that are disconnecting
         disconnected_user_ids = []
         for user in manager.connected_users:
@@ -235,7 +233,7 @@ class DDOS_Simulator:
 
         # Manager connects and disconnects users all at once
         manager.connect_disconnect(self.add_users(manager, round_num),
-                                   user_cls,
+                                   self.user_cls,
                                    self.add_attackers(manager, round_num),
                                    self.attacker_cls,
                                    disconnected_user_ids)

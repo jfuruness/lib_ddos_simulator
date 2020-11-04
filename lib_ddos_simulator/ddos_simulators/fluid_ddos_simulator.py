@@ -64,3 +64,5 @@ class Fluid_DDOS_Simulator(DDOS_Simulator):
             _id = self.next_unused_user_id
             self.next_unused_user_id += 1
             return [_id]
+        else:
+            return []
