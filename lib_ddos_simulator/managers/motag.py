@@ -31,7 +31,21 @@ def ncr(n, r):
 class Motag_Manager(Manager):
     """Simulates a manager for a DDOS attack
 
-    This Manager class uses a bounded shuffling algorithm"""
+    This Manager class uses a bounded shuffling algorithm
+
+    Drawbacks of this paper:
+    Really this algo is completely useless
+    The never run thier sims with more than 5% attackers
+    They estimate attackers when attackers are 3% or less
+        -as this # goes up it becomes incredibly worse
+    They estimate attackers when attackers are ~= #buckets
+        -obvi this will do well, this is trivial
+    They don't specify what to do with good buckets
+    They set % users to service, but a good attacker can
+        always work around this #
+    We don't estimate real # of attackers, but use actual #
+        -in reality, their algorithm would perform much worse
+    """
 
     __slots__ = []
 
@@ -40,11 +54,7 @@ class Motag_Manager(Manager):
     percent_users_to_save = .95
 
     def detect_and_shuffle(self, *args):
-        """Bounded Manager algorithm"""
-
-
-
-
+        """Motag Manager algorithm"""
 
         serviced_users = sum([len(x) for x in self.non_attacked_buckets])
         # LOL just drop the buckets
@@ -54,9 +64,6 @@ class Motag_Manager(Manager):
 
         else:
             self.greedy_assign()
-
-
-
 
     def greedy_assign(self, num_insiders=None, attacked_users=None, prox=None):
         """Greedy algorithm from motag paper"""
