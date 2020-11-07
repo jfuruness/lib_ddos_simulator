@@ -400,6 +400,10 @@ To be written
 
 ## History
 * [lib\_ddos\_simulator](#lib_ddos_simulator)
+   * 0.0.91
+     * Flasgger updates
+     * Added MOTAG algorithm
+     * Added stopping condition to Sieve
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test
