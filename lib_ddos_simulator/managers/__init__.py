@@ -14,6 +14,9 @@ from .motag import Motag_Manager
 from .protag import Protag_Manager_Base, Protag_Manager_Merge, Protag_Manager_No_Merge
 
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2
+from .sieve import Sieve_Manager_V0_W_Stop_S0
+from .sieve import Sieve_Manager_V0_W_Stop_S1
+from .sieve import Sieve_Manager_V0_W_Stop_S2
 from .sieve import Sieve_Manager_V1_S0, Sieve_Manager_V1_S1, Sieve_Manager_V1_S2
 from .sieve import Sieve_Manager_KPO_S0, Sieve_Manager_KPO_S1, Sieve_Manager_KPO_S2
 from .sieve import Sieve_Manager_Base

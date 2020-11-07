@@ -60,7 +60,7 @@ class Motag_Manager(Manager):
         # LOL just drop the buckets
         if serviced_users / len(self.connected_users) > self.percent_users_to_save:
             for bucket in self.attacked_buckets:
-                self.eliminate_users_list([x.id for x in bucket.users])
+                self.disconnect_users_list([x.id for x in bucket.users])
 
         else:
             self.greedy_assign()

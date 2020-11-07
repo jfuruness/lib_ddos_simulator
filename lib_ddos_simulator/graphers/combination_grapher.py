@@ -48,11 +48,13 @@ class Combination_Grapher(Base_Grapher):
         self.second_legend = []
 
     def run(self,
-            ddos_sim_cls_list=None,
+            ddos_sim_cls_list=[DDOS_Simulator],#None,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
+            # Note that for range, last number is not included
             num_buckets_list=[10 ** i for i in range(1, 3)],
-            users_per_bucket_list=[10 ** i for i in range(1, 4)],
+            # Note that this is the users per bucket, not total users
+            users_per_bucket_list=[10 ** i for i in range(1, 3)],
             num_rounds_list=[10 ** i for i in range(1, 4)],
             trials=10):
         """Runs in parallel every possible scenario

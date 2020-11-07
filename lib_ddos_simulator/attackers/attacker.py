@@ -40,8 +40,8 @@ class Attacker(User):
     def take_action(self, manager, turn):
         """Action that user takes every round"""
 
-        User.take_action(self, manager, turn)
         self.attack(turn)
+        User.take_action(self, manager, turn)
         assert self.bucket in manager.buckets
 
     def attack(self, turn):

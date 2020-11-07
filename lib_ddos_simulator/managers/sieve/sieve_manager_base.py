@@ -48,11 +48,14 @@ class Sieve_Manager_Base(Manager):
 
         self._update_suspicion()
         self.remove_attackers()
+        self.drop_buckets()
         buckets = self.get_buckets_to_sort()
         if len(buckets) > 0:
             self._reorder_buckets(buckets)
             self._sort_buckets(buckets)
  
+    def drop_buckets(self):
+        pass
 
     def _reorder_buckets(self, buckets):
         if len(buckets) == 0:

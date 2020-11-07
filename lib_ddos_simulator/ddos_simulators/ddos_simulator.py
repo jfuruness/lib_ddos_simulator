@@ -185,7 +185,6 @@ class DDOS_Simulator:
             self.user_actions(manager, turn)
             # Record data
             self.record(turn, manager, i, animater)
-           
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
             manager.take_action(turn)
@@ -199,7 +198,11 @@ class DDOS_Simulator:
         """Attackers attack, adds 1 to user lifetime"""
 
         manager.get_animation_statistics()
-        for user in manager.connected_users:
+        # Attackers attack first
+        for user in manager.connected_attackers:
+            user.take_action(manager, turn)
+        # Users go second
+        for user in manager.connected_good_users:
             user.take_action(manager, turn)
 
     def record(self, turn, manager, animate, animater):

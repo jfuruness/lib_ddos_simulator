@@ -17,7 +17,7 @@ class User:
     # patch, text used in animations
     __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
                  "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk",
-                 "track_suspicion", "status"]
+                 "track_suspicion", "status", "turns_attacked_in_a_row"]
 
     # Used in animations
     patch_radius = 1
@@ -43,12 +43,17 @@ class User:
         self.conn_lt = 0
         self.dose_atk_risk = 0
         self.status = None
+        self.turns_attacked_in_a_row = 0
 
     def take_action(self, *args):  # Note that args are manager, turn
         """Action that user takes every round"""
 
         # Used in DOSE for connection lifetime
         self.conn_lt += 1
+        if self.bucket.attacked:
+            self.turns_attacked_in_a_row += 1
+        else:
+            self.turns_attacked_in_a_row = 0
 
     def disconnect(self, round_num):
         """Inherit to include when user will disconnect"""

@@ -87,6 +87,7 @@ class Manager:
         for user in users:
             user.status = User_Status.CONNECTED
             user.conn_lt = 0
+            user.turns_attacked_in_a_row = 0
 
     def reinit(self):
         users_dict = self.users.copy()
@@ -316,6 +317,7 @@ class Manager:
             self.users[user.id] = user
         user.status = User_Status.CONNECTED
         user.conn_lt = 0
+        user.turns_attacked_in_a_row = 0
 
     def disconnect_users(self, disconnect_user_ids):
         """Disconnect users. Set status to disconnected"""
@@ -358,8 +360,16 @@ class Manager:
 
     @property
     def connected_users(self):
-        return [x for x in self.users.values()
-                if x.status == User_Status.CONNECTED]
+        return self._get_connected_users()
+
+    def _get_connected_users(self, filter_func=None):
+        if filter_func is None:
+            return [x for x in self.users.values()
+                    if x.status == User_Status.CONNECTED]
+        else:
+            return [x for x in self.users.values()
+                    if x.status == User_Status.CONNECTED
+                    and filter_func(x)]
 
     @property
     def eliminated_users(self):
@@ -370,3 +380,19 @@ class Manager:
     def disconnected_users(self):
         return [x for x in self.users.values()
                 if x.status == User_Status.DISCONNECTED]
+
+    @property
+    def serviced_users(self):
+        return self._get_connected_users(lambda x: x.bucket.attacked is False)
+
+    @property
+    def attacked_users(self):
+        return self._get_connected_users(lambda x: x.bucket.attacked is True)
+
+    @property
+    def connected_attackers(self):
+        return self._get_connected_users(lambda x: isinstance(x, Attacker))
+
+    @property
+    def connected_good_users(self):
+        return self._get_connected_users(lambda x: not isinstance(x, Attacker))
