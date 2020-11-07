@@ -48,7 +48,7 @@ class Combination_Grapher(Base_Grapher):
         self.second_legend = []
 
     def run(self,
-            ddos_sim_cls_list=[ddos_simulator.DDOS_Simulator],#None,
+            ddos_sim_cls_list=None,
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             # Note that for range, last number is not included
@@ -64,7 +64,7 @@ class Combination_Grapher(Base_Grapher):
 
         if ddos_sim_cls_list is None:
             ddos_sim_cls_list =\
-                ddos_simulator.DDOS_Simulator.runnable_simulators
+                [ddos_simulator.DDOS_Simulator.runnable_simulators[0]]
 
         # Initializes graph path
         self.make_graph_dir(destroy=True)
