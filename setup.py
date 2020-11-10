@@ -26,6 +26,7 @@ setup(
         'tikzplotlib',
         'wheel',
         'setuptools',
+        'scipy',
         'tqdm',
         'pytest',
         'pathos'

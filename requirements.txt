@@ -4,6 +4,7 @@ matplotlib
 tikzplotlib
 wheel
 setuptools
+scipy
 tqdm
 pathos
 pytest

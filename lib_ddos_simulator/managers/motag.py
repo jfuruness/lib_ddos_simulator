@@ -10,23 +10,12 @@ __status__ = "Development"
 
 import random
 
+import scipy.special
+
 from .manager import Manager
 
 from ..attackers import Attacker
 from ..utils import split_list
-
-
-import operator as op
-from functools import reduce
-
-# https://stackoverflow.com/a/4941932/8903959
-# Not python3.8, normally just use math.comb
-def ncr(n, r):
-    r = min(r, n-r)
-    numer = reduce(op.mul, range(n, n-r, -1), 1)
-    denom = reduce(op.mul, range(1, r+1), 1)
-    return numer // denom  # or / in Python 2
-
 
 class Motag_Manager(Manager):
     """Simulates a manager for a DDOS attack
@@ -45,6 +34,9 @@ class Motag_Manager(Manager):
         always work around this #
     We don't estimate real # of attackers, but use actual #
         -in reality, their algorithm would perform much worse
+    LOL bugs in their sudo code. If shuffled buckets only have attackers,
+        then there is division by zero error (since max_proxy returns 0)
+        RIP MOTAG what a dumb paper
     """
 
     __slots__ = []
@@ -60,7 +52,7 @@ class Motag_Manager(Manager):
         # LOL just drop the buckets
         if serviced_users / len(self.connected_users) > self.percent_users_to_save:
             for bucket in self.attacked_buckets:
-                self.disconnect_users_list([x.id for x in bucket.users])
+                self.disconnect_users([x.id for x in bucket.users])
 
         else:
             self.greedy_assign()
@@ -71,6 +63,8 @@ class Motag_Manager(Manager):
         (num_insiders,
          attacked_users,
          prox) = self.get_greedy_init_vals(num_insiders, attacked_users, prox)
+
+        print(f"greedy assign called {num_insiders}, {attacked_users}, {prox}")
 
         if len(attacked_users) <= prox:
             for user in attacked_users:
@@ -89,6 +83,7 @@ class Motag_Manager(Manager):
             w = self.max_proxy(len(attacked_users),
                                len(attacked_users) - 1,
                                num_insiders)
+            assert w > 0, str(len(attacked_users)) + " " + str(num_insiders)
             prox_to_fill = len(attacked_users) // w
             if prox_to_fill >= prox:
                 prox_to_fill = prox - 1
@@ -129,7 +124,7 @@ class Motag_Manager(Manager):
         # This means the true motag algo would perform worse
         # Much, much worse
         num_attackers = 0
-        for bucket in buckets:
+        for bucket in self.attacked_buckets:
             for user in bucket.users:
                 if isinstance(user, Attacker):
                     num_attackers += 1
@@ -138,10 +133,19 @@ class Motag_Manager(Manager):
     def max_proxy(self, client, upper_bound, insider):
         """Algo as defined in algo 1 for motag paper"""
 
+        print("max proxy called")
         _max = 0
         max_assign = 0
         for i in range(upper_bound + 1):
-            save = ncr(client - i, insider) * i / ncr(client, insider)
+            print(client)
+            print(i)
+            print(insider)
+            numerator = scipy.special.comb(client - i,
+                                           insider,
+                                           exact=True) * i
+            denominator = scipy.special.comb(client, insider, exact=True)
+            save = numerator / denominator
+            print(f"num: {numerator} de: {denominator}")
             if save > _max:
                 _max = save
                 max_assign = i
