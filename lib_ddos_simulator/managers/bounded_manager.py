@@ -24,10 +24,6 @@ class Bounded_Manager(Manager):
 
     runnable = True
 
-    def __init__(self, *args, **kwargs):
-        super(Bounded_Manager, self).__init__(*args, **kwargs)
-        self.num_attackers_guess = None
-
     def detect_and_shuffle(self, *args):
         """Bounded Manager algorithm"""
 

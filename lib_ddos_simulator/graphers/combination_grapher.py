@@ -54,7 +54,7 @@ class Combination_Grapher(Base_Grapher):
             # Note that for range, last number is not included
             num_buckets_list=[10 ** i for i in range(1, 3)],
             # Note that this is the users per bucket, not total users
-            users_per_bucket_list=[10 ** i for i in range(1, 3)],
+            users_per_bucket_list=[10 ** i for i in range(1, 4)],
             num_rounds_list=[10 ** i for i in range(1, 4)],
             trials=10):
         """Runs in parallel every possible scenario
@@ -150,7 +150,7 @@ class Combination_Grapher(Base_Grapher):
 
         for attacker in attackers:
             self.print_progress(attacker, total_num)
-            percent_attackers_list = [i / 100 for i in range(1, 52, 5)]
+            percent_attackers_list = [i / 100 for i in range(1, 92, 5)]
 
             for manager in managers:
                 manager_data = scenario_data[manager][attacker]
@@ -266,7 +266,7 @@ class Combination_Grapher(Base_Grapher):
                                                       num_buckets,
                                                       users_per_bucket,
                                                       num_rounds, attacker)
-
+        input("graph done")
         for manager_i, manager in enumerate(scenario_data):
             self.populate_axs(axs,
                               scenario_data,

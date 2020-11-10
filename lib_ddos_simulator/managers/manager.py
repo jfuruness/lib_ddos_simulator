@@ -21,7 +21,8 @@ class Manager:
     __slots__ = ["users", "_threshold", "buckets", "attackers_detected",
                  "og_num_buckets", "max_users_y",
                  "max_buckets", "og_user_order", "bucket_id", "og_json",
-                 "downed_json", "will_be_connected_users", "next_unused_id"]
+                 "downed_json", "will_be_connected_users", "next_unused_id",
+                 "num_attackers_guess"]
 
     runnable_managers = []
 
@@ -57,6 +58,7 @@ class Manager:
                  max_buckets=0):
         """inits buckets and stores threshold"""
 
+        self.num_attackers_guess = None
         self.users = {x.id: x for x in users}
         # NOTE: should prob change this and have self.users
         # NOTE: be a property iterating over self.buckets

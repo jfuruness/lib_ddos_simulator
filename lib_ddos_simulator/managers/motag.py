@@ -37,6 +37,7 @@ class Motag_Manager(Manager):
     LOL bugs in their sudo code. If shuffled buckets only have attackers,
         then there is division by zero error (since max_proxy returns 0)
         RIP MOTAG what a dumb paper
+    It gets worse - doing binomials causes the code to run a super long time!
     """
 
     __slots__ = []
