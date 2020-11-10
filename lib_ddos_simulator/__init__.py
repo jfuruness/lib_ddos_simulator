@@ -33,4 +33,5 @@ from .managers import Sieve_Manager_KPO_S0, Sieve_Manager_V0_S0, Sieve_Manager_V
 from .managers import Sieve_Manager_V0_W_Stop_S0
 from .managers import Protag_Manager_Base, Protag_Manager_Merge
 from .managers import Protag_Manager_No_Merge
-from .managers import Motag_Manager
+# Commented out due to bugs in their paper
+#from .managers import Motag_Manager
