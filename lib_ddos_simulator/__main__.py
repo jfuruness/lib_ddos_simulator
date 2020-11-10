@@ -14,7 +14,7 @@ from sys import argv
 
 from .api import create_app
 from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
-from .managers import Manager, Motag_Manager
+from .managers import Manager
 from .utils import Log_Levels
 from .graphers import Combination_Grapher
 

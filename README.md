@@ -404,6 +404,7 @@ To be written
      * Flasgger updates
      * Added MOTAG algorithm
      * Added stopping condition to Sieve
+     * Removed MOTAG due to bugs in their sudo code of their paper
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test
