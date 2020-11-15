@@ -13,7 +13,7 @@ import os
 from sys import argv
 
 from .api import create_app
-from .attackers import Even_Turn_Attacker
+from .attackers import Basic_Attacker, Even_Turn_Attacker
 from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
 from .managers import Manager, Protag_Manager_Smart_Merge
 from .utils import Log_Levels
@@ -25,17 +25,16 @@ def main():
     parser = ArgumentParser(description="Runs a DDOS simulation")
     # NOTE: these defaults are chosen that way because they work for the animator
     # Changing these defaults will result in worse animations
-    parser.add_argument("--num_users", type=int, dest="num_users", default=192)
-    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=48)
-    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=32)
+    parser.add_argument("--num_users", type=int, dest="num_users", default=21)
+    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=9)
+    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=3)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=45)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=10)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
     parser.add_argument("--combination_grapher", dest="graph_combos", default=False, action='store_true')
     parser.add_argument("--tikz", dest="tikz", default=False, action="store_true")
-
     parser.add_argument("--save", dest="save", default=False, action="store_true")
     parser.add_argument("--high_res", dest="high_res", default=False, action="store_true")
     parser.add_argument("--trials", type=int, dest="trials", default=10)
@@ -49,20 +48,21 @@ def main():
         create_app().run(debug=True)
     elif args.animate:
         for sim_cls in reversed(DDOS_Simulator.runnable_simulators):
-            # NOTE: for optimal animations,
-            # use 24, 4, 8, 10 for users, attackers, buckets, threshold
-            sim_cls(args.num_users,  # number of users
-                    args.num_attackers,  # number of attackers
-                    args.num_buckets,  # number of buckets
-                    args.threshold,  # Threshold
-                    Manager.runnable_managers,
-                    graph_dir=args.graph_dir,
-                    save=args.save,
-                    stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                    high_res=args.high_res,
-                    attacker_cls=Even_Turn_Attacker).run(args.rounds,
-                                                         animate=True,
-                                                         graph_trials=False)
+            for atk_cls in [Basic_Attacker, Even_Turn_Attacker]:
+                # NOTE: for optimal animations,
+                # use 24, 4, 8, 10 for users, attackers, buckets, threshold
+                sim_cls(args.num_users,  # number of users
+                        args.num_attackers,  # number of attackers
+                        args.num_buckets,  # number of buckets
+                        args.threshold,  # Threshold
+                            Manager.runnable_managers,
+                        graph_dir=args.graph_dir,
+                        save=args.save,
+                        stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
+                        high_res=args.high_res,
+                        attacker_cls=Even_Turn_Attacker).run(args.rounds,
+                                                             animate=True,
+                                                             graph_trials=False)
     elif args.graph_combos:
         Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                             graph_dir=args.graph_dir,
