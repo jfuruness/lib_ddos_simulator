@@ -408,6 +408,7 @@ To be written
      * Added Protag Manager Smart Merge - conservative and non conservative
      * Added attacker that attacks every time until it's the last one in the bucket
      * Added attacker that attacks every time until it's the only attacker in the bucket
+     * Fixed animation naming overlap
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test
