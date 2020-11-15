@@ -13,6 +13,7 @@ import os
 from sys import argv
 
 from .api import create_app
+from .attackers import Even_Turn_Attacker
 from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
 from .managers import Manager, Protag_Manager_Smart_Merge
 from .utils import Log_Levels
@@ -58,9 +59,10 @@ def main():
                     graph_dir=args.graph_dir,
                     save=args.save,
                     stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                    high_res=args.high_res).run(args.rounds,
-                                                animate=True,
-                                                graph_trials=False)
+                    high_res=args.high_res,
+                    attacker_cls=Even_Turn_Attacker).run(args.rounds,
+                                                         animate=True,
+                                                         graph_trials=False)
     elif args.graph_combos:
         Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                             graph_dir=args.graph_dir,

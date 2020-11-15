@@ -65,7 +65,7 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
         for bucket in self.non_attacked_buckets:
             in_tracked_splits = False
             for tracked_split in self.tracked_splits:
-                if bucket.id in tracked_split:
+                if bucket in tracked_split:
                     in_tracked_splits = True
             if bucket in merge_buckets:
                 in_tracked_splits = True
