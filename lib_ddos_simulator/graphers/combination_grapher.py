@@ -266,7 +266,6 @@ class Combination_Grapher(Base_Grapher):
                                                       num_buckets,
                                                       users_per_bucket,
                                                       num_rounds, attacker)
-        input("graph done")
         for manager_i, manager in enumerate(scenario_data):
             self.populate_axs(axs,
                               scenario_data,

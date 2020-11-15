@@ -22,9 +22,10 @@ class Protag_Manager_Base(Manager):
 
     This Manager class uses a protag shuffling algorithm"""
 
-    __slots__ = []
+    __slots__ = ["tracked_splits"]
 
     runnable = False
+    split_factor = 2
 
     def __init__(self, *args, **kwargs):
         """Error checking"""
@@ -32,9 +33,10 @@ class Protag_Manager_Base(Manager):
         msg = "Must have a combine buckets method, even if it's empty"""
         assert self.runnable is False or hasattr(self, "combine_buckets"), msg
 
+        self.tracked_splits = []
         super(Protag_Manager_Base, self).__init__(*args, **kwargs)
 
-    def detect_and_shuffle(self, *args):
+    def detect_and_shuffle(self, turn, *args):
         """Protag algorithm"""
 
         # Removes bucket/attacker if bucket is attacked and len is 1
@@ -45,6 +47,11 @@ class Protag_Manager_Base(Manager):
         bucks = self.attacked_buckets
         for bucket in bucks:
             # Attacked with more than one user, split in two
-            user_chunk1, user_chunk2 = split_list(bucket.users, 2)
-            bucket.reinit(user_chunk1)
-            self.get_new_bucket().reinit(user_chunk2)
+            user_chunks = split_list(bucket.users, self.split_factor)
+            bucket.users = []
+            split_set = set()
+            for user_chunk in user_chunks:
+                new_bucket = self.get_new_bucket()
+                new_bucket.reinit(user_chunk)
+                split_set.add(new_bucket)
+            self.tracked_splits.append(split_set)
