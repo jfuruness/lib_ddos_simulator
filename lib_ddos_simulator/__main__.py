@@ -60,7 +60,7 @@ def main():
                         save=args.save,
                         stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                         high_res=args.high_res,
-                        attacker_cls=Even_Turn_Attacker).run(args.rounds,
+                        attacker_cls=atk_cls).run(args.rounds,
                                                              animate=True,
                                                              graph_trials=False)
     elif args.graph_combos:
