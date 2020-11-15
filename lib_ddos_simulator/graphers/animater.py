@@ -134,7 +134,7 @@ class Animater(Base_Grapher):
 
         self._create_bucket_patches()
         self._create_user_patches()
-        self.name = manager.__class__.__name__
+        self.name = manager.__class__.__name__ 
         self.frames_per_round = 50
         if self.save:
             self.frames_per_round = 100
@@ -242,7 +242,7 @@ class Animater(Base_Grapher):
                 pbar.update()
 
             # graph_dir comes from inherited class
-            path = os.path.join(self.graph_dir, f'{self.name}_animation.mp4')
+            path = os.path.join(self.graph_dir, f'{self._get_round_text(0)}_animation.mp4')
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
             # NOTE: bitrate barely impacts the speed that it saves
