@@ -11,17 +11,19 @@ __status__ = "Development"
 from .attacker import Attacker
 
 
-class Even_Turn_Attacker(Attacker):
-    """Attacker that only attacks on every even turn"""
+class Never_Last_Attacker(Attacker):
+    """Basic attacker class"""
 
     runnable = True
 
     def _attack(self, manager, turn):
-        if turn % 2:
+        if len(self.bucket) > 1:
             self.bucket.attacked = True
+        elif len(self.bucket) == 0:
+            assert False, "This should never happen"
+        
 
-
-class Even_Turn_Lone_Attacker(Even_Turn_Attacker):
-    """Attacks on even turns if no attacker in it's bucket attacked"""
+class Never_Last_Lone_Attacker(Never_Last_Attacker):
+    """Attacks every turn if no attacker in it's bucket attacked"""
 
     lone = True

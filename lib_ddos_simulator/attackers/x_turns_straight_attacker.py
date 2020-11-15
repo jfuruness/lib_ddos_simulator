@@ -20,7 +20,7 @@ class X_Turns_Straight_Attacker(Attacker):
         assert not self.runnable or hasattr(self, "turns_in_a_row")
         super(X_Turns_Straight_Attacker, self).__init__(*args, **kwargs)
 
-    def _attack(self, turn):
+    def _attack(self, manager, turn):
         if not (turn % self.turns_in_a_row == 0 and turn > 0):
             self.bucket.attacked = True
 

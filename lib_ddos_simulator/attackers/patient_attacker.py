@@ -28,7 +28,7 @@ class Patient_Attacker(Attacker):
             self.total_additions += 1
             self.starting_users = len(self.bucket.users)
 
-    def _attack(self, turn):
+    def _attack(self, manager, turn):
         """Attacks only if the bucket size has increased num_additions times"""
 
         self.add_additions(turn)

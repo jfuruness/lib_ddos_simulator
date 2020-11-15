@@ -18,7 +18,7 @@ class Random_Attacker(Attacker):
 
     runnable = False
 
-    def _attack(self, turn):
+    def _attack(self, manager, turn):
         if random() < self._percent_chance_attack:
             self.bucket.attacked = True
 

@@ -40,20 +40,20 @@ class Attacker(User):
     def take_action(self, manager, turn):
         """Action that user takes every round"""
 
-        self.attack(turn)
+        self.attack(manager, turn)
         User.take_action(self, manager, turn)
         assert self.bucket in manager.buckets
 
-    def attack(self, turn):
+    def attack(self, manager, turn):
         """Attacks the bucket it's in"""
 
         # Don't attack if another attacker attacked
         if self.lone and self.bucket.attacked:
             return
         else:
-            self._attack(turn)
+            self._attack(manager, turn)
 
-    def _attack(self, turn):
+    def _attack(self, manager, turn):
         """Set bucket to be attacked"""
 
         self.bucket.attacked = True

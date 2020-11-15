@@ -405,6 +405,9 @@ To be written
      * Added MOTAG algorithm
      * Added stopping condition to Sieve
      * Removed MOTAG due to bugs in their sudo code of their paper
+     * Added Protag Manager Smart Merge - conservative and non conservative
+     * Added attacker that attacks every time until it's the last one in the bucket
+     * Added attacker that attacks every time until it's the only attacker in the bucket
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test
