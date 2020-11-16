@@ -409,6 +409,7 @@ To be written
      * Added attacker that attacks every time until it's the last one in the bucket
      * Added attacker that attacks every time until it's the only attacker in the bucket
      * Fixed animation naming overlap
+     * Fixed bug in sieve that would shuffle according to ID if suspicion was equal (which grouped attackers together)
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test

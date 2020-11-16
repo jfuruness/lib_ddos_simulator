@@ -9,7 +9,7 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from math import e
-
+import random
 
 class User:
     """Simulates a user for a DDOS attack"""
@@ -84,7 +84,7 @@ class User:
 
         if isinstance(other, User):
             if self.suspicion == other.suspicion:
-                return self.id < other.id
+                return random.random() < .5
             else:
                 return self.suspicion < other.suspicion
 

@@ -242,7 +242,7 @@ class Animater(Base_Grapher):
                 pbar.update()
 
             # graph_dir comes from inherited class
-            path = os.path.join(self.graph_dir, f'{self._get_round_text(0)}_animation.mp4')
+            path = os.path.join(self.graph_dir, f'{self._get_round_text(0).replace("Round 0", "")}.mp4')
 
             dpi = self.high_dpi if self.high_res else self.low_dpi
             # NOTE: bitrate barely impacts the speed that it saves
