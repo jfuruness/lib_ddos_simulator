@@ -45,6 +45,7 @@ class Motag_Manager(Manager):
     runnable = True
     prox = 20
     percent_users_to_save = .95
+    start_number_of_buckets = 10
 
     def detect_and_shuffle(self, *args):
         """Motag Manager algorithm"""

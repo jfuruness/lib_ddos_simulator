@@ -78,9 +78,9 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
             bucket.users = []
         assert len(set(users)) == len(users)
         if self.conservative:
-            split_num = min(len(users), self.og_num_buckets)
+            split_num = min(len(users), len(self.tracked_splits))
         else:
-            split_num = min(len(users), 1)
+            split_num = 1
         if split_num > 0:
             for user_chunk in split_list(users, split_num):
                 self.get_new_bucket().reinit(user_chunk)

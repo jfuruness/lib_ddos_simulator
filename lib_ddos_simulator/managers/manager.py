@@ -58,6 +58,9 @@ class Manager:
                  max_buckets=0):
         """inits buckets and stores threshold"""
 
+        if hasattr(self, start_number_of_buckets):
+            num_buckets = self.start_number_of_buckets
+
         self.num_attackers_guess = None
         self.users = {x.id: x for x in users}
         # NOTE: should prob change this and have self.users

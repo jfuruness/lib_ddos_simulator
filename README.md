@@ -410,6 +410,8 @@ To be written
      * Added attacker that attacks every time until it's the only attacker in the bucket
      * Fixed animation naming overlap
      * Fixed bug in sieve that would shuffle according to ID if suspicion was equal (which grouped attackers together)
+     * Fixed sims to always start from 1 bucket
+     * Fixed sieve and motag to always start from 10 buckets
    * 0.0.9
      * Fixed worst case attacker legend
      * Fixed broken import on unit test

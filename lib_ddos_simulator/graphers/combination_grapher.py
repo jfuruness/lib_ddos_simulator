@@ -52,10 +52,10 @@ class Combination_Grapher(Base_Grapher):
             managers=Manager.runnable_managers,
             attackers=Attacker.runnable_attackers,
             # Note that for range, last number is not included
-            num_buckets_list=[10 ** i for i in range(1, 3)],
+            num_buckets_list=[1],
             # Note that this is the users per bucket, not total users
-            users_per_bucket_list=[10 ** i for i in range(1, 4)],
-            num_rounds_list=[10 ** i for i in range(1, 4)],
+            users_per_bucket_list=[10 ** i for i in range(4, 6)],
+            num_rounds_list=[10 ** i for i in range(3, 5)],
             trials=10):
         """Runs in parallel every possible scenario
 
@@ -294,7 +294,7 @@ class Combination_Grapher(Base_Grapher):
 
         fig, axs = plt.subplots(figsize=(20, 10))
         title = (f"Sim: {sim_cls.__name__}, "
-                 f"Scenario: buckets: {num_buckets}, "
+                 f"Scenario: og_buckets: {num_buckets}, "
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__}")
         fig.suptitle(title)
