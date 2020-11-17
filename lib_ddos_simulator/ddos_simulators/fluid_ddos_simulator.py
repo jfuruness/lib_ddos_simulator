@@ -28,6 +28,7 @@ class Fluid_DDOS_Simulator(DDOS_Simulator):
 
         Should return a list of user ids to add"""
 
+        random.seed(str(manager.json) + str(round_num))
         og_users = self.og_num_attackers = self.og_num_users
         og_percent_users = self.og_num_users / og_users
 
@@ -52,6 +53,9 @@ class Fluid_DDOS_Simulator(DDOS_Simulator):
 
         Should return a list of attackers to add"""
 
+        # NOTE: must always use random.seed
+        # NOTE: encode this elsewhere
+        random.seed(str(manager.json) + str(round_num))
         og_users = self.og_num_attackers = self.og_num_users
         percent_attackers = self.og_num_attackers / og_users
 

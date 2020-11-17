@@ -17,7 +17,8 @@ class User:
     # patch, text used in animations
     __slots__ = ["id", "suspicion", "bucket", "patch", "text", "points",
                  "suspicions", "exp_conn_lt", "conn_lt", "dose_atk_risk",
-                 "track_suspicion", "status", "turns_attacked_in_a_row"]
+                 "track_suspicion", "status", "turns_attacked_in_a_row",
+                 "random_sort_id"]
 
     # Used in animations
     patch_radius = 1
@@ -44,6 +45,7 @@ class User:
         self.dose_atk_risk = 0
         self.status = None
         self.turns_attacked_in_a_row = 0
+        self.random_sort_id = random.random()
 
     def take_action(self, *args):  # Note that args are manager, turn
         """Action that user takes every round"""
@@ -84,7 +86,10 @@ class User:
 
         if isinstance(other, User):
             if self.suspicion == other.suspicion:
-                return random.random() < .5
+                if self.random_sort_id == other.random_sort_id:
+                    assert False, "Add code to ensure random sort ids are unique"
+                else:
+                    return self.random_sort_id < other.random_sort_id
             else:
                 return self.suspicion < other.suspicion
 

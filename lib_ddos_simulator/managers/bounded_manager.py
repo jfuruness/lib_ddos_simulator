@@ -112,6 +112,7 @@ class Bounded_Manager(Manager):
             if new_bucket_amnt > len(self.attacked_users):
                 new_bucket_amnt = len(self.attacked_users)
             users = self.attacked_users
+            random.seed(str(self.json) + str(users))
             random.shuffle(users)
 
             # Clear out buckets

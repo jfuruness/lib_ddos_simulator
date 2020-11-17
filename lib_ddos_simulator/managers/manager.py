@@ -58,7 +58,7 @@ class Manager:
                  max_buckets=0):
         """inits buckets and stores threshold"""
 
-        if hasattr(self, start_number_of_buckets):
+        if hasattr(self, "start_number_of_buckets"):
             num_buckets = self.start_number_of_buckets
 
         self.num_attackers_guess = None
@@ -309,7 +309,7 @@ class Manager:
                         raise Exception("Unkown user status type")
                 else:
                     users.append(self.get_new_user(user_type, user_id=_id))
-
+        random.seed(str(self.json) + str(user_ids_to_conn) + str(attacker_ids_to_conn))
         random.shuffle(users)
         for user in users:
             self.connect_user(user)

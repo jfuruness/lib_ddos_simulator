@@ -23,13 +23,11 @@ def main():
     """Runs simulations with command line arguments"""
 
     parser = ArgumentParser(description="Runs a DDOS simulation")
-    # NOTE: these defaults are chosen that way because they work for the animator
-    # Changing these defaults will result in worse animations
-    parser.add_argument("--num_users", type=int, dest="num_users", default=42)
-    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=18)
-    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=6)
+    parser.add_argument("--num_users", type=int, dest="num_users", default=21)
+    parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=9)
+    parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=3)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=10)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=7)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
@@ -47,7 +45,7 @@ def main():
     if args.api:
         create_app().run(debug=True)
     elif args.animate:
-        for sim_cls in DDOS_Simulator.runnable_simulators:
+        for sim_cls in reversed(DDOS_Simulator.runnable_simulators):
             for atk_cls in [Basic_Attacker, Even_Turn_Attacker]:
                 # NOTE: for optimal animations,
                 # use 24, 4, 8, 10 for users, attackers, buckets, threshold

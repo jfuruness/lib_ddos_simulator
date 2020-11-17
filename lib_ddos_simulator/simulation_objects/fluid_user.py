@@ -20,5 +20,5 @@ class Fluid_User(User):
 
     def disconnect(self, round_num):
         """Inherit to include when user will disconnect"""
-
+        random.seed(str(self.id) + str(round_num))
         return (self.conn_lt / self.exp_conn_lt) > random.random()

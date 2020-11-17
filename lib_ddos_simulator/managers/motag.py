@@ -114,6 +114,7 @@ class Motag_Manager(Manager):
             for bucket in self.attacked_buckets:
                 attacked_users.extend(bucket.users)
                 bucket.users = []
+            random.seed(manager.json)
             random.shuffle(attacked_users)
         if prox is None:
             prox = self.prox - len(self.non_attacked_buckets)

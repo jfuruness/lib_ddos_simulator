@@ -73,6 +73,7 @@ class Sieve_Manager_Base(Manager):
         if len(buckets) == 0:
             return
         elif len(buckets) == 1:
+            random.seed(str(manager.json) + "1 bucket seed")
             random.shuffle(buckets[0].users)
         elif len(buckets) % 2 == 0:
             self._shuffle_buckets(buckets, num_buckets_per_round=2)
@@ -93,6 +94,7 @@ class Sieve_Manager_Base(Manager):
                            for i in range(num_buckets_per_round)]
             shuffled_users = reduce(lambda x, y: x+y,
                                     [bucket.users for bucket in cur_buckets])
+            random.seed(str(self.json) + str(current_index))
             random.shuffle(shuffled_users)
             user_chunks = split_list(shuffled_users, num_buckets_per_round)
             for bucket, user_chunk in zip(cur_buckets, user_chunks):
