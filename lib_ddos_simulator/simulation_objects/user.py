@@ -87,7 +87,8 @@ class User:
         if isinstance(other, User):
             if self.suspicion == other.suspicion:
                 if self.random_sort_id == other.random_sort_id:
-                    assert False, "Add code to ensure random sort ids are unique"
+                    print("Add code to ensure random sort ids are unique")
+                    return random.random() < .5
                 else:
                     return self.random_sort_id < other.random_sort_id
             else:

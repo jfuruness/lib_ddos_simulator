@@ -38,23 +38,6 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
     def combine_buckets(self):
         """Merge all non attacked buckets"""
 
-        user_mapping = self.json["user_mapping"]
-        new_bucket_mapping = {}
-        for user_id, bucket_num in user_mapping.items():
-            new_bucket_mapping[bucket_num] = new_bucket_mapping.get(bucket_num, []) + [user_id]
-        try:
-            for bucket_num in new_bucket_mapping:
-                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
-            for bucket_num in self.json["bucket_mapping"]:
-                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
-        except:
-            input("press me2")
-            print(new_bucket_mapping)
-            print(self.json)
-            input("ugh")
-            2/0
-
-
         merge_buckets = set()
         new_tracked_splits = []
         for tracked_split in self.tracked_splits:
@@ -97,7 +80,6 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
             if in_tracked_splits is False:
                 merge_buckets.add(bucket)
 
-        print([x.id for x in merge_buckets])
         # Sorted to preserve deterministic randomness
         for bucket in sorted(list(merge_buckets), key=lambda x: x.id):
             users.extend(bucket.users)
@@ -108,7 +90,6 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
         else:
             split_num = 1
 
-        input(users)
         if split_num > 1:
             for user_chunk in split_list(users, split_num):
                 self.get_new_bucket().reinit(user_chunk)
@@ -117,18 +98,18 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
         elif split_num < 1:
             assert False, "Split num must be 1 or more"
 
-        user_mapping = self.json["user_mapping"]
-        new_bucket_mapping = {}
-        for user_id, bucket_num in user_mapping.items():
-            new_bucket_mapping[bucket_num] = new_bucket_mapping.get(bucket_num, []) + [user_id]
-        try:
-            for bucket_num in new_bucket_mapping:
-                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
-            for bucket_num in self.json["bucket_mapping"]:
-                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
-        except:
-            input("press me")
-            print(new_bucket_mapping)
-            print(self.json)
-            input("ugh")
-            1/0
+#        user_mapping = self.json["user_mapping"]
+#        new_bucket_mapping = {}
+#        for user_id, bucket_num in user_mapping.items():
+#            new_bucket_mapping[bucket_num] = new_bucket_mapping.get(bucket_num, []) + [user_id]
+#        try:
+#            for bucket_num in new_bucket_mapping:
+#                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
+#            for bucket_num in self.json["bucket_mapping"]:
+#                assert sorted(new_bucket_mapping[bucket_num]) == sorted(self.json["bucket_mapping"][bucket_num])
+#        except:
+#            input("ERROR")
+#            print(new_bucket_mapping)
+#            print(self.json)
+#            input("ugh")
+#            1/0
