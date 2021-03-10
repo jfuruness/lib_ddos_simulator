@@ -57,7 +57,3 @@ class Attacker(User):
         """Set bucket to be attacked"""
 
         self.bucket.attacked = True
-
-    @classmethod
-    def get_attackers(cls, next_id, num_attackers):
-        return [cls(_id + next_id) for _id in range(num_attackers)]

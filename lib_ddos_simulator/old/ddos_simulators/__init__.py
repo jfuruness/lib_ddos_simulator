@@ -9,3 +9,4 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from .ddos_simulator import DDOS_Simulator
+from .fluid_ddos_simulator import Fluid_DDOS_Simulator

@@ -45,6 +45,7 @@ class User:
         self.dose_atk_risk = 0
         self.status = None
         self.turns_attacked_in_a_row = 0
+        self.random_sort_id = random.random()
 
     def take_action(self, *args):  # Note that args are manager, turn
         """Action that user takes every round"""
@@ -56,9 +57,16 @@ class User:
         else:
             self.turns_attacked_in_a_row = 0
 
+    def disconnect(self, round_num):
+        """Inherit to include when user will disconnect"""
+
+        return False
+
     # For animations, since dose has it's own suspicion of sorts
     def get_suspicion(self):
-        if self.dose_risk > 0:
+        if self.suspicion > 0:
+            return self.suspicion
+        elif self.dose_risk > self.lone_drone_suspicion:
             return self.dose_risk
         else:
             return self.suspicion
@@ -77,7 +85,14 @@ class User:
         """Comparison operator for users"""
 
         if isinstance(other, User):
-            return self.suspicion < other.suspicion
+            if self.suspicion == other.suspicion:
+                if self.random_sort_id == other.random_sort_id:
+                    print("Add code to ensure random sort ids are unique")
+                    return random.random() < .5
+                else:
+                    return self.random_sort_id < other.random_sort_id
+            else:
+                return self.suspicion < other.suspicion
 
     def __repr__(self):
         """For printing"""

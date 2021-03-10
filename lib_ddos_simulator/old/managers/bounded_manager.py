@@ -20,6 +20,10 @@ class Bounded_Manager(Manager):
 
     This Manager class uses a bounded shuffling algorithm"""
 
+    __slots__ = ["num_attackers_guess"]
+
+    runnable = True
+
     def detect_and_shuffle(self, *args):
         """Bounded Manager algorithm"""
 

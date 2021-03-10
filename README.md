@@ -1,3 +1,38 @@
+# Disclaimer
+
+Unfortunately I made two bad design decisions that cost us later on.
+
+The first was that I decided in order to code this much faster, was to do everything as a list comprehension. There was a pressing deadline, and in order to get simulations done on time I implimented attacker and user searches as list comprehensions. Later on, it was decided that simulations actually needed to include 10,000 or 100,000 users rather than 100-1000 users. This requires a hash tree structure that I did not attempt to impliment
+
+The second was the animations. For the animations to look nice, you must know in advance how many buckets there will be. Unfortunately I chose the approach of making the simulations deterministic, and simply running them twice. This was a mistake, since there are many operations that are not deterministic. At first the solution worked great, but as we vastly extended the capabilities of the simulator, slowly this caused more and more problems.
+
+I am attempting to fix these now for our paper deadline next month. To do so, I have moved the api functionality, and the dynamic simulator (coming and going users) into a section called old. they (mostly) work, so feel free to pull them out when you need to use them. Apologies for the state this package is in, I didn't realize I would be pulled away to another project.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # lib\_ddos\_simulator
 This package contains functionality to simulate, graph, and animate various attack/defense scenarios for DDOS attacks. It is also easily extendable to allow for easy testing of defense techniques. The purpose of this library is to determine which DDOS defense techniques from published literature work the best in practice.
 

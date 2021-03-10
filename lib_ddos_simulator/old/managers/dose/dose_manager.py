@@ -155,7 +155,3 @@ class DOSE_Manager(Manager):
         # Single threat case hardcoded to 2
         # Multithreat case is hardcoded to 3
         return DOSE_Manager.CRPA / len(bucket)
-
-    def take_action(self, *args, **kwargs):
-        self.record_dose_events()
-        super(Dose_Manager, self).take_action(*args, **kwargs)

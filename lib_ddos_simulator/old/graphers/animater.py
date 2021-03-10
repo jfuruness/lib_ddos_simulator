@@ -3,6 +3,27 @@
 
 """This module contains the class Animater to animate ddos simulations"""
 
+"""
+NOTE TO ANY FUTURE DEVS:
+
+I got a little carried away with this thing, and it needs a serious refactor
+But animations are quite useless, and every time I look at this file I try
+to improve the animations, so I'm not going to do it.
+
+
+If you wrote a manager and the animation is breaking, chances are you:
+1. Got rid of a bucket when you shouldn't have
+2. Created a new bucket when you should've called manager.get_new_bucket()
+3. Got rid of a user when you should've added to manager.eliminated_users
+4. Created a user mid round (not functional)
+5. Your animation is too complex (try a small one, like 9 users)
+
+If you ever need to change this, please just contact me
+jfuruness@gmail.com
+and I'll fix it.
+"""
+
+
 __Lisence__ = "BSD"
 __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
@@ -13,7 +34,14 @@ from enum import Enum
 import os
 import math
 
+import matplotlib
 import matplotlib as mpl
+dpi = 120
+# https://stackoverflow.com/a/51955985/8903959
+mpl.rcParams['figure.dpi'] = dpi
+import matplotlib
+matplotlib.rcParams['figure.dpi'] = dpi
+mpl.rcParams['figure.dpi'] = dpi
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
@@ -24,7 +52,7 @@ from .base_grapher import Base_Grapher
 
 from ..attackers import Attacker
 from ..simulation_objects import Bucket, User
-from ..managers import Manager
+from ..managers import Manager, Sieve_Manager_Base
 
 class Bucket_States(Enum):
     USED = 1
@@ -34,14 +62,15 @@ class Bucket_States(Enum):
 class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
-    eliminated_location = (-10, -10)
-    low_dpi = 60
-    # Anything higher than 600 and you must drastically increase bitrate
-    # However increasing bitrate cause crashes elsewhere
-    high_dpi = 120
+    slots__ = ["_data", "ax", "round", "max_users", "fig",
+                 "name", "round_text", "frames_per_round",
+                 "total_rounds", "manager", "ogbuckets", "ogusers",
+                 "detected_location", "blue_to_yellow",
+                 "yellow_to_blue", "track_suspicions"]
 
     def __init__(self,
                  manager,
+                 sim_cls,
                  user_cls,
                  attacker_cls,
                  **kwargs):
@@ -50,162 +79,138 @@ class Animater(Base_Grapher):
 
         super(Animater, self).__init__(**kwargs)
 
-        # Validation step
-        assert self.tikz is False, "Can't save animation as tikz afaik"
-
-        # Graph data
+        self.sim_cls = sim_cls
         self.user_cls = user_cls
         self.attacker_cls = attacker_cls
-        self.manager = deepcopy(manager)
-        self.manager_copies = [deepcopy(manager)]
+
+        self.disconnected_location = (-20, -20)
+
+        self.low_dpi = 60
+        if self.high_res:
+            # Anything higher than 600 and you need to drastically increase bitrate
+            # But increasing bitrate causes it to crash on other machines
+            self.high_dpi = 120
+            # https://stackoverflow.com/a/51955985/8903959
+            mpl.rcParams['figure.dpi'] = self.high_dpi
+            matplotlib.rcParams['figure.dpi'] = self.high_dpi
+
+        if manager.max_users_y >= 40:
+            self.row_cutoff = 100
+        else:
+            self.row_cutoff = 32
+        assert self.tikz is False, "Can't save animation as tikz afaik"
+        self.manager = manager
+        self.ogbuckets = deepcopy(manager.buckets)
+        self.max_users, self.fig, self.ax = self._format_graph()
+        #assert self.save or len(manager.users) <= 40,\
+        #    "Matplotlib can't handle that many users"
+        self.ogusers = deepcopy(self.users)
+
+        fontsize = 12
+        matplotlib.rcParams.update({'font.size': 10})
 
 
-        # DPI for plotting graph
-        self.dpi = self.high_dpi if self.high_res else self.low_dpi
-        # Number of buckets in a single row
+        if manager.max_buckets > 10:
+            fontsize -= 3
+
+
+        if manager.max_users_y > 10:
+            fontsize -= 3
+            matplotlib.rcParams.update({'font.size': 5})
+
+        if manager.max_buckets > 20:
+            fontsize -= 2
+        if manager.max_buckets >= 100:
+            fontsize -= 4
+        if ("dose" in manager.__class__.__name__.lower()
+            or "sieve" in manager.__class__.__name__.lower()):
+            fontsize -= 2.5
+
+        if self.high_res:
+            # 3 is difference between low res and high res dpi
+            fontsize = fontsize / 1
+
+        matplotlib.rcParams.update({'font.size': fontsize})
+
+        self._create_bucket_patches()
+        self._create_user_patches()
+        self.name = manager.__class__.__name__ 
+        self.frames_per_round = 50
+        if self.save:
+            self.frames_per_round = 100
+        self.total_rounds = 0
+        self.detected_location = (-10, -10,)
+
+        # Frames left before turning non attacked to attacked
+        self.percent_left_before_change = .2
+
+        # Reason we limit # of color changes is because
+        # We only do the atk in last 10% of frames in the round
+        self.blue_to_yellow = [self.color_fader(c1="b", c2="y", mix=x/int(self.frames_per_round * self.percent_left_before_change))
+                               for x in range(int(self.frames_per_round * self.percent_left_before_change))]
+        self.blue_to_yellow[0] = "b"
+        self.blue_to_yellow[-1] = "y"
+        self.yellow_to_blue = [self.color_fader(mix=x/self.frames_per_round)
+                               for x in range(self.frames_per_round)]
+        self.yellow_to_blue[0] = "y"
+        self.yellow_to_blue[-1] = "b"
+
+        #assert isinstance(manager, Sieve_Manager_Base), "Can't do that manager yet"
+
+    def color_fader(self, c1="y", c2="b", mix=0):
+        """Returns colors from c1 to c2"""
+
+        # https://stackoverflow.com/a/50784012/8903959
+        c1=np.array(mpl.colors.to_rgb(c1))
+        c2=np.array(mpl.colors.to_rgb(c2))
+        return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
+
+    @property
+    def users(self):
+        will_be_conn = []
+        for user_list in self.manager.will_be_connected_users.values():
+            will_be_conn.extend(user_list)
+        return list(self.manager.users.values()) + will_be_conn
+
+    @property
+    def buckets(self):
+        return self.manager.buckets
 
     def capture_data(self, manager: Manager):
         """Captures data for the round"""
 
-        # I know this isn't the best, but I have more important work to do
-        self.manager_copies.append(deepcopy(manager))
+        self.total_rounds += 1
 
-    def set_up_animation(self):
-        # Step 1: Figure out max users in a bucket
-        max_users_y, good_user_ids, attacker_ids = self._get_user_data()
-        # Step 2: Get all the bucket ids ever made
-        bucket_ids = self._get_max_buckets()
-        # Format graph
-        fig, ax, buckets_per_row = self._format_graph(max_users_y, bucket_ids)
-        # Create bucket id patches
-        self._create_buckets(bucket_ids, buckets_per_row, max_users_y)
-        self._create_users(good_user_ids, attacker_ids)
-        for manager_copy in self.manager_copies:
-            self._append_bucket_data(manager_copy)
-            self._append_user_data(manager_copy)
+        # add to the points array
+        for bucket in manager.buckets:
+            user_y = User.patch_padding + bucket.patch.get_y()
+            for user in bucket.users:
+                circle_y = User.patch_radius + user_y
+                user.points.append((bucket.patch_center(), circle_y,))
+                # Get suspicion due to DOSE
+                user.suspicions.append(user.get_suspicion())
+                user_y = circle_y + User.patch_radius
+                user_y += (User.patch_padding * 2)
+            if bucket.attacked:
+                bucket.states.append(Bucket_States.ATTACKED)
+            elif len(bucket) == 0:
+                bucket.states.append(Bucket_States.UNUSED)
+            else:
+                bucket.states.append(Bucket_States.USED)
 
-    def _get_user_data(self):
-        """Gets the max number of users in a given bucket for any round ever"""
+        for user in manager.eliminated_users:
+            user.points.append(self.detected_location)
+            #user.detected = True
+            user.suspicions.append(0)
 
-        # self.managers is a deep copy stored each round
-        good_user_ids = set()
-        attacker_ids = set()
-        max_users_y = 0
-        for manager in self.manager_copies:
-            for bucket im manager.used_buckets:
-                for user in bucket.users:
-                    if isinstance(user, Attacker):
-                        attacker_ids.add(user.id)
-                    else:
-                        good_user_ids.add(user.id)
-            # Get the max y val for that round
-            temp_max_users_y = max(len(x) for x in manager.used_buckets)
-            # Set the max y value for all rounds
-            max_users_y = max(max_users_y, temp_max_users_y)
-        return max_users_y, good_user_ids, attacker_ids
+        for user in manager.disconnected_users:
+            user.points.append(self.disconnected_location)
+            user.suspicions.append(0)
 
-    def _get_num_buckets(self):
-        """Gets the number of buckets that were used, ever"""
-
-        bucket_ids = set()
-        for manager in self.manager_copies:
-            for bucket in manager.used_buckets:
-                bucket_ids.add(bucket.id)
-
-        return bucket_ids
-
-    def _format_graph(self, max_users_y, bucket_ids):
-        """Formats graph properly
-
-        Basically makes graph colorful"""
-
-        if self.save:
-            matplotlib.use("Agg")
-        plt.style.use('dark_background')
-        # https://stackoverflow.com/a/48958260/8903959
-        matplotlib.rcParams.update({'text.color': "black"})
-
-        fig = plt.figure()
-        # NOTE: Increasing figure size makes it take way longer
-        fig.set_size_inches(16, 9)
-        
-        # Buckets_per_row
-        row_cutoff = 100 if max_users_y >= 40 else 32
-
-        rows = math.ceil(len(bucket_ids) / row_cutoff)
-
-        y_max = ((max_users_y * Anim_User.patch_length()
-                  + Anim_Bucket.patch_padding)
-                 * rows + 1)
-
-        ax = plt.axes(xlim=(0, min(len(bucket_ids),
-                                   row_cutoff) * Anim_Bucket.patch_length()),
-                      ylim=(0, max_y))
-        ax.set_axis_off()
-        ax.margins(0)
-
-        gradient_image(ax,
-                       direction=0,
-                       extent=(0, 1, 0, 1),
-                       transform=ax.transAxes,
-                       cmap=plt.cm.Oranges,
-                       cmap_range=(0.1, 0.6))
-
-        return fig, ax, row_cutoff
-
-    def _create_buckets(self, bucket_ids, buckets_per_row, max_users_y):
-        self.buckets = {_id: Anim_Bucket(_id, buckets_per_row, max_users_y)
-                        for _id in sorted(bucket_ids)}
-
-
-    def _create_users(self, good_user_ids, attacker_ids):
-        # Create user id patches
-        self.users = {}
-        for _id, cls in zip([good_user_ids, attacker_ids],
-                            [Anim_User, Anim_Attacker]):
-            og_bucket_id = self.manager.users[_id].bucket.id
-
-            self.users[_id] = cls(_id, self.buckets[og_bucket_id])
-
-    def _append_bucket_data(self, manager_copy):
-        used_bucket_ids = set()
-        for b in manager_copy.used_buckets:
-            state = B_States.ATTACKED if b.attacked else B_States.USED
-            self.buckets[bucket.id].states.append(state)
-            used_bucket_ids.add(b.id)
-
-        for bucket_id, bucket in self.buckets.items():
-            if bucket_id not in used_bucket_ids:
-                bucket.states.append(B_States.UNUSED)
-
-    def _append_user_data(self, manager_copy):
-        user_y_pts = set()
-        for _id, anim_user in self.users.items():
-            user = manager_copy.users[_id]
-            if user.status = Status.DISCONNECTED:
-                x, y = self.disconnected_location
-            elif user.status = Status.ELIMINATED:
-                x, y = self.eliminated_location
-            elif user.status = Status.CONNECTED:
-                anim_bucket = self.buckets[user.bucket.id]
-                x = anim_bucket.patch_center()
-                y = Anim_User.patch_padding + anim_bucket.patch.get_y()
-                # Move the user higher if other user in that spot
-                while y in user_y_pts:
-                    y += Anim_User.patch_radius
-                    y += Anim_User.patch_padding * 2
-                user_y_pts.add(y)
-
-            anim_user.points.append([x, y])
-            anim_user.suspicions.append(user.suspicion)
-
-
-
-
-
-
-############ REFACTOR BELOW. ALSO MOVE SOME FUNCS INTO A COLOR GENERATOR. ALSO NEED A ROUND TEXT CLASS ####################################################################################
-
+        for user_list in manager.will_be_connected_users.values():
+            for user in user_list:
+                user.points.append(self.disconnected_location)
+                user.suspicions.append(0)
 
 
     def run_animation(self, total_rounds):
@@ -214,7 +219,6 @@ class Animater(Base_Grapher):
         Saves all data to an mp4 file. Note, you can increase or
         decrease total number of frames in this function"""
 
-        self.set_up_animation()
         frames = total_rounds * self.frames_per_round
         anim = animation.FuncAnimation(self.fig, self.animate,
                                        init_func=self.init,
@@ -233,19 +237,128 @@ class Animater(Base_Grapher):
 
             pbar = tqdm(desc="Saving video",
                         total=self.frames_per_round * (self.total_rounds - 1))
+            # Callback function for saving animation
+            def callback(current_frame_number, total_frames):
+                pbar.update()
 
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self._get_round_text(0).replace("Round 0", "")}.mp4')
 
+            dpi = self.high_dpi if self.high_res else self.low_dpi
+            # NOTE: bitrate barely impacts the speed that it saves
+            bitrate = 12000 if self.high_res else 12000
+
+            # assert bitrate <= 3000 and dpi <= 1200, "Too high quality, breaks"
+            # FFwriter=animation.FFMpegFileWriter(bitrate=bitrate)
             # https://stackoverflow.com/a/14666461/8903959
-            anim.save(path,
-                      progress_callback=lambda *_: pbar.update(),
-                      dpi=self.dpi,
-                      # NOTE: bitrate barely impacts saving speed
-                      bitrate=12000)
+            anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate)
+            #anim.save(path, progress_callback=callback, dpi=dpi, bitrate=bitrate, writer=FFwriter)
             pbar.close()
         else:
             plt.show()
+
+    def _format_graph(self):
+        """Formats graph properly
+
+        Basically makes graph colorful"""
+
+        if self.save:
+            matplotlib.use("Agg")
+        plt.style.use('dark_background')
+        # https://stackoverflow.com/a/48958260/8903959
+        matplotlib.rcParams.update({'text.color': "black"})
+
+        # NOTE:
+        # I'm not sure this fig is ever used
+        # Should prob be removed
+        fig = plt.figure()
+        # NOTE: Increasing figure size makes it take way longer
+        fig.set_size_inches(16, 9)
+        
+
+        max_users = self.manager.max_users_y
+
+        
+        rows = math.ceil(len(self.buckets) / self.row_cutoff)
+
+        ax = plt.axes(xlim=(0, min(len(self.buckets), self.row_cutoff)* Bucket.patch_length()),
+                      ylim=(0, (max_users * User.patch_length() + Bucket.patch_padding) * rows+ 1))
+        ax.set_axis_off()
+        ax.margins(0)
+
+        gradient_image(ax,
+                       direction=0,
+                       extent=(0, 1, 0, 1),
+                       transform=ax.transAxes,
+                       cmap=plt.cm.Oranges,
+                       cmap_range=(0.1, 0.6))
+
+        return max_users, fig, ax
+
+    def _create_bucket_patches(self):
+        """Creates patches of users and buckets"""
+
+        self.bucket_patches = []
+        bucket_rows = [[]]
+        for i, bucket in enumerate(reversed(self.buckets)):
+            if i % self.row_cutoff == 0 and i != 0:
+
+                bucket_rows.append([])
+                bucket_rows[-1].append(bucket)
+            else:
+                bucket_rows[-1].append(bucket)
+
+        ordered_bucket_rows = []
+        for bucket_row in bucket_rows:
+            ordered_bucket_rows.append(list(reversed(bucket_row)))
+
+        x = Bucket.patch_padding
+        y = 0
+
+        for bucket_row in reversed(ordered_bucket_rows):
+            for bucket in bucket_row:
+                kwargs = {"fc": bucket.og_face_color}
+                patch_type = FancyBboxPatch
+                kwargs["boxstyle"] = "round,pad=0.1"
+
+                bucket.patch = patch_type((x, y),
+                                          Bucket.patch_width,
+                                          self.max_users * User.patch_length(),
+                                          **kwargs)
+
+                bucket.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+
+                x += Bucket.patch_length()
+                self.bucket_patches.append(bucket.patch)
+
+            # Next row
+            y += bucket.patch_height
+            x = Bucket.patch_padding
+
+
+    def _create_user_patches(self):
+        """Creates patches of users"""
+
+        self.user_patches = []
+        for user in self.users:
+            if user.bucket is None or user.bucket.patch is None:
+                bucket_patch_center = self.disconnected_location[0]
+            else:
+                bucket_patch_center = user.bucket.patch_center()
+            user.patch = plt.Circle((bucket_patch_center, 5),
+                                    User.patch_radius,
+                                    fc=user.og_face_color)
+            if isinstance(user, Attacker):
+                user.horns = plt.Polygon(0 * self.get_horn_array(user),
+                                         fc=user.og_face_color,
+                                         **dict(ec="k"))
+                user.horns.set_linewidth(.4 if self.high_res else .5)
+            user.text = plt.text(bucket_patch_center,
+                                 5,
+                                 f"{user.id}",
+                                 horizontalalignment='center',
+                                 verticalalignment='center')
+            self.user_patches.append(user.patch)
 
     def init(self):
         """inits the animation
@@ -403,45 +516,32 @@ class Animater(Base_Grapher):
         objs += [x.patch for x in self.buckets]
         return objs
 
+    def get_horn_array(self, user):
+        """Returns the horn array for the attackers"""
+
+        horn_array = np.array(
+                        [user.patch.center,
+                         [user.patch.center[0] - User.patch_radius,
+                          user.patch.center[1]],
+                         [user.patch.center[0] - User.patch_radius,
+                          user.patch.center[1] + User.patch_radius],
+                         user.patch.center,
+                         [user.patch.center[0] + User.patch_radius,
+                          user.patch.center[1]],
+                         [user.patch.center[0] + User.patch_radius,
+                          user.patch.center[1] + User.patch_radius],
+                         user.patch.center
+                         ])
+        return horn_array
+
     def _get_round_text(self, round_num):
         return (f"{self.name}: "
                 f"Round {round_num // self.frames_per_round}     "
                 f"{self.sim_cls.__name__}|||"
                 f"{self.user_cls.__name__}|||"
                 f"{self.attacker_cls.__name__}")
+ 
 
-    def set_matplotlib_args(self):
-        self.set_dpi()
-        self.set_font_size()
-
-    def set_dpi(self):
-        # https://stackoverflow.com/a/51955985/8903959
-        mpl.rcParams['figure.dpi'] = self.dpi
-        matplotlib.rcParams['figure.dpi'] = self.dpi
-
-    def set_font_size(self):
-        fontsize = 12
-
-        if self.manager.max_buckets > 10:
-            fontsize -= 3
-
-        if self.manager.max_users_y > 10:
-            fontsize -= 3
-            matplotlib.rcParams.update({'font.size': 5})
-
-        if self.manager.max_buckets > 20:
-            fontsize -= 2
-        if self.manager.max_buckets >= 100:
-            fontsize -= 4
-        if ("dose" in self.manager.__class__.__name__.lower()
-            or "sieve" in self.manager.__class__.__name__.lower()):
-            fontsize -= 2.5
-
-        if self.high_res:
-            # 3 is difference between low res and high res dpi
-            fontsize = fontsize / 1
-
-        matplotlib.rcParams.update({'font.size': fontsize})
 
 # Basically just makes the colors pretty
 # https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/gradient_bar.html

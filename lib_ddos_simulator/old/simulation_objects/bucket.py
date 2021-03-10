@@ -16,7 +16,7 @@ class Bucket:
     """Simulates a Bucket that provides service for users"""
 
     # patch used in animations
-    __slots__ = ["users", "attacked", "patch",
+    __slots__ = ["users", "_max_users", "attacked", "patch",
                  "turns_not_attacked", "states", "id"]
 
     # Used in animations
@@ -24,7 +24,7 @@ class Bucket:
     patch_padding = .5
     og_face_color = "b"
 
-    def __init__(self, users=[], id=0, attacked=False):
+    def __init__(self, users=[], id=0, max_users=100000000, attacked=False):
         """Stores users"""
 
         assert len(users) < max_users, "Too many users, over max_users"
@@ -33,11 +33,26 @@ class Bucket:
         self.id = id
         for user in users:
             user.bucket = self
-            user.status = User_Status.CONNECTED
+        self._max_users = max_users
         self.attacked = attacked
         self.turns_not_attacked = 0
         # For animations
         self.states = []
+
+    def reinit(self, users, max_users=100000000, attacked=False):
+        """inits with patch"""
+
+        patch = None
+        if hasattr(self, "patch"):
+            patch = self.patch
+        #self.__init__(users, max_users=max_users, attacked=attacked)
+        self.users = users
+        for user in self.users:
+            user.bucket = self
+        self._max_users = max_users
+        self.attacked = attacked
+        
+        self.patch = patch
 
     @property
     def attackers(self):
@@ -69,10 +84,6 @@ class Bucket:
         multiplier = int(self.attacked)
         for user in self.users:
             user.suspicion += (1 / len(self.users)) * multiplier
-
-###########################
-### Animation Functions ###
-###########################
 
     @staticmethod
     def patch_length():

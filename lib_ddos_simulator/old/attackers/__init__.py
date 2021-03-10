@@ -10,6 +10,7 @@ __status__ = "Development"
 
 from .basic_attacker import Basic_Attacker, Basic_Lone_Attacker
 from .even_turn_attacker import Even_Turn_Attacker, Even_Turn_Lone_Attacker
+from .mixed_attacker import Mixed_Attacker
 from .never_alone_attacker import Never_Alone_Attacker
 from .never_alone_attacker import Never_Alone_Lone_Attacker
 from .never_last_attacker import Never_Last_Attacker
