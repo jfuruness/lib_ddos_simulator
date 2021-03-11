@@ -78,3 +78,6 @@ class Anim_Bucket:
     @property
     def row_num(self):
         return self.id // self.buckets_per_row
+
+    def animate(self, frame):
+
