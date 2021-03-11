@@ -19,7 +19,6 @@ class Random_Attacker(Attacker):
     runnable = False
 
     def _attack(self, manager, turn):
-        random.seed(str(manager.json) + str(turn))
         if random() < self._percent_chance_attack:
             self.bucket.attacked = True
 

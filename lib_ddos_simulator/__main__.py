@@ -34,7 +34,7 @@ def main():
     parser.add_argument("--tikz", dest="tikz", default=False, action="store_true")
     parser.add_argument("--save", dest="save", default=False, action="store_true")
     parser.add_argument("--high_res", dest="high_res", default=False, action="store_true")
-    parser.add_argument("--trials", type=int, dest="trials", default=10)
+    parser.add_argument("--trials", type=int, dest="trials", default=2)
     parser.add_argument("--graph_dir", type=str, dest="graph_dir", default=os.path.join("/tmp", "lib_ddos_simulator"))
     parser.add_argument("--api", dest="api", default=False, action="store_true")
 
@@ -48,7 +48,7 @@ def main():
             DDOS_Simulator(args.num_users,  # number of users
                            args.num_attackers,  # number of attackers
                            args.num_buckets,  # number of buckets
-                           [Sieve_Manager_V0_S0],#Manager.runnable_managers,
+                           Manager.runnable_managers,
                            graph_dir=args.graph_dir,
                            save=args.save,
                            debug=args.debug,
@@ -57,20 +57,19 @@ def main():
                                                      animate=True,
                                                      graph_trials=False)
     elif args.graph_combos:
-        Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
+        Combination_Grapher(debug=args.debug,
                             graph_dir=args.graph_dir,
                             tikz=args.tikz,
                             save=args.save,
                             high_res=args.high_res).run(trials=args.trials)
     else:
-        for sim_cls in DDOS_Simulator.runnable_simulators:
-            sim_cls(args.num_users,
-                    args.num_attackers,
-                    args.num_buckets,
-                    args.threshold,
-                    Manager.runnable_managers,
-                    stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                    graph_dir=args.graph_dir,
-                    save=args.save,
-                    tikz=args.tikz,
-                    high_res=args.high_res).run(args.rounds)
+        DDOS_Simulator(args.num_users,
+                       args.num_attackers,
+                       args.num_buckets,
+                       args.threshold,
+                       Manager.runnable_managers,
+                       debug=args.debug,
+                       graph_dir=args.graph_dir,
+                       save=args.save,
+                       tikz=args.tikz,
+                       high_res=args.high_res).run(args.rounds)

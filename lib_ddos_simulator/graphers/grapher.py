@@ -19,8 +19,6 @@ from ..managers import Manager
 class Grapher(Base_Grapher):
     """graphs a DDOS attack"""
 
-    __slots__ = ["_data", "good_users", "attackers"]
-
     def __init__(self, managers, good_users, attackers, **kwargs):
         """Initializes simulation"""
 

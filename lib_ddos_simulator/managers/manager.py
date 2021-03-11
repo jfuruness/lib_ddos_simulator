@@ -65,9 +65,6 @@ class Manager:
         # Simple error checks
         self.validate()
 
-        # We reuse empty buckets to make animations cleaner
-        self.non_used_buckets = []
-
     def take_action(self, turn=0):
         """Actions to take every turn"""
 
@@ -119,6 +116,7 @@ class Manager:
                 self.attackers_detected += 1
                 for user in bucket.users:
                     user.status = User_Status.ELIMINATED
+                    user.bucket = None
                 caught_attackers.extend(bucket.users)
                 bucket.users = []
                 bucket.attacked = True
@@ -131,6 +129,7 @@ class Manager:
             user = self.users[_id]
             assert user.status == User_Status.CONNECTED
             user.bucket.users.remove(user)
+            user.bucket = None
             user.status = User_Status.DISCONNECTED
 
     def get_buckets_by_ids(self, ids):
@@ -207,3 +206,7 @@ class Manager:
     @property
     def used_buckets(self):
         return [x for x in self.buckets if len(x) > 0]
+
+    @property
+    def non_used_buckets(self):
+        return [x for x in self.buckets if len(x) == 0]

@@ -64,10 +64,10 @@ class DDOS_Simulator:
                          for X in Manager_Child_Classes]
 
         # Creates graphing class to capture data
-        #self.grapher = Grapher(self.managers,
-        #                       len(self.good_users),
-        #                       len(self.attackers),
-        #                       **self.graph_kwargs)
+        self.grapher = Grapher(self.managers,
+                               len(self.good_users),
+                               len(self.attackers),
+                               **self.graph_kwargs)
         self.attacker_cls = attacker_cls
         self.user_cls = user_cls
 
@@ -87,7 +87,6 @@ class DDOS_Simulator:
                             self.user_cls,
                             self.attacker_cls,
                             **self.graph_kwargs)
-        print(manager.__class__.__name__)
         for turn in range(num_rounds):
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
@@ -117,7 +116,6 @@ class DDOS_Simulator:
     def record(self, turn, manager, animate, animater):
         """Records statistics for graphs"""
 
-        print("Not capturing data for grapher")
-        #self.grapher.capture_data(turn, manager)
+        self.grapher.capture_data(turn, manager)
         if animate:
             animater.capture_data(manager)

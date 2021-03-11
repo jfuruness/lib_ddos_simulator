@@ -207,9 +207,9 @@ class Animater(Base_Grapher):
         for _id, anim_user in self.users.items():
             user = manager_copy.users[_id]
             if user.status == Status.DISCONNECTED:
-                x, y = user.disconnected_location
+                x, y = Anim_User.disconnected_location
             elif user.status == Status.ELIMINATED:
-                x, y = user.eliminated_location
+                x, y = Anim_User.detected_location
             elif user.status == Status.CONNECTED:
                 anim_bucket = self.buckets[user.bucket.id]
                 x = anim_bucket.patch_center()

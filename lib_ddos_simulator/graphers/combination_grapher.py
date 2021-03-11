@@ -41,8 +41,6 @@ class Combination_Grapher(Base_Grapher):
     Plots % of users that are attackers on the X axis
     """
 
-    __slots__ = ["second_legend"]
-
     def __init__(self, *args, **kwargs):
         super(Combination_Grapher, self).__init__(*args, **kwargs)
         self.second_legend = []
@@ -54,17 +52,16 @@ class Combination_Grapher(Base_Grapher):
             # Note that for range, last number is not included
             num_buckets_list=[1],
             # Note that this is the users per bucket, not total users
-            users_per_bucket_list=[10 ** i for i in range(4, 6)],
-            num_rounds_list=[10 ** i for i in range(3, 5)],
-            trials=10):
+            users_per_bucket_list=[10 ** i for i in range(1, 2)],
+            num_rounds_list=[10 ** i for i in range(1, 2)],
+            trials=2):
         """Runs in parallel every possible scenario
 
         Looks complicated, but no real way to simplify it
         so deal with it"""
 
         if ddos_sim_cls_list is None:
-            ddos_sim_cls_list =\
-                [ddos_simulator.DDOS_Simulator.runnable_simulators[0]]
+            ddos_sim_cls_list = [ddos_simulator.DDOS_Simulator]
 
         # Initializes graph path
         self.make_graph_dir(destroy=True)
@@ -106,10 +103,8 @@ class Combination_Grapher(Base_Grapher):
 
         # If we are debugging, no multiprocessing
         # https://stackoverflow.com/a/1987484/8903959
-        if (self.stream_level == Log_Levels.DEBUG
-            # https://stackoverflow.com/a/58866220/8903959
-            or "PYTEST_CURRENT_TEST" in os.environ):
-
+        # https://stackoverflow.com/a/58866220/8903959
+        if (self.debug or "PYTEST_CURRENT_TEST" in os.environ):
             for i in range(total):
                 try:
                     current_args = [x[i] for x in full_args]
@@ -210,9 +205,8 @@ class Combination_Grapher(Base_Grapher):
         sim = ddos_sim_cls(good_users,
                            attackers,
                            num_buckets,
-                           threshold,
                            [manager],
-                           stream_level=self.stream_level,
+                           debug=self.debug,
                            graph_dir=self.graph_dir,
                            tikz=self.tikz,
                            save=self.save,

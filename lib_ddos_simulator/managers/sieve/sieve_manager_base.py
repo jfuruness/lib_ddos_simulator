@@ -73,7 +73,6 @@ class Sieve_Manager_Base(Manager):
         if len(buckets) == 0:
             return
         elif len(buckets) == 1:
-            random.seed(str(manager.json) + "1 bucket seed")
             random.shuffle(buckets[0].users)
         elif len(buckets) % 2 == 0:
             self._shuffle_buckets(buckets, num_buckets_per_round=2)

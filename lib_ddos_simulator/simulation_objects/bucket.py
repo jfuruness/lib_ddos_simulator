@@ -41,7 +41,7 @@ class Bucket:
     def reinit(self, user_chunk):
         """Kept only for backwards compatability"""
 
-        self.__init__(users=user_chunk, id=self.id, attacked=self.attacked)
+        self.__init__(users=user_chunk, id=self.id, attacked=False)
 
     @property
     def attackers(self):

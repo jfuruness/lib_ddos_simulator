@@ -158,4 +158,4 @@ class DOSE_Manager(Manager):
 
     def take_action(self, *args, **kwargs):
         self.record_dose_events()
-        super(Dose_Manager, self).take_action(*args, **kwargs)
+        super(DOSE_Manager, self).take_action(*args, **kwargs)
