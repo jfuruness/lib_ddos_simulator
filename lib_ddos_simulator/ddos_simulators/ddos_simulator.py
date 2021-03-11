@@ -14,8 +14,9 @@ import random
 
 from tqdm import trange
 
-from ..graphers import Animater, Grapher
-from ..attackers import Attacker, Basic_Attacker, Mixed_Attacker
+from ..animations import Animater
+from ..graphers import Grapher
+from ..attackers import Attacker, Basic_Attacker
 from .. import managers
 from ..simulation_objects import User
 from .. import utils
@@ -28,7 +29,6 @@ class DDOS_Simulator:
                  num_users: int,
                  num_attackers: int,
                  num_buckets: int,
-                 threshold: int,
                  Manager_Child_Classes: list,
                  debug=False,
                  # The graph kwargs
@@ -36,7 +36,6 @@ class DDOS_Simulator:
                  tikz=False,
                  save=False,
                  high_res=False,
-                 animate=False,
                  attacker_cls=Basic_Attacker,
                  user_cls=User):
         """Initializes simulation"""
@@ -52,7 +51,8 @@ class DDOS_Simulator:
         # Ids start at one to make rows easier for animations for buckets
         self.good_users = [user_cls(x) for x in range(1, num_users + 1)]
 
-        self.attackers = self.get_attackers(num_attackers, attacker_cls)
+        self.attackers = attacker_cls.get_attackers(num_users + 1,
+                                                    num_attackers)
 
         self.users = self.good_users + self.attackers
 
@@ -60,14 +60,14 @@ class DDOS_Simulator:
         # Shuffle so attackers are not at the end
         random.shuffle(self.users)
         # Creates manager and distributes users evenly across buckets
-        self.managers = [X(num_buckets, deepcopy(self.users), threshold)
+        self.managers = [X(num_buckets, deepcopy(self.users))
                          for X in Manager_Child_Classes]
 
         # Creates graphing class to capture data
-        self.grapher = Grapher(self.managers,
-                               len(self.good_users),
-                               len(self.attackers),
-                               **self.graph_kwargs)
+        #self.grapher = Grapher(self.managers,
+        #                       len(self.good_users),
+        #                       len(self.attackers),
+        #                       **self.graph_kwargs)
         self.attacker_cls = attacker_cls
         self.user_cls = user_cls
 
@@ -88,14 +88,18 @@ class DDOS_Simulator:
                             self.user_cls,
                             self.attacker_cls,
                             **self.graph_kwargs)
+        print(manager.__class__.__name__)
         for turn in range(num_rounds):
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
             # Record data
-            self.record(turn, manager, animater)
+            self.record(turn, manager, animate, animater)
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
             manager.take_action(turn)
+
+        if animate:
+            animater.run_animation(num_rounds)
 
 ########################
 ### Helper Functions ###
@@ -111,10 +115,10 @@ class DDOS_Simulator:
         for user in manager.connected_good_users:
             user.take_action(manager, turn)
 
-    def record(self, turn, manager, animater):
+    def record(self, turn, manager, animate, animater):
         """Records statistics for graphs"""
 
         print("Not capturing data for grapher")
         #self.grapher.capture_data(turn, manager)
-        if self.animate:
-            self.animater.capture_data(manager)
+        if animate:
+            animater.capture_data(manager)

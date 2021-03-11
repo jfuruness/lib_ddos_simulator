@@ -10,6 +10,7 @@ __status__ = "Development"
 
 from .. import attackers
 from .user import User
+from .user_status import User_Status
 
 
 class Bucket:
@@ -27,8 +28,6 @@ class Bucket:
     def __init__(self, users=[], id=0, attacked=False):
         """Stores users"""
 
-        assert len(users) < max_users, "Too many users, over max_users"
-
         self.users = users
         self.id = id
         for user in users:
@@ -38,6 +37,11 @@ class Bucket:
         self.turns_not_attacked = 0
         # For animations
         self.states = []
+
+    def reinit(self, user_chunk):
+        """Kept only for backwards compatability"""
+
+        self.__init__(users=user_chunk, id=self.id, attacked=self.attacked)
 
     @property
     def attackers(self):

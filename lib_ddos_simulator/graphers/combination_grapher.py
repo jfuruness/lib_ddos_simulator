@@ -20,7 +20,7 @@ from multiprocessing import cpu_count
 from pathos.multiprocessing import ProcessingPool
 import json
 
-from .base_grapher import Base_Grapher
+from ..base_grapher import Base_Grapher
 
 from ..attackers import Attacker
 # Done this way to avoid circular imports

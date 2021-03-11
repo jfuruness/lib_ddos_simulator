@@ -13,7 +13,7 @@ import os
 import shutil
 import tikzplotlib
 
-from ..utils import Log_Levels
+from .utils import Log_Levels
 
 
 class Base_Grapher:
@@ -22,14 +22,14 @@ class Base_Grapher:
     __slots__ = ["stream_level", "graph_dir", "tikz", "save", "high_res"]
   
     def __init__(self,
-                 stream_level=Log_Levels.INFO,
+                 debug=False,
                  graph_dir=os.path.join("/tmp", "lib_ddos_simulator"),
                  tikz=False,
                  save=False,
                  high_res=False):
         """Initializes simulation"""
 
-        self.stream_level = stream_level
+        self.debug = debug
         self.graph_dir = graph_dir
         self.make_graph_dir()
         self.tikz = tikz

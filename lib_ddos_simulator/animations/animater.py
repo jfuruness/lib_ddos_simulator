@@ -20,10 +20,15 @@ from matplotlib import animation
 import numpy as np
 from tqdm import tqdm
 
-from .base_grapher import Base_Grapher
+from .anim_attacker import Anim_Attacker
+from .anim_bucket import Anim_Bucket
+from .anim_user import Anim_User
+from .color_generator import Color_Generator
+
+from ..base_grapher import Base_Grapher
 
 from ..attackers import Attacker
-from ..simulation_objects import Bucket, User
+from ..simulation_objects import Bucket, User, User_Status as Status
 from ..managers import Manager
 
 class Bucket_States(Enum):
@@ -72,7 +77,7 @@ class Animater(Base_Grapher):
         # Step 1: Figure out max users in a bucket
         max_users_y, good_user_ids, attacker_ids = self._get_user_data()
         # Step 2: Get all the bucket ids ever made
-        bucket_ids = self._get_max_buckets()
+        bucket_ids = self._get_bucket_ids()
         # Format graph
         fig, ax, buckets_per_row = self._format_graph(max_users_y, bucket_ids)
         # Create bucket id patches
@@ -92,7 +97,7 @@ class Animater(Base_Grapher):
         attacker_ids = set()
         max_users_y = 0
         for manager in self.manager_copies:
-            for bucket im manager.used_buckets:
+            for bucket in manager.used_buckets:
                 for user in bucket.users:
                     if isinstance(user, Attacker):
                         attacker_ids.add(user.id)
@@ -106,7 +111,7 @@ class Animater(Base_Grapher):
             max_users_y = max(max_users_y, temp_max_users_y)
         return max_users_y, good_user_ids, attacker_ids
 
-    def _get_num_buckets(self):
+    def _get_bucket_ids(self):
         """Gets the number of buckets that were used, ever"""
 
         bucket_ids = set()
@@ -122,10 +127,10 @@ class Animater(Base_Grapher):
         Basically makes graph colorful"""
 
         if self.save:
-            matplotlib.use("Agg")
+            mpl.use("Agg")
         plt.style.use('dark_background')
         # https://stackoverflow.com/a/48958260/8903959
-        matplotlib.rcParams.update({'text.color': "black"})
+        mpl.rcParams.update({'text.color': "black"})
 
         fig = plt.figure()
         # NOTE: Increasing figure size makes it take way longer
@@ -142,16 +147,16 @@ class Animater(Base_Grapher):
 
         ax = plt.axes(xlim=(0, min(len(bucket_ids),
                                    row_cutoff) * Anim_Bucket.patch_length()),
-                      ylim=(0, max_y))
+                      ylim=(0, y_max))
         ax.set_axis_off()
         ax.margins(0)
 
-        gradient_image(ax,
-                       direction=0,
-                       extent=(0, 1, 0, 1),
-                       transform=ax.transAxes,
-                       cmap=plt.cm.Oranges,
-                       cmap_range=(0.1, 0.6))
+        Color_Generator.gradient_image(ax,
+                                       direction=0,
+                                       extent=(0, 1, 0, 1),
+                                       transform=ax.transAxes,
+                                       cmap=plt.cm.Oranges,
+                                       cmap_range=(0.1, 0.6))
 
         return fig, ax, row_cutoff
 
@@ -184,11 +189,11 @@ class Animater(Base_Grapher):
         user_y_pts = set()
         for _id, anim_user in self.users.items():
             user = manager_copy.users[_id]
-            if user.status = Status.DISCONNECTED:
+            if user.status == Status.DISCONNECTED:
                 x, y = user.disconnected_location
-            elif user.status = Status.ELIMINATED:
+            elif user.status == Status.ELIMINATED:
                 x, y = user.eliminated_location
-            elif user.status = Status.CONNECTED:
+            elif user.status == Status.CONNECTED:
                 anim_bucket = self.buckets[user.bucket.id]
                 x = anim_bucket.patch_center()
                 y = Anim_User.patch_padding + anim_bucket.patch.get_y()
@@ -294,7 +299,7 @@ class Animater(Base_Grapher):
     def set_dpi(self):
         # https://stackoverflow.com/a/51955985/8903959
         mpl.rcParams['figure.dpi'] = self.dpi
-        matplotlib.rcParams['figure.dpi'] = self.dpi
+        mpl.rcParams['figure.dpi'] = self.dpi
 
     def set_font_size(self):
         fontsize = 12
@@ -304,7 +309,7 @@ class Animater(Base_Grapher):
 
         if self.manager.max_users_y > 10:
             fontsize -= 3
-            matplotlib.rcParams.update({'font.size': 5})
+            mpl.rcParams.update({'font.size': 5})
 
         if self.manager.max_buckets > 20:
             fontsize -= 2
@@ -318,4 +323,4 @@ class Animater(Base_Grapher):
             # 3 is difference between low res and high res dpi
             fontsize = fontsize / 1
 
-        matplotlib.rcParams.update({'font.size': fontsize})
+        mpl.rcParams.update({'font.size': fontsize})

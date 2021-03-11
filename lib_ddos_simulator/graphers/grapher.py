@@ -12,8 +12,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-from .base_grapher import Base_Grapher
-
+from ..base_grapher import Base_Grapher
 from ..managers import Manager
 
 

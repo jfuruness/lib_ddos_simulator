@@ -35,14 +35,14 @@ class Anim_User:
         else:
             center_x = self.disconnected_location[0]
 
-        self.patch = plt.Circle(center_x, 5),
+        self.patch = plt.Circle((center_x, 5),
                                 Anim_User.patch_radius,
                                 fc=Anim_User.og_face_color)
         self.text = plt.text(center_x,
                              5,
                              self.id,
                              horizontalalignment="center",
-                             verticalalignment="center"
+                             verticalalignment="center")
 
     @property
     def anim_objects(self):
@@ -138,10 +138,11 @@ class Anim_User:
         return (next_point_x1_contr + next_point_x2_contr,
                 next_point_y1_contr + next_point_y2_contr)
 
-    def _take_action(self,
-                     future_pt,
-                     cur_pt,
-                     disconnected_loc,
+    def _take_action(self, future_pt, cur_pt):
+
+        detected_loc = self.detected_location
+        disconnected_loc = self.disconnected_location
+
         # If we're going to the detected location
         if future_pt == detected_loc and cur_pt != detected_loc:
             self._become_detected()

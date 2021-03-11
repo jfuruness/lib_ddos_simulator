@@ -18,6 +18,31 @@ from ..utils import split_list
 class Manager:
     """Simulates a manager for a DDOS attack"""
 
+    runnable_managers = []
+
+    # https://stackoverflow.com/a/43057166/8903959
+    def __init_subclass__(cls, **kwargs):
+        """This method essentially creates a list of all subclasses"""
+
+        super().__init_subclass__(**kwargs)
+
+        assert hasattr(cls, "runnable"), f"{cls.__name__}: add runnable attr"
+
+        # Only attack if it's runnable
+        if cls.runnable:
+            # Ignore all sus funcs > 0, too many managers
+            if (hasattr(cls, "suspicion_func_num")
+                    and cls.suspicion_func_num != 0):
+                pass
+            else:
+                cls.runnable_managers.append(cls)
+                Manager.runnable_managers.append(cls)
+
+        for q in [Manager, cls]:
+            # Sorts alphabetically
+            q.runnable_managers = list(sorted(set(q.runnable_managers),
+                                              key=lambda x: x.__name__))
+
     def __init__(self, num_buckets: int, users: list):
         """inits buckets and stores threshold"""
 
@@ -39,6 +64,9 @@ class Manager:
 
         # Simple error checks
         self.validate()
+
+        # We reuse empty buckets to make animations cleaner
+        self.non_used_buckets = []
 
     def take_action(self, turn=0):
         """Actions to take every turn"""
@@ -175,3 +203,7 @@ class Manager:
     @property
     def connected_good_users(self):
         return self._get_connected_users(lambda x: not isinstance(x, Attacker))
+
+    @property
+    def used_buckets(self):
+        return [x for x in self.buckets if len(x) > 0]

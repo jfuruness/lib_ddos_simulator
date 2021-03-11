@@ -6,6 +6,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from matplotlib.patches import FancyBboxPatch
+
 from .anim_user import Anim_User
 
 
@@ -29,15 +31,15 @@ class Anim_Bucket:
         # Previous number of buckets in that row
         prev_buckets = id % buckets_per_row - 1
         # Set width to the size of the patch plus left padding
-        path_width = Anim_Bucket.patch_padding + Anim_Bucket.patch_length
+        patch_width = Anim_Bucket.patch_padding + Anim_Bucket.patch_length()
         # Set x
         x = patch_width * prev_buckets + Anim_Bucket.patch_padding
         y = 0
         self.patch = FancyBboxPatch((x, y),
                                     self.patch_width,
-                                    self.max_users * Anim_User.patch_length(),
-                                    "fc": self.og_face_color,
-                                    "boxstyle": "round,pad=0.1")
+                                    max_users * Anim_User.patch_length(),
+                                    fc=self.og_face_color,
+                                    boxstyle="round,pad=0.1")
         self.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
 
     def add_to_anim(self, ax, zorder):
@@ -82,7 +84,7 @@ class Anim_Bucket:
     def animate(self,
                 f,  # Frame
                 fpr,  # Frames per round
-                _
+                _,
                 color_generator,
                 *args):
         """Animates bucket"""

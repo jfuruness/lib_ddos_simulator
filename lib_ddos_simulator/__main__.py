@@ -12,9 +12,8 @@ from argparse import ArgumentParser
 import os
 from sys import argv
 
-from .api import create_app
 from .attackers import Basic_Attacker, Even_Turn_Attacker
-from .ddos_simulators import DDOS_Simulator, Fluid_DDOS_Simulator
+from .ddos_simulators import DDOS_Simulator
 from .managers import Manager, Protag_Manager_Smart_Merge, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
 from .utils import Log_Levels
 from .graphers import Combination_Grapher
@@ -42,25 +41,21 @@ def main():
 
     args = parser.parse_args()
 
-    if args.api:
-        create_app().run(debug=True)
-    elif args.animate:
-        for sim_cls in reversed(DDOS_Simulator.runnable_simulators):
-            for atk_cls in [Basic_Attacker, Even_Turn_Attacker]:
-                # NOTE: for optimal animations,
-                # use 24, 4, 8, 10 for users, attackers, buckets, threshold
-                sim_cls(args.num_users,  # number of users
-                        args.num_attackers,  # number of attackers
-                        args.num_buckets,  # number of buckets
-                        args.threshold,  # Threshold
-                        Manager.runnable_managers,
-                        graph_dir=args.graph_dir,
-                        save=args.save,
-                        stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
-                        high_res=args.high_res,
-                        attacker_cls=atk_cls).run(args.rounds,
-                                                  animate=True,
-                                                  graph_trials=False)
+    if args.animate:
+        for atk_cls in [Basic_Attacker, Even_Turn_Attacker]:
+            # NOTE: for optimal animations,
+            # use 24, 4, 8, 10 for users, attackers, buckets, threshold
+            DDOS_Simulator(args.num_users,  # number of users
+                           args.num_attackers,  # number of attackers
+                           args.num_buckets,  # number of buckets
+                           Manager.runnable_managers,
+                           graph_dir=args.graph_dir,
+                           save=args.save,
+                           debug=args.debug,
+                           high_res=args.high_res,
+                           attacker_cls=atk_cls).run(args.rounds,
+                                                     animate=True,
+                                                     graph_trials=False)
     elif args.graph_combos:
         Combination_Grapher(stream_level=Log_Levels.DEBUG if args.debug else Log_Levels.INFO,
                             graph_dir=args.graph_dir,

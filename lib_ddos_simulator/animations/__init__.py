@@ -8,4 +8,4 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from animater import Animater
+from .animater import Animater
