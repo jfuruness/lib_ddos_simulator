@@ -81,7 +81,7 @@ class Animater(Base_Grapher):
         for manager_copy in self.manager_copies:
             self._append_bucket_data(manager_copy)
             self._append_user_data(manager_copy)
-        self.round_text = Anim_Round_Text()
+        self.round_text = Anim_Round_Text(0)
 
     def _get_user_data(self):
         """Gets the max number of users in a given bucket for any round ever"""
@@ -201,15 +201,6 @@ class Animater(Base_Grapher):
             anim_user.points.append([x, y])
             anim_user.suspicions.append(user.suspicion)
 
-
-
-
-
-
-############ REFACTOR BELOW. ALSO MOVE SOME FUNCS INTO A COLOR GENERATOR. ALSO NEED A ROUND TEXT CLASS ####################################################################################
-
-
-
     def run_animation(self, total_rounds):
         """Graphs data
 
@@ -275,7 +266,7 @@ class Animater(Base_Grapher):
             objs.extend(instance.anim_objects)
         return objs
 
-    def animate(self, i):
+    def animate(self, frame):
         """Animates the frame
 
         moves all objects partway to the next point. Basically,
@@ -286,47 +277,15 @@ class Animater(Base_Grapher):
 
 
         for instance in self.animation_instances:
-            instance.animate(i)
+            instance.animate(frame,
+                             self.frames_per_round,
+                             self.track_suspicion,
+                             self.color_generator)
+
+        # Must recreate round text every time
+        if frame % self.frames_per_round:
+            self.round_text = Anim_Round_Text(frame % self.frames_per_round)
         return self.animation_objects
-
-    def animate_buckets(self, i):
-        for bucket in self.buckets:
-            current_state = bucket.states[i // self.frames_per_round]
-            future_state = bucket.states[(i // self.frames_per_round) + 1]
-
-            # Transition between used and unused
-            if future_state == Bucket_States.UNUSED and current_state != Bucket_States.UNUSED:
-                bucket.patch.set_alpha( 1 - ((i % self.frames_per_round) / self.frames_per_round))
-            elif current_state == Bucket_States.UNUSED and future_state != Bucket_States.UNUSED:
-                bucket.patch.set_alpha((i % self.frames_per_round) / self.frames_per_round)
-
-            # Transition between attacked and not attacked
-            if current_state == Bucket_States.ATTACKED and future_state != Bucket_States.ATTACKED:
-                bucket.patch.set_facecolor(self.yellow_to_blue[i % self.frames_per_round])
-            elif future_state == Bucket_States.ATTACKED and current_state != Bucket_States.ATTACKED:
-                frames_left_in_round = self.frames_per_round - (i % self.frames_per_round)
-                if frames_left_in_round <= self.percent_left_before_change * self.frames_per_round:
-                    frames_before_change = int(self.frames_per_round * self.percent_left_before_change)
-                    color_index = frames_before_change - frames_left_in_round
-                    bucket.patch.set_facecolor(self.blue_to_yellow[color_index])
-
-    def animate_round_text(self, i):
-        if i % self.frames_per_round != 0:
-            return
-        self.round_text.set_visible(False)
-        self.round_text.remove()
-        round_text_kwargs = dict(facecolor='white', alpha=1)
-        if self.high_res:
-            # https://stackoverflow.com/a/29127933/8903959
-            round_text_kwargs["boxstyle"] = "square,pad=.05"
-        # This is why it works best with that sizing
-        self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
-                                   self.ax.get_ylim()[1] - .5,
-                                   self._get_round_text(i),
-                                   fontsize=12 if self.high_res else 12,
-                                   bbox=round_text_kwargs,
-                                   horizontalalignment='center',
-                                   verticalalignment='center')
 
     def set_matplotlib_args(self):
         self.set_dpi()
@@ -360,39 +319,3 @@ class Animater(Base_Grapher):
             fontsize = fontsize / 1
 
         matplotlib.rcParams.update({'font.size': fontsize})
-
-# Basically just makes the colors pretty
-# https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/gradient_bar.html
-def gradient_image(ax, extent, direction=0.3, cmap_range=(0, 1), **kwargs):
-    """
-    Draw a gradient image based on a colormap.
-
-    Parameters
-    ----------
-    ax : Axes
-        The axes to draw on.
-    extent
-        The extent of the image as (xmin, xmax, ymin, ymax).
-        By default, this is in Axes coordinates but may be
-        changed using the *transform* kwarg.
-    direction : float
-        The direction of the gradient. This is a number in
-        range 0 (=vertical) to 1 (=horizontal).
-    cmap_range : float, float
-        The fraction (cmin, cmax) of the colormap that should be
-        used for the gradient, where the complete colormap is (0, 1).
-    **kwargs
-        Other parameters are passed on to `.Axes.imshow()`.
-        In particular useful is *cmap*.
-    """
-
-    np.random.seed(19680801)
-    phi = direction * np.pi / 2
-    v = np.array([np.cos(phi), np.sin(phi)])
-    X = np.array([[v @ [1, 0], v @ [1, 1]],
-                  [v @ [0, 0], v @ [0, 1]]])
-    a, b = cmap_range
-    X = a + (b - a) / X.max() * X
-    im = ax.imshow(X, extent=extent, interpolation='bicubic',
-                   vmin=0, vmax=1, **kwargs)
-    return im

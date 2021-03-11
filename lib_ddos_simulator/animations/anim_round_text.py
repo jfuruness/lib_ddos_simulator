@@ -34,3 +34,8 @@ class Anim_Round_Text:
                 f"{self.sim_cls.__name__}|||"
                 f"{self.user_cls.__name__}|||"
                 f"{self.attacker_cls.__name__}")
+
+    def animate(self, frame, frames_per_round):
+        if frame % frames_per_round == 0:
+            self.round_text.set_visible(False)
+            self.round_text.remove()

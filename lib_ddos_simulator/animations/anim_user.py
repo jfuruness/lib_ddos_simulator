@@ -74,8 +74,12 @@ class Anim_User:
                 frame,  # Frame
                 frames_per_round,  # Frames per round
                 track_sus,  # Track suspicion
-                detected_loc,  # Detected location to go 
-                disconnected_loc):
+                *args,
+                ):
+
+        detected_loc = self.detected_location
+        disconnected_loc = self.disconnected_location
+
         current_pt, future_pt = self._get_points(frame, frames_per_round)
         # If the points aren't the same or we're in the middle of a round
         if current_pt != future_pt or frame % frames_per_round != 0:
