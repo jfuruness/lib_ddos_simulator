@@ -36,6 +36,7 @@ class DDOS_Simulator:
                  tikz=False,
                  save=False,
                  high_res=False,
+                 animate=False,
                  attacker_cls=Basic_Attacker,
                  user_cls=User):
         """Initializes simulation"""
@@ -69,7 +70,6 @@ class DDOS_Simulator:
                                **self.graph_kwargs)
         self.attacker_cls = attacker_cls
         self.user_cls = user_cls
-        self.animator = Animator(ASDF)
 
     def run(self, num_rounds: int, animate=False, graph_trials=True):
         """Runs simulation"""
@@ -84,11 +84,15 @@ class DDOS_Simulator:
     def run_sim(self, manager, num_rounds, animate: bool, graph_trials: bool):
         """Initializes sim for a single manager and runs"""
 
+        animater = Animater(manager,
+                            self.user_cls,
+                            self.attacker_cls,
+                            **self.graph_kwargs)
         for turn in range(num_rounds):
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
             # Record data
-            self.record(turn, manager)
+            self.record(turn, manager, animater)
             # Manager detects and removes suspicious users, then shuffles
             # Then reset buckets to not attacked
             manager.take_action(turn)
@@ -107,8 +111,10 @@ class DDOS_Simulator:
         for user in manager.connected_good_users:
             user.take_action(manager, turn)
 
-    def record(self, turn, manager, animate, animater):
+    def record(self, turn, manager, animater):
         """Records statistics for graphs"""
 
+        print("Not capturing data for grapher")
         #self.grapher.capture_data(turn, manager)
-        self.animater.capture_data(manager)
+        if self.animate:
+            self.animater.capture_data(manager)
