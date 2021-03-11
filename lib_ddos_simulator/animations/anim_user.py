@@ -9,6 +9,8 @@ __status__ = "Development"
 from math import e
 import random
 
+from matplotlib.pyplot import Circle, text
+
 class Anim_User:
     """Animated User"""
 
@@ -35,14 +37,14 @@ class Anim_User:
         else:
             center_x = self.disconnected_location[0]
 
-        self.patch = plt.Circle((center_x, 5),
-                                Anim_User.patch_radius,
-                                fc=Anim_User.og_face_color)
-        self.text = plt.text(center_x,
-                             5,
-                             self.id,
-                             horizontalalignment="center",
-                             verticalalignment="center")
+        self.patch = Circle((center_x, 5),
+                             Anim_User.patch_radius,
+                             fc=Anim_User.og_face_color)
+        self.text = text(center_x,
+                         5,
+                         self.id,
+                         horizontalalignment="center",
+                         verticalalignment="center")
 
     @property
     def anim_objects(self):
@@ -87,8 +89,8 @@ class Anim_User:
 
         # At the start of the round
         if frame % frames_per_round == 0:
-            self._update_picture(track_sus)
-            self._update_sus()
+            self._take_action(current_pt, future_pt)
+            self._update_sus(track_sus, frame, frames_per_round)
 
     def _get_points(self, frame, frames_per_round):
         # Gets current point
@@ -123,7 +125,7 @@ class Anim_User:
 
 
         # Frames left in round
-        remainder = i - ((i // fpr) * fpr)
+        remainder = f - ((f // fpr) * fpr)
 
         # Get the next point for x
         next_point_x1_contr = cur_pt[0] * ((fpr - remainder) / fpr)
@@ -138,7 +140,7 @@ class Anim_User:
         return (next_point_x1_contr + next_point_x2_contr,
                 next_point_y1_contr + next_point_y2_contr)
 
-    def _take_action(self, future_pt, cur_pt):
+    def _take_action(self, cur_pt, future_pt):
 
         detected_loc = self.detected_location
         disconnected_loc = self.disconnected_location

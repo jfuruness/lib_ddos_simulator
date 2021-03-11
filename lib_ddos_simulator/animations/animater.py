@@ -22,7 +22,9 @@ from tqdm import tqdm
 
 from .anim_attacker import Anim_Attacker
 from .anim_bucket import Anim_Bucket
+from .anim_round_text import Anim_Round_Text
 from .anim_user import Anim_User
+from .bucket_states import Bucket_States as B_States
 from .color_generator import Color_Generator
 
 from ..base_grapher import Base_Grapher
@@ -67,6 +69,10 @@ class Animater(Base_Grapher):
         self.dpi = self.high_dpi if self.high_res else self.low_dpi
         # Number of buckets in a single row
 
+        self.frames_per_round = 100 if self.save else 50
+
+        self.color_generator = Color_Generator(self.frames_per_round)
+
     def capture_data(self, manager: Manager):
         """Captures data for the round"""
 
@@ -79,14 +85,22 @@ class Animater(Base_Grapher):
         # Step 2: Get all the bucket ids ever made
         bucket_ids = self._get_bucket_ids()
         # Format graph
-        fig, ax, buckets_per_row = self._format_graph(max_users_y, bucket_ids)
+        fig, buckets_per_row = self._format_graph(max_users_y, bucket_ids)
         # Create bucket id patches
         self._create_buckets(bucket_ids, buckets_per_row, max_users_y)
         self._create_users(good_user_ids, attacker_ids)
         for manager_copy in self.manager_copies:
             self._append_bucket_data(manager_copy)
             self._append_user_data(manager_copy)
-        self.round_text = Anim_Round_Text(0)
+        self.round_text = Anim_Round_Text(self.high_res,
+                                          0,
+                                          self.ax,
+                                          self.manager.__class__.__name__,
+                                          self.frames_per_round,
+                                          self.user_cls,
+                                          self.attacker_cls)
+
+        return fig
 
     def _get_user_data(self):
         """Gets the max number of users in a given bucket for any round ever"""
@@ -146,7 +160,7 @@ class Animater(Base_Grapher):
                  * rows + 1)
 
         ax = plt.axes(xlim=(0, min(len(bucket_ids),
-                                   row_cutoff) * Anim_Bucket.patch_length()),
+                                   row_cutoff) * (Anim_Bucket.patch_length() + Anim_Bucket.patch_padding)),
                       ylim=(0, y_max))
         ax.set_axis_off()
         ax.margins(0)
@@ -158,7 +172,9 @@ class Animater(Base_Grapher):
                                        cmap=plt.cm.Oranges,
                                        cmap_range=(0.1, 0.6))
 
-        return fig, ax, row_cutoff
+
+        self.ax = ax
+        return fig, row_cutoff
 
     def _create_buckets(self, bucket_ids, buckets_per_row, max_users_y):
         self.buckets = {_id: Anim_Bucket(_id, buckets_per_row, max_users_y)
@@ -168,17 +184,18 @@ class Animater(Base_Grapher):
     def _create_users(self, good_user_ids, attacker_ids):
         # Create user id patches
         self.users = {}
-        for _id, cls in zip([good_user_ids, attacker_ids],
+        for _ids, cls in zip([good_user_ids, attacker_ids],
                             [Anim_User, Anim_Attacker]):
-            og_bucket_id = self.manager.users[_id].bucket.id
+            for _id in _ids:
+                og_bucket_id = self.manager.users[_id].bucket.id
 
-            self.users[_id] = cls(_id, self.buckets[og_bucket_id])
+                self.users[_id] = cls(_id, self.buckets[og_bucket_id])
 
     def _append_bucket_data(self, manager_copy):
         used_bucket_ids = set()
         for b in manager_copy.used_buckets:
             state = B_States.ATTACKED if b.attacked else B_States.USED
-            self.buckets[bucket.id].states.append(state)
+            self.buckets[b.id].states.append(state)
             used_bucket_ids.add(b.id)
 
         for bucket_id, bucket in self.buckets.items():
@@ -186,7 +203,7 @@ class Animater(Base_Grapher):
                 bucket.states.append(B_States.UNUSED)
 
     def _append_user_data(self, manager_copy):
-        user_y_pts = set()
+        user_y_pts = {}
         for _id, anim_user in self.users.items():
             user = manager_copy.users[_id]
             if user.status == Status.DISCONNECTED:
@@ -196,12 +213,15 @@ class Animater(Base_Grapher):
             elif user.status == Status.CONNECTED:
                 anim_bucket = self.buckets[user.bucket.id]
                 x = anim_bucket.patch_center()
-                y = Anim_User.patch_padding + anim_bucket.patch.get_y()
+                y = Anim_User.patch_padding + anim_bucket.patch.get_y() + Anim_User.patch_radius
                 # Move the user higher if other user in that spot
-                while y in user_y_pts:
-                    y += Anim_User.patch_radius
+                while y in user_y_pts.get(user.bucket.id, set()):
+                    # * 2 for diameter
+                    y += Anim_User.patch_radius * 2
                     y += Anim_User.patch_padding * 2
-                user_y_pts.add(y)
+                if user_y_pts.get(user.bucket.id) is None:
+                    user_y_pts[user.bucket.id] = set()
+                user_y_pts[user.bucket.id].add(y)
 
             anim_user.points.append([x, y])
             anim_user.suspicions.append(user.suspicion)
@@ -212,9 +232,9 @@ class Animater(Base_Grapher):
         Saves all data to an mp4 file. Note, you can increase or
         decrease total number of frames in this function"""
 
-        self.set_up_animation()
+        fig = self.set_up_animation()
         frames = total_rounds * self.frames_per_round
-        anim = animation.FuncAnimation(self.fig, self.animate,
+        anim = animation.FuncAnimation(fig, self.animate,
                                        init_func=self.init,
                                        frames=frames,
                                        interval=40,
@@ -251,8 +271,10 @@ class Animater(Base_Grapher):
         Sets z order: bucket->horns->attacker/user->text"""
 
         zorder = 0
-        for obj in self.animation_instances:
-            zorder = obj.add_to_anim(ax, zorder)
+        for obj in self.animation_instances[:-1]:
+            zorder = obj.add_to_anim(self.ax, zorder)
+        err = "Change list slice above"
+        assert isinstance(self.animation_instances[-1], Anim_Round_Text), err
 
         return self.animation_objects
 
@@ -284,12 +306,20 @@ class Animater(Base_Grapher):
         for instance in self.animation_instances:
             instance.animate(frame,
                              self.frames_per_round,
-                             self.track_suspicion,
+                             self.track_suspicions,
                              self.color_generator)
 
         # Must recreate round text every time
         if frame % self.frames_per_round:
-            self.round_text = Anim_Round_Text(frame % self.frames_per_round)
+            self.round_text = Anim_Round_Text(self.high_res,
+                                              frame % self.frames_per_round,
+                                              self.ax,
+                                              self.manager.__class__.__name__,
+                                              self.frames_per_round,
+                                              self.user_cls,
+                                              self.attacker_cls)
+            self.round_text.add_to_anim(self.ax, 1000 + frame)
+
         return self.animation_objects
 
     def set_matplotlib_args(self):

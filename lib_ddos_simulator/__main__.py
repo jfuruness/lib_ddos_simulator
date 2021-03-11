@@ -48,7 +48,7 @@ def main():
             DDOS_Simulator(args.num_users,  # number of users
                            args.num_attackers,  # number of attackers
                            args.num_buckets,  # number of buckets
-                           Manager.runnable_managers,
+                           [Sieve_Manager_V0_S0],#Manager.runnable_managers,
                            graph_dir=args.graph_dir,
                            save=args.save,
                            debug=args.debug,

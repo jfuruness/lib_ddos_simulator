@@ -76,7 +76,6 @@ class DDOS_Simulator:
 
         for manager in self.managers:
             self.run_sim(manager, num_rounds, animate, graph_trials)
-            assert False, "Perform animation here"
 
         # Returns latest utility, used for combination graphing
         return self.grapher.graph(graph_trials, self.attacker_cls)

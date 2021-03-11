@@ -6,21 +6,24 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from matplotlib.pyplot import Polygon
 import numpy as np
 
-from ..simulation_objects.anim_user import Anim_User
+from .anim_user import Anim_User
 
 
 class Anim_Attacker(Anim_User):
     """Animated User"""
 
+    og_face_color = "r"
+
     def __init__(self, *args, **kwargs):
         """Stores user values"""
 
         super(Anim_Attacker, self).__init__(*args, **kwargs)
-        self.horns = plt.Polygon(0 * self.get_horn_array(),
-                                 fc=self.og_face_color,
-                                 "ec"=k)
+        self.horns = Polygon(0 * self.get_horn_array(),
+                             fc=self.og_face_color,
+                             ec="k")
         # .4 if self.high_res else .5
         self.horns.set_linewidth(.5)
 

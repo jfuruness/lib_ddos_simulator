@@ -94,7 +94,6 @@ class Sieve_Manager_Base(Manager):
                            for i in range(num_buckets_per_round)]
             shuffled_users = reduce(lambda x, y: x+y,
                                     [bucket.users for bucket in cur_buckets])
-            random.seed(str(self.json) + str(current_index))
             random.shuffle(shuffled_users)
             user_chunks = split_list(shuffled_users, num_buckets_per_round)
             for bucket, user_chunk in zip(cur_buckets, user_chunks):

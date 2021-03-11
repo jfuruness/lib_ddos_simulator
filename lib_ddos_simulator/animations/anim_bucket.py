@@ -9,7 +9,7 @@ __status__ = "Development"
 from matplotlib.patches import FancyBboxPatch
 
 from .anim_user import Anim_User
-
+from .bucket_states import Bucket_States
 
 class Anim_Bucket:
     """Animated_Bucket"""
