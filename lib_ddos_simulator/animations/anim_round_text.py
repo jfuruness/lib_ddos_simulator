@@ -27,7 +27,7 @@ class Anim_Round_Text:
         self.attacker_cls = attacker_cls
         bbox_kwargs = dict(facecolor='white', alpha=1)
         if high_res:
-            bbox__kwargs["boxstyle"] = "square,pad=.05"
+            bbox_kwargs["boxstyle"] = "square,pad=.05"
 
         self.patch = text(ax.get_xlim()[1] * .5,
                           ax.get_ylim()[1] - .5,
