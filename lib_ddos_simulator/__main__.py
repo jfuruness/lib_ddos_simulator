@@ -66,7 +66,6 @@ def main():
         DDOS_Simulator(args.num_users,
                        args.num_attackers,
                        args.num_buckets,
-                       args.threshold,
                        Manager.runnable_managers,
                        debug=args.debug,
                        graph_dir=args.graph_dir,

@@ -52,7 +52,7 @@ class Combination_Grapher(Base_Grapher):
             # Note that for range, last number is not included
             num_buckets_list=[1],
             # Note that this is the users per bucket, not total users
-            users_per_bucket_list=[10 ** i for i in range(1, 2)],
+            users_per_bucket_list=[10 ** i for i in range(3, 4)],
             num_rounds_list=[10 ** i for i in range(1, 2)],
             trials=2):
         """Runs in parallel every possible scenario
@@ -319,7 +319,7 @@ class Combination_Grapher(Base_Grapher):
         # https://stackoverflow.com/a/16910957/8903959
         cpt = sum([len([x for x in files if "json" not in x.lower()])
                    for r, d, files in os.walk(self.graph_dir)])
-        print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
+        print(f"Starting: {cpt}/{total_num}", end="      \r")
 
     def populate_axs(self,
                      axs,
