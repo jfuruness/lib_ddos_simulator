@@ -31,15 +31,14 @@ class Anim_Round_Text:
 
         self.patch = text(ax.get_xlim()[1] * .5,
                           ax.get_ylim()[1] - .5,
-                          self._get_round_text(0),
+                          self._get_round_text(int(round_num)),
                           fontsize=12,
                           bbox=bbox_kwargs,
                           horizontalalignment='center',
                           verticalalignment='center')
 
     def add_to_anim(self, ax, zorder):
-        self.patch.set_zorder(zorder)
-        return zorder + 1
+        return zorder
 
     @property
     def anim_objects(self):
@@ -48,12 +47,10 @@ class Anim_Round_Text:
 
     def _get_round_text(self, round_num):
         return (f"{self.name}: "
-                f"Round {round_num // self.frames_per_round}     "
+                f"Round {int(round_num)}     "
                 f"{self.user_cls.__name__}|||"
                 f"{self.attacker_cls.__name__}")
 
     def animate(self, frame, frames_per_round, *args):
         if frame % frames_per_round == 0:
-            self.patch.set_zorder(0)
-            self.patch.set_visible(False)
-            self.patch.remove()
+            self.patch.set_text(self._get_round_text(frame / frames_per_round))

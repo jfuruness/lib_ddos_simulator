@@ -271,10 +271,8 @@ class Animater(Base_Grapher):
         Sets z order: bucket->horns->attacker/user->text"""
 
         zorder = 0
-        for obj in self.animation_instances[:-1]:
+        for obj in self.animation_instances:
             zorder = obj.add_to_anim(self.ax, zorder)
-        err = "Change list slice above"
-        assert isinstance(self.animation_instances[-1], Anim_Round_Text), err
 
         return self.animation_objects
 
@@ -308,17 +306,6 @@ class Animater(Base_Grapher):
                              self.frames_per_round,
                              self.track_suspicions,
                              self.color_generator)
-
-        # Must recreate round text every time
-        if frame % self.frames_per_round:
-            self.round_text = Anim_Round_Text(self.high_res,
-                                              frame / self.frames_per_round,
-                                              self.ax,
-                                              self.manager.__class__.__name__,
-                                              self.frames_per_round,
-                                              self.user_cls,
-                                              self.attacker_cls)
-            self.round_text.add_to_anim(self.ax, 1000 + frame)
 
         return self.animation_objects
 
