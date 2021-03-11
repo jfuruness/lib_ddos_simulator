@@ -312,7 +312,7 @@ class Animater(Base_Grapher):
         # Must recreate round text every time
         if frame % self.frames_per_round:
             self.round_text = Anim_Round_Text(self.high_res,
-                                              frame % self.frames_per_round,
+                                              frame / self.frames_per_round,
                                               self.ax,
                                               self.manager.__class__.__name__,
                                               self.frames_per_round,
