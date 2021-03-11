@@ -34,7 +34,6 @@ class Bucket_States(Enum):
 class Animater(Base_Grapher):
     """animates a DDOS attack"""
 
-    eliminated_location = (-10, -10)
     low_dpi = 60
     # Anything higher than 600 and you must drastically increase bitrate
     # However increasing bitrate cause crashes elsewhere
@@ -59,7 +58,6 @@ class Animater(Base_Grapher):
         self.manager = deepcopy(manager)
         self.manager_copies = [deepcopy(manager)]
 
-
         # DPI for plotting graph
         self.dpi = self.high_dpi if self.high_res else self.low_dpi
         # Number of buckets in a single row
@@ -83,10 +81,12 @@ class Animater(Base_Grapher):
         for manager_copy in self.manager_copies:
             self._append_bucket_data(manager_copy)
             self._append_user_data(manager_copy)
+        self.round_text = Anim_Round_Text()
 
     def _get_user_data(self):
         """Gets the max number of users in a given bucket for any round ever"""
 
+        self.track_suspicions = False
         # self.managers is a deep copy stored each round
         good_user_ids = set()
         attacker_ids = set()
@@ -98,6 +98,8 @@ class Animater(Base_Grapher):
                         attacker_ids.add(user.id)
                     else:
                         good_user_ids.add(user.id)
+                    if user.suspicion > 0:
+                        self.track_suspicions = True
             # Get the max y val for that round
             temp_max_users_y = max(len(x) for x in manager.used_buckets)
             # Set the max y value for all rounds
@@ -183,9 +185,9 @@ class Animater(Base_Grapher):
         for _id, anim_user in self.users.items():
             user = manager_copy.users[_id]
             if user.status = Status.DISCONNECTED:
-                x, y = self.disconnected_location
+                x, y = user.disconnected_location
             elif user.status = Status.ELIMINATED:
-                x, y = self.eliminated_location
+                x, y = user.eliminated_location
             elif user.status = Status.CONNECTED:
                 anim_bucket = self.buckets[user.bucket.id]
                 x = anim_bucket.patch_center()
@@ -252,48 +254,26 @@ class Animater(Base_Grapher):
 
         Sets z order: bucket->horns->attacker/user->text"""
 
-        for bucket in self.buckets:
-            self.ax.add_patch(bucket.patch)
-            bucket.patch.set_zorder(1)
-            if bucket.states[0] == Bucket_States.UNUSED:
-                bucket.patch.set_alpha(0)
-            elif bucket.states[0] == Bucket_States.ATTACKED:
-                # Change this to not be hardcoded
-                bucket.patch.set_facecolor("y")
-        zorder = 2
-        max_sus = 0
-        for user in self.users:
-            max_sus = max(max(user.suspicions), max_sus)
-            user.patch.center = user.points[0]
+        zorder = 0
+        for obj in self.animation_instances:
+            zorder = obj.add_to_anim(ax, zorder)
 
-            self.ax.add_patch(user.patch)
-            if isinstance(user, Attacker):
-                user.horns.set_zorder(zorder)
-                zorder += 1
-                self.ax.add_patch(user.horns)
-                user.horns.set_xy(self.get_horn_array(user))
-            user.patch.set_zorder(zorder)
-            zorder += 1
-            user.text.set_y(user.points[0][1])
-            user.text.set_zorder(zorder)
-            zorder += 1
+        return self.animation_objects
 
-        self.track_suspicions = max_sus != 0
+    @property
+    def animation_instances(self):
+        """instances being animated"""
+        return (list(self.buckets.values())
+                + list(self.users.values())
+                + [self.round_text])
 
-        round_text_kwargs = dict(facecolor='white', alpha=1)
-        if self.high_res:
-            round_text_kwargs["boxstyle"] = "square,pad=.05"
-
-        self.round_text = plt.text(self.ax.get_xlim()[1] * .5,
-                                   self.ax.get_ylim()[1] - .5,
-                                   self._get_round_text(0),
-                                   fontsize=12 if self.high_res else 12,
-                                   bbox=round_text_kwargs,
-                                   horizontalalignment='center',
-                                   verticalalignment='center')
-
-
-        return self.return_animation_objects()
+    @property
+    def animation_objects(self):
+        """objects used by matplotlib"""
+        objs = []
+        for instance in self.animation_instances:
+            objs.extend(instance.anim_objects)
+        return objs
 
     def animate(self, i):
         """Animates the frame
@@ -304,57 +284,10 @@ class Animater(Base_Grapher):
         and text of the user as well
         """
 
-        self.animate_users(i)
-        self.animate_buckets(i)
-        self.animate_round_text(i)
-        return self.return_animation_objects(i)
 
-    def animate_users(self, i):
-        for user in self.users:
-            current_point = user.points[i // self.frames_per_round]
-            future_point = user.points[(i // self.frames_per_round) + 1]
-            if current_point != future_point or i % self.frames_per_round != 0:
-                remainder = i - ((i // self.frames_per_round)
-                                 * self.frames_per_round)
-                next_point_x1_contr = current_point[0] * (
-                    (self.frames_per_round - remainder) / self.frames_per_round)
-                next_point_x2_contr = future_point[0] * (
-                    remainder / self.frames_per_round)
-                next_point_y1_contr = current_point[1] * (
-                    (self.frames_per_round - remainder) / self.frames_per_round)
-                next_point_y2_contr = future_point[1] * (
-                    remainder / self.frames_per_round)
-                next_point = (next_point_x1_contr + next_point_x2_contr,
-                              next_point_y1_contr + next_point_y2_contr)
-                user.patch.center = next_point
-                if isinstance(user, Attacker):
-                    user.horns.set_xy(self.get_horn_array(user))
-                user.text.set_x(next_point[0])
-                user.text.set_y(next_point[1])
-            if (future_point == self.detected_location
-                and current_point != self.detected_location
-                and i % self.frames_per_round== 0):
-                user.text.set_text("Detected")
-                user.patch.set_facecolor("grey")
-            elif (future_point == self.disconnected_location
-                  and current_point != self.disconnected_location
-                  and i % self.frames_per_round== 0):
-                  user.text.set_text("Disconnected")
-                  user.patch.set_facecolor("purple")
-            else:
-                if self.track_suspicions and i % self.frames_per_round == 0:
-                    text = f"{user.suspicions[(i//self.frames_per_round) + 1]:.1f}"
-                    user.text.set_text(f"{user.id:2.0f}:{text}")
-                if i == 0:
-                    user.patch.set_facecolor(user.og_face_color)
-                if (current_point not in [self.disconnected_location, self.detected_location]
-                    and future_point not in [self.disconnected_location, self.detected_location]):
-                    user.patch.set_facecolor(user.og_face_color)
-                    text = user.text.get_text().lower()
-                    # String comparisons no!!!
-                    if "disconnected" in text or "detected" in text:
-                        text = str(user.id)
-                        user.text.set_text(text)
+        for instance in self.animation_instances:
+            instance.animate(i)
+        return self.animation_objects
 
     def animate_buckets(self, i):
         for bucket in self.buckets:
@@ -394,21 +327,6 @@ class Animater(Base_Grapher):
                                    bbox=round_text_kwargs,
                                    horizontalalignment='center',
                                    verticalalignment='center')
-
-    def return_animation_objects(self, *args):
-        horns = [x.horns for x in self.users if isinstance(x, Attacker)]
-
-        objs = [x.patch for x in self.users] + [x.text for x in self.users]
-        objs += [self.round_text] + horns
-        objs += [x.patch for x in self.buckets]
-        return objs
-
-    def _get_round_text(self, round_num):
-        return (f"{self.name}: "
-                f"Round {round_num // self.frames_per_round}     "
-                f"{self.sim_cls.__name__}|||"
-                f"{self.user_cls.__name__}|||"
-                f"{self.attacker_cls.__name__}")
 
     def set_matplotlib_args(self):
         self.set_dpi()

@@ -16,6 +16,8 @@ class Anim_Bucket:
     patch_width = Anim_User.patch_length()
     patch_padding = .5
     og_face_color = "b"
+    attacked_face_color = "y"
+    zorder = 1
 
     def __init__(self, id, buckets_per_row, max_users):
         """Stores users"""
@@ -37,6 +39,26 @@ class Anim_Bucket:
                                     "fc": self.og_face_color,
                                     "boxstyle": "round,pad=0.1")
         self.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+
+    def add_to_anim(self, ax, zorder):
+        """Adds patch to the animation for the first time"""
+
+        ax.add_patch(self.patch)
+        self.patch.set_zorder(self.zorder)
+        # Make it transparent if unused
+        if self.states[0] == Bucket_States.UNUSED:
+            self.patch.set_alpha(0)
+        # Make it yellow if attacked
+        elif self.states[0] == Bucket_States.ATTACKED:
+            self.patch.set_facecolor(self.attacked_face_color)
+
+        return zorder + 1
+
+    @property
+    def anim_objects(self):
+        """Returns animation objects used by matplotlib"""
+
+        return [self.patch]
 
     @staticmethod
     def patch_length():
