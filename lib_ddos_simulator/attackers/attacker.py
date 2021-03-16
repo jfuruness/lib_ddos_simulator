@@ -16,6 +16,10 @@ class Attacker(User):
 
     # List of attackers that inherit from this class
     runnable_attackers = []
+    # List of attackers that are in our paper (the rest are too weak)
+    paper_attackers = []
+    # Default to True
+    paper = True
 
     # https://stackoverflow.com/a/43057166/8903959
     def __init_subclass__(cls, **kwargs):
@@ -28,6 +32,8 @@ class Attacker(User):
         assert hasattr(cls, "runnable"), "Subclass must have runnable bool"
         if cls.runnable:
             cls.runnable_attackers.append(cls)
+            if cls.paper:
+                cls.paper_attackers.append(cls)
 
     def take_action(self, manager, turn):
         """Action that user takes every round"""

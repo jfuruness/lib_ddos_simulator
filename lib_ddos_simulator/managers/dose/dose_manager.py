@@ -91,7 +91,8 @@ class DOSE_Manager(Manager):
 
     __slots__ = ["dose_atk_events"]
 
-    runnable = False
+    runnable = True
+    paper = False
 
     # Single threat case hardcoded to 2 in DOSE code
     # Multithreat case is hardcoded to 3 in DOSE code

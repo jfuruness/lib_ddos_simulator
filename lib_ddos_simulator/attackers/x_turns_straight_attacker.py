@@ -15,6 +15,7 @@ class X_Turns_Straight_Attacker(Attacker):
     """Attacker that attacks for x turns straight"""
 
     runnable = False
+    paper = False
 
     def __init__(self, *args, **kwargs):
         assert not self.runnable or hasattr(self, "turns_in_a_row")

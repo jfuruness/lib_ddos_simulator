@@ -24,15 +24,15 @@ class Sieve_Manager_V0(Sieve_Manager_Base):
 
 
 class Sieve_Manager_V0_S0(Sieve_Manager_V0):
-    runnable = False
+    runnable = True
     suspicion_func_num = 0
 
 
 class Sieve_Manager_V0_S1(Sieve_Manager_V0):
-    runnable = False
+    runnable = True
     suspicion_func_num = 1
 
 
 class Sieve_Manager_V0_S2(Sieve_Manager_V0):
-    runnable = False
+    runnable = True
     suspicion_func_num = 2

@@ -15,6 +15,7 @@ class Patient_Attacker(Attacker):
     """Attacker waits until they are in a combined bucket before attacking"""
 
     runnable = False
+    paper = False
 
     __slots__ = ["starting_users", "total_additions"]
 

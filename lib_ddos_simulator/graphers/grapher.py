@@ -30,7 +30,7 @@ class Grapher(Base_Grapher):
         # Dictionary for recording stats
         self._data = {manager: {"X": [],
                                 "Y": {"num_buckets": [],
-                                      "total_good_not_serviced": [],
+                                      "good_users_not_serviced": [],
                                       "total_good_users": [],
                                       "harm": [],
                                       "total_serviced": [],
@@ -63,10 +63,10 @@ class Grapher(Base_Grapher):
         cur_data["percent_serviced"].append(percent_serviced)
 
         # good users not serviced
-        cur_data["good_users_not_serviced"] = [x for x in manager.connected_good_users
-                                               if x.bucket.attacked]
-        cur_data["good_users"] = manager.connected_good_users
-        cur_data["harm"] = cur_data["good_users_not_serviced"] / cur_data["good_users"]
+        cur_data["good_users_not_serviced"].append(len([x for x in manager.connected_good_users
+                                                        if x.bucket.attacked]))
+        cur_data["total_good_users"].append(len(manager.connected_good_users))
+        cur_data["harm"].append(sum(cur_data["good_users_not_serviced"]) / sum(cur_data["total_good_users"]))
 
 
         # Utility: total number ever serviced / total number of buckets used

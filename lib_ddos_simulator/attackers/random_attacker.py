@@ -17,6 +17,7 @@ class Random_Attacker(Attacker):
     """Attacks at random self._percent_change_attack of the time"""
 
     runnable = False
+    paper = False
 
     def _attack(self, manager, turn):
         if random() < self._percent_chance_attack:

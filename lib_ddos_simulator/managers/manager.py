@@ -19,6 +19,8 @@ class Manager:
     """Simulates a manager for a DDOS attack"""
 
     runnable_managers = []
+    # Managers we are including in our paper
+    paper_managers = []
 
     # https://stackoverflow.com/a/43057166/8903959
     def __init_subclass__(cls, **kwargs):
@@ -37,11 +39,18 @@ class Manager:
             else:
                 cls.runnable_managers.append(cls)
                 Manager.runnable_managers.append(cls)
+                if cls.paper:
+                    cls.paper_managers.append(cls)
+                    Manager.paper_managers.append(cls)
 
         for q in [Manager, cls]:
             # Sorts alphabetically
             q.runnable_managers = list(sorted(set(q.runnable_managers),
                                               key=lambda x: x.__name__))
+            # Sorts alphabetically
+            q.paper_managers = list(sorted(set(q.paper_managers),
+                                           key=lambda x: x.__name__))
+
 
     def __init__(self, num_buckets: int, users: list):
         """inits buckets and stores threshold"""

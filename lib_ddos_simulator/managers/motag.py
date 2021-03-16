@@ -43,6 +43,7 @@ class Motag_Manager(Manager):
     __slots__ = []
 
     runnable = True
+    paper = False
     prox = 3#20
     percent_users_to_save = .95
 

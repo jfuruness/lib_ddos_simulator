@@ -25,6 +25,7 @@ class Protag_Manager_Base(Manager):
     __slots__ = ["tracked_splits"]
 
     runnable = False
+    paper = True
     split_factor = 2
 
     def __init__(self, *args, **kwargs):
@@ -47,7 +48,7 @@ class Protag_Manager_Base(Manager):
         bucks = self.attacked_buckets
         for bucket in bucks:
             # Attacked with more than one user, split in two
-            user_chunks = split_list(bucket.users, self.split_factor)
+            user_chunks = split_list(bucket.users, min(self.split_factor, len(bucket.users)))
             bucket.users = []
             split_set = set()
             for user_chunk in user_chunks:

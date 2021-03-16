@@ -47,13 +47,13 @@ class Combination_Grapher(Base_Grapher):
 
     def run(self,
             ddos_sim_cls_list=None,
-            managers=Manager.runnable_managers,
-            attackers=Attacker.runnable_attackers,
+            managers=Manager.paper_managers,
+            attackers=Attacker.paper_attackers,
             # Note that for range, last number is not included
             num_buckets_list=[1],
             # Note that this is the users per bucket, not total users
             users_per_bucket_list=[10 ** i for i in range(3, 4)],
-            num_rounds_list=[10 ** i for i in range(1, 2)],
+            num_rounds_list=[10 ** i for i in range(2, 3)],
             trials=2):
         """Runs in parallel every possible scenario
 

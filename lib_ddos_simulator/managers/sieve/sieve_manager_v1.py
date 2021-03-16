@@ -23,15 +23,15 @@ class Sieve_Manager_V1(Sieve_Manager_Base):
         return self.attacked_buckets
 
 class Sieve_Manager_V1_S0(Sieve_Manager_V1):
-    runnable = False
+    runnable = True
     suspicion_func_num = 0
 
 
 class Sieve_Manager_V1_S1(Sieve_Manager_V1):
-    runnable = False
+    runnable = True
     suspicion_func_num = 1
 
 
 class Sieve_Manager_V1_S2(Sieve_Manager_V1):
-    runnable = False
+    runnable = True
     suspicion_func_num = 2

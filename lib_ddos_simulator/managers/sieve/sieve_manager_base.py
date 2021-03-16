@@ -27,6 +27,7 @@ class Sieve_Manager_Base(Manager):
     __slots__ = []
 
     runnable = False
+    paper = False
     start_number_of_buckets = 10
 
     def __init__(self, *args, **kwargs):
