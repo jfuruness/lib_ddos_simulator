@@ -42,13 +42,15 @@ class Motag_Manager(Manager):
 
     __slots__ = []
 
-    prox = 20
+    runnable = True
+    prox = 3#20
     percent_users_to_save = .95
-    start_number_of_buckets = 10
 
     def detect_and_shuffle(self, *args):
         """Motag Manager algorithm"""
 
+        self.remove_attackers()
+        self.combine_buckets()
         serviced_users = sum([len(x) for x in self.non_attacked_buckets])
         # LOL just drop the buckets
         if serviced_users / len(self.connected_users) > self.percent_users_to_save:
@@ -113,7 +115,6 @@ class Motag_Manager(Manager):
             for bucket in self.attacked_buckets:
                 attacked_users.extend(bucket.users)
                 bucket.users = []
-            random.seed(manager.json)
             random.shuffle(attacked_users)
         if prox is None:
             prox = self.prox - len(self.non_attacked_buckets)
@@ -151,4 +152,16 @@ class Motag_Manager(Manager):
             if save > _max:
                 _max = save
                 max_assign = i
-        return max_assign
+        # If max assign is 0, return 1 instead
+        # NOTE: This is a bug in their sudo code that we are fixing
+        return max(max_assign, 1)
+
+    def combine_buckets(self):
+        """Merge all non attacked buckets"""
+
+        users = []
+        for bucket in self.non_attacked_buckets:
+            users.extend(bucket.users)
+            bucket.users = []
+        if len(users) > 0:
+            self.get_new_bucket().reinit(users)

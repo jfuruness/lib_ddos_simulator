@@ -14,14 +14,6 @@ from ..simulation_objects import User
 class Attacker(User):
     """Simulates an attacker for a DDOS attack"""
 
-    # Horns is used for animations
-    __slots__ = ["horns"]
-
-    og_face_color = "r"
-
-    # Whether attacker attacks alone or not
-    lone = False
-
     # List of attackers that inherit from this class
     runnable_attackers = []
 
@@ -34,24 +26,15 @@ class Attacker(User):
 
         super().__init_subclass__(**kwargs)
         assert hasattr(cls, "runnable"), "Subclass must have runnable bool"
-        if cls.runnable and not cls.lone:
+        if cls.runnable:
             cls.runnable_attackers.append(cls)
 
     def take_action(self, manager, turn):
         """Action that user takes every round"""
 
-        self.attack(manager, turn)
+        self._attack(manager, turn)
         User.take_action(self, manager, turn)
         assert self.bucket in manager.buckets
-
-    def attack(self, manager, turn):
-        """Attacks the bucket it's in"""
-
-        # Don't attack if another attacker attacked
-        if self.lone and self.bucket.attacked:
-            return
-        else:
-            self._attack(manager, turn)
 
     def _attack(self, manager, turn):
         """Set bucket to be attacked"""

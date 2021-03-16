@@ -11,12 +11,15 @@ __status__ = "Development"
 from .bounded_manager import Bounded_Manager
 from .dose import DOSE_Manager, DOSE_Attack_Event
 # Commented out due to bugs in sudo code of their paper
-# from .motag import Motag_Manager
+from .motag import Motag_Manager
 from .protag import Protag_Manager_Base
 from .protag import Protag_Manager_Merge
 from .protag import Protag_Manager_No_Merge
 from .protag import Protag_Manager_Smart_Merge
 from .protag import Protag_Manager_Smart_Merge_Conservative
+from .protag import Protag_Manager_Smart_Merge_3
+from .protag import Protag_Manager_Smart_Merge_Conservative_3
+
 
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2
 from .sieve import Sieve_Manager_V0_W_Stop_S0

@@ -15,8 +15,3 @@ class Basic_Attacker(Attacker):
     """Basic attacker class"""
 
     runnable = True
-
-class Basic_Lone_Attacker(Basic_Attacker):
-    """Attacks every turn if no attacker in it's bucket attacked"""
-
-    lone = True

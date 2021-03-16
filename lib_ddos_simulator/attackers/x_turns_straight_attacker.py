@@ -25,12 +25,6 @@ class X_Turns_Straight_Attacker(Attacker):
             self.bucket.attacked = True
 
 
-class X_Turns_Straight_Lone_Attacker(X_Turns_Straight_Attacker):
-    """Attacks on even turns if no attacker in it's bucket attacked"""
-
-    lone = True
-
-
 class Three_Turns_Straight_Attacker(X_Turns_Straight_Attacker):
     """Attacker that attacks for x turns straight"""
 

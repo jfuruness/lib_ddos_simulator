@@ -23,9 +23,3 @@ class Never_Alone_Attacker(Attacker):
             self.bucket.attacked = True
         elif attacker_count == 0:
             assert False, "This should never happen"
-        
-
-class Never_Alone_Lone_Attacker(Never_Alone_Attacker):
-    """Attacks every turn if no attacker in it's bucket attacked"""
-
-    lone = True

@@ -20,11 +20,6 @@ class Bucket:
     __slots__ = ["users", "attacked", "patch",
                  "turns_not_attacked", "states", "id"]
 
-    # Used in animations
-    patch_width = User.patch_length()
-    patch_padding = .5
-    og_face_color = "b"
-
     def __init__(self, users=[], id=0, attacked=False):
         """Stores users"""
 
@@ -73,22 +68,3 @@ class Bucket:
         multiplier = int(self.attacked)
         for user in self.users:
             user.suspicion += (1 / len(self.users)) * multiplier
-
-###########################
-### Animation Functions ###
-###########################
-
-    @staticmethod
-    def patch_length():
-        """Animation object length"""
-
-        return Bucket.patch_width + Bucket.patch_padding * 2
-
-    @property
-    def patch_height(self):
-        return self.patch.get_height() + Bucket.patch_padding * 2
-
-    def patch_center(self):
-        """Gets the center of the animation object for moving"""
-
-        return self.patch.get_x() + self.patch.get_width() / 2

@@ -21,9 +21,3 @@ class Never_Last_Attacker(Attacker):
             self.bucket.attacked = True
         elif len(self.bucket) == 0:
             assert False, "This should never happen"
-        
-
-class Never_Last_Lone_Attacker(Never_Last_Attacker):
-    """Attacks every turn if no attacker in it's bucket attacked"""
-
-    lone = True

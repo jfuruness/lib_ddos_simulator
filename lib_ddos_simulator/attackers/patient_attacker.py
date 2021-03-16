@@ -43,26 +43,10 @@ class Wait_For_One_Addition_Attacker(Patient_Attacker):
     num_additions = 1
 
 
-class Wait_For_One_Addition_Lone_Attacker(Wait_For_One_Addition_Attacker):
-    """Attacker waits until they are in a combined bucket before attacking
-
-    and only attacks when no other attacker attacks in their bucket"""
-
-    lone = True
-
-
 class Wait_For_Two_Additions_Attacker(Patient_Attacker):
     """Attacker waits until their bucket size increased twice to attack"""
     runnable = True
     num_additions = 2
-
-
-class Wait_For_Two_Additions_Lone_Attacker(Wait_For_Two_Additions_Attacker):
-    """Attacker waits until their bucket size increased thrice to attack
-
-    and only attacks when no other attacker attacks in their bucket"""
-
-    lone = True
 
 
 class Wait_For_Three_Additions_Attacker(Patient_Attacker):
@@ -70,11 +54,3 @@ class Wait_For_Three_Additions_Attacker(Patient_Attacker):
 
     runnable = True
     num_additions = 3
-
-
-class Wait_For_Three_Additions_Lone_Attacker(Wait_For_Three_Additions_Attacker):
-    """Attacker waits until their bucket size increased thrice to attack
-
-    and only attacks when no other attacker attacks in their bucket"""
-
-    lone = True

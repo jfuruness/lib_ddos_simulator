@@ -31,15 +31,15 @@ class Sieve_Manager_KPO(Sieve_Manager_Base):
 
 
 class Sieve_Manager_KPO_S0(Sieve_Manager_KPO):
-    runnable = True
+    runnable = False
     suspicion_func_num = 0
 
 
 class Sieve_Manager_KPO_S1(Sieve_Manager_KPO):
-    runnable = True
+    runnable = False
     suspicion_func_num = 1
 
 
 class Sieve_Manager_KPO_S2(Sieve_Manager_KPO):
-    runnable = True
+    runnable = False
     suspicion_func_num = 2

@@ -20,11 +20,6 @@ class User:
                  "track_suspicion", "status", "turns_attacked_in_a_row",
                  "random_sort_id"]
 
-    # Used in animations
-    patch_radius = 1
-    patch_padding = .25
-    og_face_color = "g"
-
     def __init__(self, identifier: int, suspicion: float = 0, bucket=None):
         """Stores user values"""
 
@@ -84,9 +79,3 @@ class User:
 
         # Uses class name so that it also works for attackers
         return f"{self.__class__.__name__} {self.id}:{self.suspicion}"
-
-    @staticmethod
-    def patch_length():
-        """Returns animation object length"""
-
-        return User.patch_radius * 2 + User.patch_padding * 2

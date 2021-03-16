@@ -19,9 +19,3 @@ class Even_Turn_Attacker(Attacker):
     def _attack(self, manager, turn):
         if turn % 2:
             self.bucket.attacked = True
-
-
-class Even_Turn_Lone_Attacker(Even_Turn_Attacker):
-    """Attacks on even turns if no attacker in it's bucket attacked"""
-
-    lone = True

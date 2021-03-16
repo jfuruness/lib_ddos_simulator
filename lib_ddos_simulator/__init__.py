@@ -36,5 +36,8 @@ from .managers import Protag_Manager_Base, Protag_Manager_Merge
 from .managers import Protag_Manager_No_Merge
 from .managers import Protag_Manager_Smart_Merge
 from .managers import Protag_Manager_Smart_Merge_Conservative
+from .managers import Protag_Manager_Smart_Merge_3
+from .managers import Protag_Manager_Smart_Merge_Conservative_3
+
 # Commented out due to bugs in their paper
-#from .managers import Motag_Manager
+from .managers import Motag_Manager

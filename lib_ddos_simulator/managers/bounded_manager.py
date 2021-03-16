@@ -20,7 +20,7 @@ class Bounded_Manager(Manager):
 
     This Manager class uses a bounded shuffling algorithm"""
 
-    runnable = True
+    runnable = False
 
     def detect_and_shuffle(self, *args):
         """Bounded Manager algorithm"""
