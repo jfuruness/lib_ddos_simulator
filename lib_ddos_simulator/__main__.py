@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 import os
 from sys import argv
 
-from .attackers import Basic_Attacker, Even_Turn_Attacker
+from .attackers import Basic_Attacker, Even_Turn_Attacker, Attacker
 from .ddos_simulators import DDOS_Simulator
 from .managers import Manager, Protag_Manager_Smart_Merge, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
 from .utils import Log_Levels
@@ -61,7 +61,17 @@ def main():
                             graph_dir=args.graph_dir,
                             tikz=args.tikz,
                             save=args.save,
-                            high_res=args.high_res).run(trials=args.trials)
+                            high_res=args.high_res).run(
+                                    percent_attackers_list=[x / 100 for x in
+                                                            range(1, 92, 5)],
+                                    managers=Manager.paper_managers,
+                                    attackers=Attacker.paper_attackers,
+                                    num_buckets=1,
+                                    # Note that this is the users per bucket
+                                    # Not total users
+                                    users_per_bucket=20,
+                                    num_rounds=2,
+                                    trials=2)
     else:
         DDOS_Simulator(args.num_users,
                        args.num_attackers,

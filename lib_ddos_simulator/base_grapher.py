@@ -21,20 +21,17 @@ class Base_Grapher:
 
     __slots__ = ["stream_level", "graph_dir", "tikz", "save", "high_res"]
   
-    def __init__(self,
-                 debug=False,
-                 graph_dir=os.path.join("/tmp", "lib_ddos_simulator"),
-                 tikz=False,
-                 save=False,
-                 high_res=False):
+    def __init__(self, **kwargs):
         """Initializes simulation"""
 
-        self.debug = debug
-        self.graph_dir = graph_dir
+        self.debug = kwargs.get("debug", False)
+        self.graph_dir = kwargs.get("graph_dir",
+                                    os.path.join("/tmp", "lib_ddos_simulator"))
         self.make_graph_dir()
-        self.tikz = tikz
-        self.save = save
-        self.high_res = high_res
+        self.tikz = kwargs.get("tikz", False)
+        self.save = kwargs.get("save", False)
+        self.high_res = kwargs.get("high_res", False)
+        self.graph_kwargs = kwargs
 
     def make_graph_dir(self, destroy=False):
         """Creates graph path from scratch"""

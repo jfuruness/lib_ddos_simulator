@@ -21,7 +21,6 @@ from pathos.multiprocessing import ProcessingPool
 import json
 
 from ..base_grapher import Base_Grapher
-from .combo_data_generator import Combo_Data_Generator
 
 from ..attackers import Attacker
 # Done this way to avoid circular imports
@@ -35,26 +34,94 @@ class Worst_Case_Attacker:
     Later used to graph the worst case attacker graph"""
     pass
 
-class Combination_Grapher(Base_Grapher):
+class Utility_Combination_Grapher(Base_Grapher):
     """Compares managers against each other
 
     Plots total utility over all rounds on the Y axis
     Plots % of users that are attackers on the X axis
     """
 
+    graph_attr = "utility"
+
     def __init__(self, *args, **kwargs):
-        super(Combination_Grapher, self).__init__(*args, **kwargs)
+        super(Utility_Combination_Grapher, self).__init__(*args, **kwargs)
         self.second_legend = []
 
-    def run(self, **kwargs):
-        """Runs in parallel every possible scenario, then graphs
+    def run(self,
+            ddos_sim_cls_list=None,
+            managers=Manager.paper_managers,
+            attackers=Attacker.paper_attackers,
+            # Note that for range, last number is not included
+            num_buckets_list=[1],
+            # Note that this is the users per bucket, not total users
+            users_per_bucket_list=[10],#[1000],
+            num_rounds_list=[2],#[100],
+            trials=2):
+        """Runs in parallel every possible scenario
 
         Looks complicated, but no real way to simplify it
-        sorry"""
+        so deal with it"""
+
+        if ddos_sim_cls_list is None:
+            ddos_sim_cls_list = [ddos_simulator.DDOS_Simulator]
 
         # Initializes graph path
-        self.make_graph_dirs(kwargs["attackers"])
-        data = Combo_Data_Generator(**self.graph_kwargs).run(**kwargs)
+        self.make_graph_dir(destroy=True)
+
+        # Total number of scenarios
+        pbar_total = (len(ddos_sim_cls_list) *
+                      len(num_buckets_list) *
+                      len(users_per_bucket_list) *
+                      len(num_rounds_list) *
+                      (len(attackers) + 1))  # Add 1 to attacker for worst case
+
+        _pathos_simulators_list = []
+        _pathos_num_buckets_list = []
+        _pathos_users_per_bucket = []
+        _pathos_num_rounds = []
+        for num_buckets in num_buckets_list:
+            for users_per_bucket in users_per_bucket_list:
+                for num_rounds in num_rounds_list:
+                    for attacker in attackers + [Worst_Case_Attacker]:
+                        for sim_cls in ddos_sim_cls_list:
+                            self.get_attacker_graph_dir(attacker)
+
+                        _pathos_simulators_list.append(sim_cls)
+                        _pathos_num_buckets_list.append(num_buckets)
+                        _pathos_users_per_bucket.append(users_per_bucket)
+                        _pathos_num_rounds.append(num_rounds)
+
+        p = ProcessingPool(nodes=cpu_count())
+        total = len(_pathos_num_rounds)
+        full_args = [_pathos_simulators_list,
+                     [attackers] * total,
+                     _pathos_num_buckets_list,
+                     _pathos_users_per_bucket,
+                     _pathos_num_rounds,
+                     [managers] * total,
+                     [trials] * total,
+                     list(range(total)),
+                     list([pbar_total] * total)]
+
+        # If we are debugging, no multiprocessing
+        # https://stackoverflow.com/a/1987484/8903959
+        # https://stackoverflow.com/a/58866220/8903959
+        if (self.debug or "PYTEST_CURRENT_TEST" in os.environ):
+            for i in range(total):
+                try:
+                    current_args = [x[i] for x in full_args]
+                    self.get_graph_data(*current_args)
+                except Exception as e:
+                    from pprint import pprint
+                    pprint(current_args)
+                    raise e
+        else:
+            p.map(self.get_graph_data, *full_args)
+            p.close()
+            p.join()
+            p.clear()
+        # Get rid of carriage returns
+        print()
 
     def get_graph_data(self,
                        ddos_sim_cls,
@@ -140,16 +207,15 @@ class Combination_Grapher(Base_Grapher):
         sim = ddos_sim_cls(good_users,
                            attackers,
                            num_buckets,
-                           threshold,
                            [manager],
-                           stream_level=self.stream_level,
+                           debug=self.debug,
                            graph_dir=self.graph_dir,
                            tikz=self.tikz,
                            save=self.save,
                            attacker_cls=attacker)
         # dict of {manager: final utility}
         utilities_dict = sim.run(num_rounds, graph_trials=False)
-        return utilities_dict[manager]
+        return utilities_dict[manager][self.graph_attr]
 
     def worst_case_data(self, managers, scenario_data, attackers):
         """Creates a json of worst case attacker data"""
@@ -237,18 +303,17 @@ class Combination_Grapher(Base_Grapher):
         # Sets y limit
         axs.set_ylim(-1, max_y_limit + 5)
         # Add labels to axis
-        axs.set(xlabel="Percent Attackers", ylabel="Utility (Users/buckets)")
+        axs.set(xlabel="Percent Attackers", ylabel=f"{self.graph_attr} (Users/buckets)")
 
         return fig, axs, title
 
-    def make_graph_dirs(self, attackers):
+    def get_attacker_graph_dir(self, attacker):
         """Returns attacker graph dir"""
 
-        self.make_graph_dir(destroy=True)
-        for attacker_cls in attackers:
-            graph_dir = os.path.join(self.graph_dir, attacker_cls.__name__)
-            if not os.path.exists(graph_dir):
-                os.makedirs(graph_dir)
+        graph_dir = os.path.join(self.graph_dir, attacker.__name__)
+        if not os.path.exists(graph_dir):
+            os.makedirs(graph_dir)
+        return graph_dir
 
     def print_progress(self, attacker, total_num):
         """Prints total number of files generated"""
@@ -256,7 +321,7 @@ class Combination_Grapher(Base_Grapher):
         # https://stackoverflow.com/a/16910957/8903959
         cpt = sum([len([x for x in files if "json" not in x.lower()])
                    for r, d, files in os.walk(self.graph_dir)])
-        print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
+        print(f"Starting: {cpt}/{total_num}", end="      \r")
 
     def populate_axs(self,
                      axs,

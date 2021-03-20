@@ -81,7 +81,7 @@ class Grapher(Base_Grapher):
         # If not graph_trials, then this data is being used in combo grapher
         if not graph_trials:
             # Return dict of manager_cls: total_utility
-            return self.get_utility_dict()
+            return self.get_final_dict()
 
         # Format graph
         fig, axs = self._get_formatted_fig_axs()
@@ -96,7 +96,7 @@ class Grapher(Base_Grapher):
         self.save_graph(os.path.join(self.graph_dir, "trials.png"), plt)
 
         # Return dict of manager_cls: total_utility to be used in combo grapher
-        return self.get_utility_dict()
+        return self.get_final_dict()
 
     def _get_formatted_fig_axs(self):
         """Creates and formats axes"""
@@ -125,10 +125,11 @@ class Grapher(Base_Grapher):
 
         return fig, axs
 
-    def get_utility_dict(self):
-        """Returns a dictionary of managers to final utility score"""
+    def get_final_dict(self):
+        """Returns a dictionary of managers to final utility/harm score"""
 
-        return {manager.__class__: self._data[manager]["Y"]["utility"][-1]
+        return {manager.__class__: {"utility": self._data[manager]["Y"]["utility"][-1],
+                                    "harm": self._data[manager]["Y"]["harm"][-1]}
                 for manager in self._data}
 
     def chart_data(self, axs):

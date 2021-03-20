@@ -68,7 +68,7 @@ class Motag_Manager(Manager):
          attacked_users,
          prox) = self.get_greedy_init_vals(num_insiders, attacked_users, prox)
 
-        print(f"greedy assign called {num_insiders}, {attacked_users}, {prox}")
+        #print(f"greedy assign called {num_insiders}, {attacked_users}, {prox}")
 
         if len(attacked_users) <= prox:
             for user in attacked_users:
@@ -137,19 +137,19 @@ class Motag_Manager(Manager):
     def max_proxy(self, client, upper_bound, insider):
         """Algo as defined in algo 1 for motag paper"""
 
-        print("max proxy called")
+        #print("max proxy called")
         _max = 0
         max_assign = 0
         for i in range(upper_bound + 1):
-            print(client)
-            print(i)
-            print(insider)
+            #print(client)
+            #print(i)
+            #print(insider)
             numerator = scipy.special.comb(client - i,
                                            insider,
                                            exact=True) * i
             denominator = scipy.special.comb(client, insider, exact=True)
             save = numerator / denominator
-            print(f"num: {numerator} de: {denominator}")
+            #print(f"num: {numerator} de: {denominator}")
             if save > _max:
                 _max = save
                 max_assign = i
