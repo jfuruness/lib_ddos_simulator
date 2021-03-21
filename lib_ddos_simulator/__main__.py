@@ -63,14 +63,14 @@ def main():
                             save=args.save,
                             high_res=args.high_res).run(
                                     percent_attackers_list=[x / 100 for x in
-                                                            range(1, 92, 5)],
+                                                            range(1, 52, 5)],
                                     managers=Manager.paper_managers,
                                     attackers=Attacker.paper_attackers,
                                     num_buckets=1,
                                     # Note that this is the users per bucket
                                     # Not total users
-                                    users_per_bucket=20,
-                                    num_rounds=2,
+                                    users_per_bucket=4000,
+                                    num_rounds=100,
                                     trials=2)
     else:
         DDOS_Simulator(args.num_users,

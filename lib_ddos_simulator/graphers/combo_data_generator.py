@@ -67,6 +67,7 @@ class Combo_Data_Generator(Base_Grapher):
                 args = [x[trial_num] for x in full_args]
                 results.append(self.get_combo_data(*args))
         else:
+            # Doesn't make sense to do tqdm here since they finish all at once
             results = p.map(self.get_combo_data, *full_args)
             p.close()
             p.join()
