@@ -73,7 +73,10 @@ class Combo_Data_Generator(Base_Grapher):
             p.clear()
         # Get rid of carriage returns
         print()
-        assert False, "return the results list aggregated with YERR" 
+        return self._aggregate_results(results,
+                                       managers,
+                                       attackers,
+                                       percent_attackers_list)
 
     def get_combo_data(self,
                        percent_attackers_list,
@@ -144,3 +147,40 @@ class Combo_Data_Generator(Base_Grapher):
     def print_progress(self, atk_num, atk_total, trial_num, trial_total):
         print(f"{atk_num + 1}/{atk_total} attackers, "
               f"{trial_num + 1}/{trial_total} trials    \r")
+
+    def _aggregate_results(self, results, managers, attackers, percents):
+        """Aggregates results and returns them"""
+
+        # Results are the in format:
+        # {Manager: {Attacker: {X: [], HARM: [], UTILITY: []}}}
+        agg_results = {}
+        for manager_cls in managers:
+            agg_results[manager_cls] = {}
+            for attacker_cls in attackers:
+                # YES, I know these should all be enums.
+                agg_results[manager_cls][attacker_cls] = {"X": [],
+                                                          "HARM": [],
+                                                          "HARM_YERR": [],
+                                                          "UTILITY": [],
+                                                          "UTILITY_YERR": []}
+                cur_agg_data = agg_results[manager_cls][attacker_cls]
+                for i, percent in enumerate(percents):
+                    cur_agg_data["X"].append(percent)
+                    # Get all the raw data
+                    raw_harm = []
+                    raw_utility = []
+                    for result in results:
+                        cur_result_data = result[manager_cls][attacker_cls]
+                        raw_harm.append(cur_result_data["HARM"][i])
+                        raw_utility.append(cur_result_data["UTILITY"][i])
+                    # Take the average of the raw data and append
+                    cur_agg_data["HARM"].append(mean(raw_harm))
+                    cur_agg_data["UTILITY"].append(mean(raw_utility))
+                    # error bar data and append
+                    cur_agg_data["HARM_YERR"].append(self._error_bar(raw_harm))
+                    utility_y_err = self._error_bar(raw_utility)
+                    cur_agg_data["UTILITY_YERR"].append(utility_y_err)
+        return agg_results
+
+    def _error_bar(self, values: list):
+        return 1.645 * 2 * (sqrt(variance(values)) / sqrt(len(values)))

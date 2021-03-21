@@ -50,14 +50,28 @@ class Combination_Grapher(Base_Grapher):
         """Runs in parallel every possible scenario, then graphs
 
         Looks complicated, but no real way to simplify it
-        sorry"""
+        sorry
+
+        kwargs: See Combo_Data_Generator. They are the same there."""
 
         # Initializes graph path
-        self.make_graph_dirs(kwargs["attackers"])
+        self.make_graph_dir(destroy=True)
         data = Combo_Data_Generator(**self.graph_kwargs).run(**kwargs)
+        self._graph_normal_attackers(data, kwargs)
+        assert False, "Graph worst case data"
+
+    def _graph_normal_attackers(self, data, kwargs):
+        for attacker_cls in kwargs["attackers"]:
+            for y_val in ["HARM", "UTILITY"]:
+                self.graph_scenario(data,
+                                    attacker_cls,
+                                    y_val,
+                                    kwargs["num_buckets"],
+                                    kwargs["users_per_bucket"],
+                                    kwargs["num_rounds"])
+
 
     def get_graph_data(self,
-                       ddos_sim_cls,
                        attackers,
                        num_buckets,
                        users_per_bucket,
@@ -68,43 +82,8 @@ class Combination_Grapher(Base_Grapher):
                        total_num):
         """Gets data for graphing and graphs it"""
 
-        ddos_sim_cls = deepcopy(ddos_sim_cls)
-        attackers = deepcopy(attackers)
-        managers = deepcopy(managers)
-
-        scenario_data = {manager: {attacker: {"X": [],
-                                              "Y": [],
-                                              "YERR": []}
-                                   for attacker in attackers}
-                         for manager in managers}
-
         for attacker in attackers:
-            self.print_progress(attacker, total_num)
-            percent_attackers_list = [i / 100 for i in range(1, 92, 5)]
-
-            for manager in managers:
-                manager_data = scenario_data[manager][attacker]
-                for percent_attackers in percent_attackers_list:
-                    manager = deepcopy(manager)
-                    attacker = deepcopy(attacker)
-                    manager_data["X"].append(percent_attackers)
-                    Y = []
-                    # TRIALS
-                    for _ in range(trials):
-                        # Get the utility for each trail and append it
-                        Y.append(self.run_scenario(ddos_sim_cls,
-                                                   attacker,
-                                                   num_buckets,
-                                                   users_per_bucket,
-                                                   num_rounds,
-                                                   percent_attackers,
-                                                   manager))
-                    manager_data["Y"].append(mean(Y))
-                    err_length = 1.645 * 2 * (sqrt(variance(Y))/sqrt(len(Y)))
-                    manager_data["YERR"].append(err_length)
-
-            self.graph_scenario(ddos_sim_cls,
-                                scenario_data,
+            self.graph_scenario(scenario_data,
                                 num_buckets,
                                 users_per_bucket,
                                 num_rounds,
@@ -121,35 +100,6 @@ class Combination_Grapher(Base_Grapher):
                             num_rounds,
                             Worst_Case_Attacker,
                             write_json=True)
-
-    def run_scenario(self,
-                     ddos_sim_cls,
-                     attacker,
-                     num_buckets,
-                     users_per_bucket,
-                     num_rounds,
-                     percent_attackers,
-                     manager):
-        """Runs a trial for simulation"""
-
-        users = num_buckets * users_per_bucket
-        attackers = int(users * percent_attackers)
-        good_users = users - attackers
-        # No longer used, but maybe in the future
-        threshold = 0
-        sim = ddos_sim_cls(good_users,
-                           attackers,
-                           num_buckets,
-                           threshold,
-                           [manager],
-                           stream_level=self.stream_level,
-                           graph_dir=self.graph_dir,
-                           tikz=self.tikz,
-                           save=self.save,
-                           attacker_cls=attacker)
-        # dict of {manager: final utility}
-        utilities_dict = sim.run(num_rounds, graph_trials=False)
-        return utilities_dict[manager]
 
     def worst_case_data(self, managers, scenario_data, attackers):
         """Creates a json of worst case attacker data"""
@@ -183,25 +133,27 @@ class Combination_Grapher(Base_Grapher):
         return worst_case_scenario_data
 
     def graph_scenario(self,
-                       ddos_sim_cls,
                        scenario_data,
+                       attacker,
+                       y_val: str,
                        num_buckets,
                        users_per_bucket,
                        num_rounds,
-                       attacker,
                        write_json=False):
 
-        fig, axs, title = self._get_formatted_fig_axs(ddos_sim_cls,
-                                                      scenario_data,
+        fig, axs, title = self._get_formatted_fig_axs(scenario_data,
                                                       num_buckets,
                                                       users_per_bucket,
-                                                      num_rounds, attacker)
+                                                      num_rounds,
+                                                      attacker,
+                                                      y_val)
         for manager_i, manager in enumerate(scenario_data):
             self.populate_axs(axs,
                               scenario_data,
                               manager,
                               attacker,
                               manager_i,
+                              y_val,
                               write_json=write_json)
 
         self.add_legend(axs)
@@ -214,17 +166,16 @@ class Combination_Grapher(Base_Grapher):
             self.write_json(graph_path, scenario_data)
 
     def _get_formatted_fig_axs(self,
-                               sim_cls,
                                scenario_data,
                                num_buckets,
                                users_per_bucket,
                                num_rounds,
-                               attacker):
+                               attacker,
+                               y_val):
         """Creates and formats axes"""
 
         fig, axs = plt.subplots(figsize=(20, 10))
-        title = (f"Sim: {sim_cls.__name__}, "
-                 f"Scenario: og_buckets: {num_buckets}, "
+        title = (f"Scenario: og_buckets: {num_buckets}, "
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__}")
         fig.suptitle(title)
@@ -232,31 +183,20 @@ class Combination_Grapher(Base_Grapher):
         # Gets maximum y value to set axis
         max_y_limit = 0
         for _, manager_data in scenario_data.items():
-            if max(manager_data[attacker]["Y"]) > max_y_limit:
-                max_y_limit = max(manager_data[attacker]["Y"])
+            if max(manager_data[attacker][y_val]) > max_y_limit:
+                max_y_limit = max(manager_data[attacker][y_val])
         # Sets y limit
         axs.set_ylim(-1, max_y_limit + 5)
         # Add labels to axis
-        axs.set(xlabel="Percent Attackers", ylabel="Utility (Users/buckets)")
+        axs.set(xlabel="Percent Attackers", ylabel=y_val)
 
         return fig, axs, title
 
-    def make_graph_dirs(self, attackers):
-        """Returns attacker graph dir"""
-
-        self.make_graph_dir(destroy=True)
-        for attacker_cls in attackers:
-            graph_dir = os.path.join(self.graph_dir, attacker_cls.__name__)
-            if not os.path.exists(graph_dir):
-                os.makedirs(graph_dir)
-
-    def print_progress(self, attacker, total_num):
-        """Prints total number of files generated"""
-
-        # https://stackoverflow.com/a/16910957/8903959
-        cpt = sum([len([x for x in files if "json" not in x.lower()])
-                   for r, d, files in os.walk(self.graph_dir)])
-        print(f"Starting: {cpt + 1}/{total_num}", end="      \r")
+    def get_attacker_graph_dir(self, attacker_cls):
+        graph_dir = os.path.join(self.graph_dir, attacker_cls.__name__)
+        if not os.path.exists(graph_dir):
+            os.makedirs(graph_dir)
+        return graph_dir
 
     def populate_axs(self,
                      axs,
@@ -264,12 +204,13 @@ class Combination_Grapher(Base_Grapher):
                      manager,
                      attacker,
                      manager_i,
+                     y_val: str,
                      write_json=False):
         """Plots error bar"""
 
         axs.errorbar(scenario_data[manager][attacker]["X"],  # X val
-                     scenario_data[manager][attacker]["Y"],  # Y value
-                     yerr=scenario_data[manager][attacker]["YERR"],
+                     scenario_data[manager][attacker][y_val],  # Y value
+                     yerr=scenario_data[manager][attacker][y_val +"_YERR"],
                      label=f"{manager.__name__}",
                      ls=self.styles(manager_i),
                      # https://stackoverflow.com/a/26305286/8903959
@@ -281,6 +222,7 @@ class Combination_Grapher(Base_Grapher):
                                       manager,
                                       attacker,
                                       manager_i,
+                                      y_val,
                                       write_json)
 
     def overlay_scatter_plot(self,
@@ -289,6 +231,7 @@ class Combination_Grapher(Base_Grapher):
                              manager,
                              attacker,
                              manager_i,
+                             y_val: str,
                              write_json):
         """Overlays error bars with worst case attacker colors"""
 
@@ -297,7 +240,7 @@ class Combination_Grapher(Base_Grapher):
         colors = [color_dict[atk_name] for atk_name in
                   scenario_data[manager][attacker]["ATKS"]]
         axs.scatter(scenario_data[manager][attacker]["X"],
-                    scenario_data[manager][attacker]["Y"],
+                    scenario_data[manager][attacker][y_val],
                     c=colors,
                     s=45,
                     zorder=3,
