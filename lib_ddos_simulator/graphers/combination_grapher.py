@@ -58,7 +58,12 @@ class Combination_Grapher(Base_Grapher):
         self.make_graph_dir(destroy=True)
         data = Combo_Data_Generator(**self.graph_kwargs).run(**kwargs)
         self._graph_normal_attackers(data, kwargs)
-        assert False, "Graph worst case data"
+        self.graph_worst(data,
+                         kwargs["managers"],
+                         kwargs["attackers"],
+                         kwargs["num_buckets"],
+                         kwargs["users_per_bucket"],
+                         kwargs["num_rounds"])
 
     def _graph_normal_attackers(self, data, kwargs):
         for attacker_cls in kwargs["attackers"]:
@@ -70,44 +75,33 @@ class Combination_Grapher(Base_Grapher):
                                     kwargs["users_per_bucket"],
                                     kwargs["num_rounds"])
 
-
-    def get_graph_data(self,
-                       attackers,
-                       num_buckets,
-                       users_per_bucket,
-                       num_rounds,
-                       managers,
-                       trials,
-                       num,
-                       total_num):
-        """Gets data for graphing and graphs it"""
-
-        for attacker in attackers:
-            self.graph_scenario(scenario_data,
+    def graph_worst(self,
+                    data,
+                    managers,
+                    attackers,
+                    num_buckets,
+                    users_per_bucket,
+                    num_rounds):
+        for y_val in ["HARM", "UTILITY"]:
+            worst_case_data = self.worst_case_data(managers,
+                                                   deepcopy(data),
+                                                   attackers,
+                                                   y_val)
+            self.graph_scenario(worst_case_data,
+                                Worst_Case_Attacker,
+                                y_val,
                                 num_buckets,
                                 users_per_bucket,
                                 num_rounds,
-                                attacker)
+                                write_json=True)
 
-        # Graphs worst case scenario
-        worst_case_data = self.worst_case_data(managers,
-                                               scenario_data,
-                                               attackers)
-        self.graph_scenario(ddos_sim_cls,
-                            worst_case_data,
-                            num_buckets,
-                            users_per_bucket,
-                            num_rounds,
-                            Worst_Case_Attacker,
-                            write_json=True)
-
-    def worst_case_data(self, managers, scenario_data, attackers):
+    def worst_case_data(self, managers, scenario_data, attackers, y_val):
         """Creates a json of worst case attacker data"""
 
         # Create json of worst case attackers
         worst_case_scenario_data = {manager: {Worst_Case_Attacker: {"X": [],
-                                                                    "Y": [],
-                                                                    "YERR": [],
+                                                                    y_val: [],
+                                                                    y_val + "_YERR": [],
                                                                     "ATKS": []}
                                               }
                                     for manager in managers}
@@ -115,19 +109,31 @@ class Combination_Grapher(Base_Grapher):
             xs = manager_data[attackers[0]]["X"]
             for i, x in enumerate(xs):
                 # should be changed to be abs max but whatevs
-                min_utility = 100000000000000000000000
+                if y_val == "HARM":
+                    worst_case_y = -10000000000
+                elif y_val == "UTILITY":
+                    worst_case_y = 10000000000
+                else:
+                    assert False, "OG y not supported"
                 worst_case_atk = None
                 yerr = None
                 for attacker in attackers:
-                    if manager_data[attacker]["Y"][i] < min_utility:
-                        min_utility = manager_data[attacker]["Y"][i]
+                    if y_val == "HARM":
+                        cond = manager_data[attacker][y_val][i] > worst_case_y
+                    elif y_val == "UTILITY":
+                        cond = manager_data[attacker][y_val][i] < worst_case_y
+                    else:
+                        assert False, "y_val not supported"
+                    # If there's a new worst case:
+                    if cond:
+                        worst_case_y = manager_data[attacker][y_val][i]
                         worst_case_atk = attacker
-                        yerr = manager_data[attacker]["YERR"][i]
+                        yerr = manager_data[attacker][y_val + "_YERR"][i]
                 atk = Worst_Case_Attacker
                 cur_data_point = worst_case_scenario_data[manager][atk]
                 cur_data_point["X"].append(x)
-                cur_data_point["Y"].append(min_utility)
-                cur_data_point["YERR"].append(yerr)
+                cur_data_point[y_val].append(worst_case_y)
+                cur_data_point[y_val + "_YERR"].append(yerr)
                 cur_data_point["ATKS"].append(worst_case_atk.__name__)
 
         return worst_case_scenario_data
