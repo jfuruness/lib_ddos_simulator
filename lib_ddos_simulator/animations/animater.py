@@ -240,20 +240,19 @@ class Animater(Base_Grapher):
                                        interval=40,
                                        blit=True if self.save else False)
 
-        self.save_graph(anim)
+        self.save_graph(anim, total_rounds)
 
 
-    def save_graph(self, anim):
+    def save_graph(self, anim, total_rounds):
         """Saves animation, overwrites Base_Grapher method"""
 
         # self.save is an attr of Base_Grapher
         if self.save:
 
-            pbar = tqdm(desc="Saving video",
-                        total=self.frames_per_round * (self.total_rounds - 1))
-
             # graph_dir comes from inherited class
-            path = os.path.join(self.graph_dir, f'{self._get_round_text(0).replace("Round 0", "")}.mp4')
+            path = os.path.join(self.graph_dir, f'{self.round_text._get_round_text(0).replace("Round 0     ", "")}.mp4')
+            pbar = tqdm(desc=f"Saving {path}",
+                        total=self.frames_per_round * total_rounds)
 
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path,

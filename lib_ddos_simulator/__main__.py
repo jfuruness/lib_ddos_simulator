@@ -57,9 +57,7 @@ def main():
                                                      animate=True,
                                                      graph_trials=False)
     elif args.graph_combos:
-        import cProfile, pstats, io
-
-
+        #import cProfile, pstats, io
 
         def profile(fnc):
             
@@ -79,7 +77,7 @@ def main():
                 return retval
 
             return inner
-        @profile
+        #@profile
         def graph(args):
             Combination_Grapher(debug=args.debug,
                             graph_dir=args.graph_dir,
@@ -93,7 +91,7 @@ def main():
                                     num_buckets=1,
                                     # Note that this is the users per bucket
                                     # Not total users
-                                    users_per_bucket=1000,
+                                    users_per_bucket=2000,
                                     num_rounds=100,
                                     trials=2)
         graph(args)

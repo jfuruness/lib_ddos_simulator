@@ -48,7 +48,6 @@ class Anim_Round_Text:
     def _get_round_text(self, round_num):
         return (f"{self.name}: "
                 f"Round {int(round_num)}     "
-                f"{self.user_cls.__name__}|||"
                 f"{self.attacker_cls.__name__}")
 
     def animate(self, frame, frames_per_round, *args):
