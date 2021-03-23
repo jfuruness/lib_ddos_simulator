@@ -91,9 +91,9 @@ def main():
                                     num_buckets=1,
                                     # Note that this is the users per bucket
                                     # Not total users
-                                    users_per_bucket=2000,
+                                    users_per_bucket=1000,
                                     num_rounds=100,
-                                    trials=2)
+                                    trials=6)
         graph(args)
         #from line_profiler import LineProfiler
         #print(LineProfiler(graph(args)).print_stats())

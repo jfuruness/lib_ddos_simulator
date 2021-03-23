@@ -165,8 +165,8 @@ class Combination_Grapher(Base_Grapher):
         self.add_legend(axs)
 
         graph_dir = self.get_attacker_graph_dir(attacker)
-        graph_path = os.path.join(graph_dir, f"{title}.png")
-        self.save_graph(os.path.join(graph_dir, f"{title}.png"), plt, fig=fig)
+        graph_path = os.path.join(graph_dir, y_val + f"_{title}.png")
+        self.save_graph(graph_path, plt, fig=fig)
 
         if write_json:
             self.write_json(graph_path, scenario_data)
@@ -183,7 +183,7 @@ class Combination_Grapher(Base_Grapher):
         fig, axs = plt.subplots(figsize=(20, 10))
         title = (f"Scenario: og_buckets: {num_buckets}, "
                  f"users: {users_per_bucket * num_buckets}, "
-                 f"rounds: {num_rounds}, attacker_cls: {attacker.__name__}")
+                 f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
         fig.suptitle(title)
 
         # Gets maximum y value to set axis
