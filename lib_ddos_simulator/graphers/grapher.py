@@ -68,7 +68,6 @@ class Grapher(Base_Grapher):
         cur_data["total_good_users"].append(len(manager.connected_good_users))
         cur_data["harm"].append(sum(cur_data["good_users_not_serviced"]) / sum(cur_data["total_good_users"]))
 
-
         # Utility: total number ever serviced / total number of buckets used
         total_ever_serviced = sum(cur_data["total_serviced"])
         total_ever_buckets = sum(cur_data["num_buckets"])
@@ -125,7 +124,7 @@ class Grapher(Base_Grapher):
 
         return fig, axs
 
-    def get_final_dict(self):
+    def get_final_dict(self, r=False):
         """Returns a dictionary of managers to final utility/harm score"""
 
         return {manager.__class__: {"utility": self._data[manager]["Y"]["utility"][-1],

@@ -150,7 +150,7 @@ class Combo_Data_Generator(Base_Grapher):
                                             attacker_cls=attacker_cls)
         # dict of {manager: {utility: final utility, harm: final harm}}
         outcome_dict = sim.run(num_rounds, graph_trials=False)
-        return [outcome_dict[manager_cls][x] for x in ["utility", "harm"]]
+        return [outcome_dict[manager_cls][x] for x in ["harm", "utility"]]
 
     def print_progress(self, atk_num, atk_total, trial_num, trial_total):
         print(f"{atk_num + 1}/{atk_total} attackers, "

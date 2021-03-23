@@ -192,7 +192,7 @@ class Combination_Grapher(Base_Grapher):
             if max(manager_data[attacker][y_val]) > max_y_limit:
                 max_y_limit = max(manager_data[attacker][y_val])
         # Sets y limit
-        axs.set_ylim(-1, max_y_limit + 5)
+        axs.set_ylim(0, max_y_limit)
         # Add labels to axis
         axs.set(xlabel="Percent Attackers", ylabel=y_val)
 
