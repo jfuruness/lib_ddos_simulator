@@ -115,7 +115,7 @@ class Motag_Manager(Manager):
             attacked_users = []
             for bucket in self.attacked_buckets:
                 attacked_users.extend(bucket.users)
-                bucket.users = []
+                self.remove_bucket(bucket)
             random.shuffle(attacked_users)
         if prox is None:
             prox = self.prox - len(self.non_attacked_buckets)
@@ -163,6 +163,6 @@ class Motag_Manager(Manager):
         users = []
         for bucket in self.non_attacked_buckets:
             users.extend(bucket.users)
-            bucket.users = []
+            self.remove_bucket(bucket)
         if len(users) > 0:
             self.get_new_bucket().reinit(users)

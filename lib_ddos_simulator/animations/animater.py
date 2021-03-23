@@ -111,7 +111,7 @@ class Animater(Base_Grapher):
         attacker_ids = set()
         max_users_y = 0
         for manager in self.manager_copies:
-            for bucket in manager.used_buckets:
+            for bucket in manager.used_buckets.values():
                 for user in bucket.users:
                     if isinstance(user, Attacker):
                         attacker_ids.add(user.id)
@@ -120,7 +120,7 @@ class Animater(Base_Grapher):
                     if user.suspicion > 0:
                         self.track_suspicions = True
             # Get the max y val for that round
-            temp_max_users_y = max(len(x) for x in manager.used_buckets)
+            temp_max_users_y = max(len(x) for x in manager.used_buckets.values())
             # Set the max y value for all rounds
             max_users_y = max(max_users_y, temp_max_users_y)
         return max_users_y, good_user_ids, attacker_ids
@@ -130,8 +130,8 @@ class Animater(Base_Grapher):
 
         bucket_ids = set()
         for manager in self.manager_copies:
-            for bucket in manager.used_buckets:
-                bucket_ids.add(bucket.id)
+            for bucket_id in manager.used_buckets:
+                bucket_ids.add(bucket_id)
 
         return bucket_ids
 
@@ -193,7 +193,7 @@ class Animater(Base_Grapher):
 
     def _append_bucket_data(self, manager_copy):
         used_bucket_ids = set()
-        for b in manager_copy.used_buckets:
+        for b in manager_copy.used_buckets.values():
             state = B_States.ATTACKED if b.attacked else B_States.USED
             self.buckets[b.id].states.append(state)
             used_bucket_ids.add(b.id)

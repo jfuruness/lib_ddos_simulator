@@ -20,7 +20,7 @@ class Sieve_Manager_V0(Sieve_Manager_Base):
     runnable = False
 
     def get_buckets_to_sort(self):
-        return self.used_buckets
+        return list(self.used_buckets.values())
 
 
 class Sieve_Manager_V0_S0(Sieve_Manager_V0):

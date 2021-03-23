@@ -40,7 +40,7 @@ class Attacker(User):
 
         self._attack(manager, turn)
         User.take_action(self, manager, turn)
-        assert self.bucket in manager.buckets
+        assert self.bucket.id in manager.used_buckets
 
     def _attack(self, manager, turn):
         """Set bucket to be attacked"""

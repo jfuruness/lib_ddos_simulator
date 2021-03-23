@@ -32,6 +32,6 @@ class Protag_Manager_Merge(Protag_Manager_Base):
         users = []
         for bucket in self.non_attacked_buckets:
             users.extend(bucket.users)
-            bucket.users = []
+            self.remove_bucket(bucket)
         if len(users) > 0:
             self.get_new_bucket().reinit(users)

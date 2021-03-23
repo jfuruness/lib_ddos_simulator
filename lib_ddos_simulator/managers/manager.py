@@ -61,12 +61,14 @@ class Manager:
         self.users = {x.id: x for x in users}
 
         # Create the buckets for the users
-        self.buckets = []
+        self.used_buckets = {}
         # Ids start at 1 for animations
         # Divide users evenly among buckets
         for _id, user_chunk in enumerate(split_list(users,
                                                     num_buckets)):
-            self.buckets.append(Bucket(user_chunk, _id + 1))
+            self.used_buckets[_id + 1] = Bucket(user_chunk, _id + 1)
+
+        self.unused_buckets = dict()
         self.bucket_id = _id + 2
 
         self.attackers_detected = 0
@@ -83,24 +85,22 @@ class Manager:
         self.reset_buckets()
 
     def get_new_bucket(self):
-        try:
-            bucket = self.non_used_buckets[0]
-            return self.non_used_buckets[0]
-        except IndexError:
-            self.buckets.append(Bucket(id=self.bucket_id))
+        if len(self.unused_buckets) > 0:
+            for _id, bucket in self.unused_buckets.items():
+                break
+            del self.unused_buckets[_id]
+            self.used_buckets[_id] = bucket
+            return bucket
+        else:
+            bucket = Bucket(id=self.bucket_id)
+            self.used_buckets[bucket.id] = bucket
             self.bucket_id += 1
-            return self.buckets[-1]
+            return bucket
 
     def get_new_buckets(self, num_to_get):
         buckets = []
-        non_used_buckets = self.non_used_buckets
         for i in range(num_to_get):
-            try:
-                buckets.append(non_used_buckets[i])
-            except IndexError:
-                self.buckets.append(Bucket(id=self.bucket_id))
-                self.bucket_id += 1
-                buckets.append(self.buckets[-1])
+            buckets.append(self.get_new_bucket())
         return buckets
 
     def validate(self):
@@ -108,38 +108,52 @@ class Manager:
 
         assert len(self.users) > 0, "No users? Surely a bug?"
         for user in self.users.values():
-            assert user.bucket in self.buckets
+            assert user.bucket.id in self.used_buckets
 
     def reset_buckets(self):
         """Sets all buckets to not be attacked"""
 
-        for bucket in self.buckets:
+        for bucket in self.used_buckets.values():
             bucket.attacked = False
 
     def remove_attackers(self):
         """Removes buckets and attackers if bucket is attacker and len is 1"""
 
         caught_attackers = []
-        for bucket in self.used_buckets:
+        removed_buckets = []
+        for bucket in self.used_buckets.values():
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 for user in bucket.users:
                     user.status = User_Status.ELIMINATED
                     user.bucket = None
                 caught_attackers.extend(bucket.users)
-                bucket.users = []
-                bucket.attacked = True
+                removed_buckets.append(bucket)
+        for bucket in removed_buckets:
+            self.remove_bucket(bucket)
         return caught_attackers
+
+    def remove_bucket(self, bucket):
+        bucket.users = []
+        bucket.attacked = False
+        self.unused_buckets[bucket.id] = bucket
+        del self.used_buckets[bucket.id]
 
     def disconnect_users(self, disconnect_user_ids):
         """Disconnect users. Set status to disconnected"""
 
+        buckets_to_check = set()
         for _id in disconnect_user_ids:
             user = self.users[_id]
             assert user.status == User_Status.CONNECTED
             user.bucket.users.remove(user)
+            buckets_to_check.add(user.bucket)
             user.bucket = None
             user.status = User_Status.DISCONNECTED
+
+        for bucket in buckets_to_check:
+            if len(bucket) == 0:
+                self.remove_bucket(bucket)
 
     def get_buckets_by_ids(self, ids):
         """Returns a list of buckets by ids"""
@@ -154,13 +168,13 @@ class Manager:
     def attacked_buckets(self):
         """Return all attacked buckets"""
 
-        return [x for x in self.used_buckets if x.attacked]
+        return [x for x in self.used_buckets.values() if x.attacked]
 
     @property
     def non_attacked_buckets(self):
         """Returns all non attacked buckets"""
 
-        return [x for x in self.used_buckets if not x.attacked]
+        return [x for x in self.used_buckets.values() if not x.attacked]
 
     @property
     def attacked_users(self):
@@ -211,11 +225,3 @@ class Manager:
     @property
     def connected_good_users(self):
         return self._get_connected_users(lambda x: not isinstance(x, Attacker))
-
-    @property
-    def used_buckets(self):
-        return [x for x in self.buckets if len(x) > 0]
-
-    @property
-    def non_used_buckets(self):
-        return [x for x in self.buckets if len(x) == 0]

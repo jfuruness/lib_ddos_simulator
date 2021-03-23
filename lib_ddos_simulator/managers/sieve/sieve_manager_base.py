@@ -103,7 +103,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_0(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.used_buckets:
+        for bucket in self.used_buckets.values():
             multiplier = 1 if bucket.attacked else 0
             for user in bucket.users:
                 user.suspicion += (1 / len(bucket)) * multiplier
@@ -111,7 +111,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_1(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.used_buckets:
+        for bucket in self.used_buckets.values():
             multiplier = 1 if bucket.attacked else 0
             for user in bucket.users:
                 user.suspicion += multiplier
@@ -119,7 +119,7 @@ class Sieve_Manager_Base(Manager):
     def _update_suspicion_2(self):
         """Updates suspicion level of all users"""
 
-        for bucket in self.used_buckets:
+        for bucket in self.used_buckets.values():
             multiplier = 1 if bucket.attacked else -1
             for user in bucket.users:
                 user.suspicion += (1 / len(bucket)) * multiplier

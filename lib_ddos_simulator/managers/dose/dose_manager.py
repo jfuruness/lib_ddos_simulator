@@ -125,14 +125,14 @@ class DOSE_Manager(Manager):
                 # CRPA = 3 in their matplotlib code
                 user.dose_atk_risk += self.dose_atk_sus_to_add(bucket)
 
-        for bucket in self.used_buckets:
+        for bucket in list(self.used_buckets.values()):
             new_bucket_amnt = sum(x.dose_risk
                                   for x in bucket.users) // self.RPR
             if new_bucket_amnt > 1:
                 if new_bucket_amnt > len(bucket.users):
                     new_bucket_amnt = len(bucket.users)
                 user_chunks = split_list(bucket.users, int(new_bucket_amnt))
-                bucket.users = []
+                self.remove_bucket(bucket)
                 # DOSE does not specify any sorting
                 for user_chunk in user_chunks:
                     self.get_new_bucket().reinit(user_chunk)

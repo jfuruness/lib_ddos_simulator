@@ -33,6 +33,9 @@ class Bucket:
         # For animations
         self.states = []
 
+    def __hash__(self):
+        return self.id
+
     def reinit(self, user_chunk):
         """Kept only for backwards compatability"""
 

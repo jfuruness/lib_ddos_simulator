@@ -64,8 +64,7 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
                 self.attackers_detected += 1
                 bucket.users[0].status = User_Status.ELIMINATED
                 bucket.users[0].bucket = None
-                bucket.users = []
-                bucket.attacked = False
+                self.remove_bucket(bucket)
                 attackers_guess -= 1
         self.tracked_splits = new_tracked_splits
         users = []
@@ -83,7 +82,7 @@ class Protag_Manager_Smart_Merge(Protag_Manager_Base):
         # Sorted to preserve deterministic randomness
         for bucket in sorted(list(merge_buckets), key=lambda x: x.id):
             users.extend(bucket.users)
-            bucket.users = []
+            self.remove_bucket(bucket)
         assert len(set(users)) == len(users)
         if self.conservative:
             split_num = max(min(len(users), attackers_guess), 1)

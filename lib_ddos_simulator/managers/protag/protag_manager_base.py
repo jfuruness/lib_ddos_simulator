@@ -49,7 +49,7 @@ class Protag_Manager_Base(Manager):
         for bucket in bucks:
             # Attacked with more than one user, split in two
             user_chunks = split_list(bucket.users, min(self.split_factor, len(bucket.users)))
-            bucket.users = []
+            self.remove_bucket(bucket)
             split_set = set()
             for user_chunk in user_chunks:
                 new_bucket = self.get_new_bucket()

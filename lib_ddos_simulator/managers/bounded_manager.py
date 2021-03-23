@@ -86,7 +86,7 @@ class Bounded_Manager(Manager):
                 sorted_buckets[i].users = users
                 for user in users:
                     user.bucket = sorted_buckets[i]
-                sorted_buckets[i + 1].users = []
+                self.remove_bucket(sorted_buckets[i + 1])
             # last bucket
             except IndexError:
                 # Odd # of buckets, just append the full bucket
@@ -115,7 +115,7 @@ class Bounded_Manager(Manager):
 
             # Clear out buckets
             for bucket in self.attacked_buckets:
-                bucket.users = []
+                self.remove_bucket(bucket)
 
             for i, user_chunk in enumerate(split_list(users, new_bucket_amnt)):
                 self.get_new_bucket().reinit(user_chunk)
@@ -138,7 +138,7 @@ class Bounded_Manager(Manager):
     def _incriment_buckets(self):
         """Incriments buckets by # turns not attacked in a row"""
 
-        for bucket in self.used_buckets:
+        for bucket in self.used_buckets.values():
             if bucket.attacked:
                 bucket.turns_not_attacked = 0
             else:

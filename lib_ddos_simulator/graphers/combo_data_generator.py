@@ -15,6 +15,7 @@ from statistics import mean, variance
 from math import sqrt
 from multiprocessing import cpu_count
 from pathos.multiprocessing import ProcessingPool
+import random
 import json
 
 from ..base_grapher import Base_Grapher
@@ -89,6 +90,12 @@ class Combo_Data_Generator(Base_Grapher):
                        trial_num,
                        total_trials):
         """Gets data for graphing and graphs it"""
+
+        # Done so that trials are different
+        random.seed(str(percent_attackers_list)
+                    + str(attackers)
+                    + str(managers)
+                    + str(trial_num))
 
         ddos_sim_cls = deepcopy(ddos_simulator.DDOS_Simulator)
         attackers = deepcopy(attackers)
