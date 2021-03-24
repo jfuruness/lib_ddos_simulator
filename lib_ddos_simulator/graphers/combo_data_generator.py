@@ -115,7 +115,7 @@ class Combo_Data_Generator(Base_Grapher):
             for manager in managers:
                 manager_data = scenario_data[manager][attacker]
                 for percent_attackers in percent_attackers_list:
-                    manager_data["X"].append(percent_attackers)
+                    manager_data["X"].append(percent_attackers * 100)
                     # Get the utility for one trial and append
                     harm, utility = self.run_scenario(attacker,
                                                       num_buckets,
@@ -123,7 +123,7 @@ class Combo_Data_Generator(Base_Grapher):
                                                       num_rounds,
                                                       percent_attackers,
                                                       manager)
-                    manager_data["HARM"].append(harm)
+                    manager_data["HARM"].append(harm * 100)
                     manager_data["UTILITY"].append(utility)
         return scenario_data
 

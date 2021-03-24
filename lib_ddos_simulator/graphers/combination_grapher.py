@@ -131,7 +131,7 @@ class Combination_Grapher(Base_Grapher):
                         yerr = manager_data[attacker][y_val + "_YERR"][i]
                 atk = Worst_Case_Attacker
                 cur_data_point = worst_case_scenario_data[manager][atk]
-                cur_data_point["X"].append(x)
+                cur_data_point["X"].append(x * 100)
                 cur_data_point[y_val].append(worst_case_y)
                 cur_data_point[y_val + "_YERR"].append(yerr)
                 cur_data_point["ATKS"].append(worst_case_atk.__name__)
@@ -181,7 +181,7 @@ class Combination_Grapher(Base_Grapher):
         """Creates and formats axes"""
 
         fig, axs = plt.subplots(figsize=(20, 10))
-        title = (f"Scenario: og_buckets: {num_buckets}, "
+        title = (f"Scenario: " 
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
         fig.suptitle(title)
@@ -291,7 +291,8 @@ class Combination_Grapher(Base_Grapher):
                            bbox_to_anchor=(1, 0.5))
 
         # If we are adding a second legend for worst case attacker colors
-        if len(self.second_legend) > 0:
+        # Legacy code now. Amir changed his mind.
+        if len(self.second_legend) > 0 and False:
             color_dict = self.get_worst_case_atk_color_dict()
             legend_elements = [mpatches.Patch(color=color_dict[atk], label=atk)
                                for atk in set(self.second_legend)]
