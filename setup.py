@@ -7,7 +7,7 @@ setup(
     name='lib_ddos_simulator',
     packages=find_packages(),
     include_package_data=True,
-    version='0.1.1',
+    version='0.1.2',
     author='Justin Furuness and Anna Gorbenko',
     author_email='jfuruness@gmail.com, agorbenko97@gmail.com',
     url='https://github.com/jfuruness/lib_ddos_simulator.git',
