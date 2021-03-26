@@ -14,7 +14,7 @@ from sys import argv
 
 from .attackers import Basic_Attacker, Even_Turn_Attacker, Attacker
 from .ddos_simulators import DDOS_Simulator
-from .managers import Manager, Protag_Manager_Smart_Merge, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
+from .managers import Manager, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
 from .utils import Log_Levels
 from .graphers import Combination_Grapher
 

@@ -34,10 +34,10 @@ from .managers import Sieve_Manager_V0_W_Stop_S0
 from .managers import Protag_Manager_Base, Protag_Manager_Merge
 
 from .managers import Protag_Manager_No_Merge
-from .managers import Protag_Manager_Smart_Merge
-from .managers import Protag_Manager_Smart_Merge_Conservative
-from .managers import Protag_Manager_Smart_Merge_3
-from .managers import Protag_Manager_Smart_Merge_Conservative_3
+from .managers import Isolator_2i_1f
+from .managers import Isolator_3i_1f
+from .managers import Isolator_2i_kf
+from .managers import Isolator_3i_kf
 
 # Commented out due to bugs in their paper
 from .managers import Motag_Manager

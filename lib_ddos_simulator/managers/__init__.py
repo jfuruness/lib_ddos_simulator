@@ -15,10 +15,10 @@ from .motag import Motag_Manager
 from .protag import Protag_Manager_Base
 from .protag import Protag_Manager_Merge
 from .protag import Protag_Manager_No_Merge
-from .protag import Protag_Manager_Smart_Merge
-from .protag import Protag_Manager_Smart_Merge_Conservative
-from .protag import Protag_Manager_Smart_Merge_3
-from .protag import Protag_Manager_Smart_Merge_Conservative_3
+from .protag import Isolator_2i_1f
+from .protag import Isolator_3i_1f
+from .protag import Isolator_2i_kf
+from .protag import Isolator_3i_kf
 
 
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2

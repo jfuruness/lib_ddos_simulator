@@ -17,7 +17,7 @@ from .protag_manager_base import Protag_Manager_Base
 from ...simulation_objects import User_Status
 from ...utils import split_list
 
-class Protag_Manager_Smart_Merge(Protag_Manager_Base):
+class Isolator_2i_1f(Protag_Manager_Base):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a protag shuffling algorithm

@@ -142,6 +142,8 @@ class Animater(Base_Grapher):
 
         if self.save:
             mpl.use("Agg")
+        else:
+            mpl.use("tkAgg")
         plt.style.use('dark_background')
         # https://stackoverflow.com/a/48958260/8903959
         mpl.rcParams.update({'text.color': "black"})

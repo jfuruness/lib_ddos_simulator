@@ -12,12 +12,12 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-from .protag_manager_smart_merge import Protag_Manager_Smart_Merge
+from .isolator_2i_1f import Isolator_2i_1f
 
 from ...simulation_objects import User_Status
 from ...utils import split_list
 
-class Protag_Manager_Smart_Merge_3(Protag_Manager_Smart_Merge):
+class Isolator_2i_kf(Isolator_2i_1f):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a protag shuffling algorithm
@@ -26,4 +26,5 @@ class Protag_Manager_Smart_Merge_3(Protag_Manager_Smart_Merge):
 
     __slots__ = []
 
-    split_factor = 3
+    runnable = True
+    conservative = True

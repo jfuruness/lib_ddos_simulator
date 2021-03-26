@@ -11,7 +11,7 @@ __status__ = "Development"
 from .protag_manager_base import Protag_Manager_Base
 from .protag_manager_merge import Protag_Manager_Merge
 from .protag_manager_no_merge import Protag_Manager_No_Merge
-from .protag_manager_smart_merge import Protag_Manager_Smart_Merge
-from .protag_manager_smart_merge_conservative import Protag_Manager_Smart_Merge_Conservative
-from .protag_manager_smart_merge_3 import Protag_Manager_Smart_Merge_3
-from .protag_manager_smart_merge_conservative_3 import Protag_Manager_Smart_Merge_Conservative_3
+from .isolator_2i_1f import Isolator_2i_1f
+from .isolator_3i_1f import Isolator_3i_1f
+from .isolator_2i_kf import Isolator_2i_kf
+from .isolator_3i_kf import Isolator_3i_kf
