@@ -26,7 +26,7 @@ def main():
     parser.add_argument("--num_attackers", type=int, dest="num_attackers", default=9)
     parser.add_argument("--num_buckets", type=int, dest="num_buckets", default=3)
     parser.add_argument("--threshold", type=int, dest="threshold", default=10)
-    parser.add_argument("--rounds", type=int, dest="rounds", default=7)
+    parser.add_argument("--rounds", type=int, dest="rounds", default=11)
     parser.add_argument("--debug", dest="debug", default=False, action='store_true')
     parser.add_argument("--animate", dest="animate", default=False, action='store_true')
     parser.add_argument("--graph_combos", dest="graph_combos", default=False, action='store_true')
@@ -48,7 +48,7 @@ def main():
             DDOS_Simulator(args.num_users,  # number of users
                            args.num_attackers,  # number of attackers
                            args.num_buckets,  # number of buckets
-                           Manager.runnable_managers,
+                           Manager.runnable_managers,  # 2nd index for isolator_2i_1f
                            graph_dir=args.graph_dir,
                            save=args.save,
                            debug=args.debug,

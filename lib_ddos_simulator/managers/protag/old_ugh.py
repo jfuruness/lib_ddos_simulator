@@ -58,6 +58,9 @@ class Isolator_2i_1f(Protag_Manager_Base):
                     merge_buckets.add(bucket)
             else:
                 new_tracked_splits.append(tracked_split)
+        print("!")
+        input(self.used_buckets)
+        input([x.bucket.id for x in self.connected_users])
 
 
         attackers_guess = len(self.attacked_buckets) + len(new_tracked_splits)
@@ -68,6 +71,9 @@ class Isolator_2i_1f(Protag_Manager_Base):
                 bucket.users[0].bucket = None
                 self.remove_bucket(bucket)
                 attackers_guess -= 1
+        print("!!")
+        input(self.used_buckets)
+        input([x.bucket.id for x in self.connected_users])
 
         self.tracked_splits = new_tracked_splits
         users = []
@@ -81,6 +87,13 @@ class Isolator_2i_1f(Protag_Manager_Base):
                 in_tracked_splits = True
             if in_tracked_splits is False:
                 merge_buckets.add(bucket)
+        print("!!!")
+        input(self.used_buckets)
+        input([x.bucket.id for x in self.connected_users])
+        print("Merged below")
+        input(merge_buckets)
+        print("non merged")
+        input([x for x in self.used_buckets if x not in merge_buckets])
         # Sorted to preserve deterministic randomness
         for bucket in sorted(list(merge_buckets), key=lambda x: x.id):
             users.extend(bucket.users)
@@ -91,10 +104,18 @@ class Isolator_2i_1f(Protag_Manager_Base):
         else:
             split_num = 1
 
-        if split_num > 1 and len(merge_buckets) > 0:
+        print("!!!!")
+        input(self.used_buckets)
+        input([x.bucket.id for x in self.connected_users])
+
+
+        if split_num > 1 and len(merged_buckets) > 0:
             for user_chunk in split_list(users, split_num):
                 self.get_new_bucket().reinit(user_chunk)
-        elif split_num == 1 and len(merge_buckets) > 0:
+        elif split_num == 1 and len(merged_buckets) > 0:
             self.get_new_bucket().reinit(users)
         elif split_num < 1:
             assert False, "Split num must be 1 or more"
+        input("!5!")
+        input(self.used_buckets)
+        input([x.bucket.id for x in self.connected_users])
