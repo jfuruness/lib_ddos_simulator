@@ -12,10 +12,10 @@ import random
 
 import scipy.special
 
-from .manager import Manager
+from ..manager import Manager
 
-from ..attackers import Attacker
-from ..utils import split_list
+from ...attackers import Attacker
+from ...utils import split_list
 
 class Motag_Manager(Manager):
     """Simulates a manager for a DDOS attack
@@ -42,8 +42,8 @@ class Motag_Manager(Manager):
 
     __slots__ = []
 
-    runnable = True
-    paper = True
+    runnable = False
+    paper = False
     prox = 3#20
     percent_users_to_save = .95
 

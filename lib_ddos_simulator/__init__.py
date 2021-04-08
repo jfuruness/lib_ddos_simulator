@@ -39,5 +39,6 @@ from .managers import Isolator_3i_1f
 from .managers import Isolator_2i_kf
 from .managers import Isolator_3i_kf
 
-# Commented out due to bugs in their paper
-from .managers import Motag_Manager
+from .managers import Motag_Manager_3_Bucket
+from .managers import Motag_Manager_20_Bucket
+from .managers import Motag_Manager_200_Bucket

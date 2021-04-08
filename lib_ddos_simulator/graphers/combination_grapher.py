@@ -42,6 +42,8 @@ class Combination_Grapher(Base_Grapher):
     Plots % of users that are attackers on the X axis
     """
 
+    y_vals = ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND", "UTILITY"]
+
     def __init__(self, *args, **kwargs):
         super(Combination_Grapher, self).__init__(*args, **kwargs)
         self.second_legend = []
@@ -67,7 +69,7 @@ class Combination_Grapher(Base_Grapher):
 
     def _graph_normal_attackers(self, data, kwargs):
         for attacker_cls in kwargs["attackers"]:
-            for y_val in ["HARM", "UTILITY"]:
+            for y_val in self.y_vals:
                 self.graph_scenario(data,
                                     attacker_cls,
                                     y_val,
@@ -82,7 +84,7 @@ class Combination_Grapher(Base_Grapher):
                     num_buckets,
                     users_per_bucket,
                     num_rounds):
-        for y_val in ["HARM", "UTILITY"]:
+        for y_val in self.y_vals:
             worst_case_data = self.worst_case_data(managers,
                                                    deepcopy(data),
                                                    attackers,
@@ -109,7 +111,7 @@ class Combination_Grapher(Base_Grapher):
             xs = manager_data[attackers[0]]["X"]
             for i, x in enumerate(xs):
                 # should be changed to be abs max but whatevs
-                if y_val == "HARM":
+                if y_val in ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND"]:
                     worst_case_y = -10000000000
                 elif y_val == "UTILITY":
                     worst_case_y = 10000000000
@@ -118,7 +120,7 @@ class Combination_Grapher(Base_Grapher):
                 worst_case_atk = None
                 yerr = None
                 for attacker in attackers:
-                    if y_val == "HARM":
+                    if y_val in ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND"]:
                         cond = manager_data[attacker][y_val][i] > worst_case_y
                     elif y_val == "UTILITY":
                         cond = manager_data[attacker][y_val][i] < worst_case_y

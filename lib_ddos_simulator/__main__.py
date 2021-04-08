@@ -93,7 +93,7 @@ def main():
                                     # Not total users
                                     users_per_bucket=1000,
                                     num_rounds=100,
-                                    trials=2)
+                                    trials=8)
         graph(args)
         #from line_profiler import LineProfiler
         #print(LineProfiler(graph(args)).print_stats())

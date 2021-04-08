@@ -10,8 +10,9 @@ __status__ = "Development"
 
 from .bounded_manager import Bounded_Manager
 from .dose import DOSE_Manager, DOSE_Attack_Event
-# Commented out due to bugs in sudo code of their paper
-from .motag import Motag_Manager
+from .motag import Motag_Manager_3_Bucket
+from .motag import Motag_Manager_20_Bucket
+from .motag import Motag_Manager_200_Bucket
 from .protag import Protag_Manager_Base
 from .protag import Protag_Manager_Merge
 from .protag import Protag_Manager_No_Merge

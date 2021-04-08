@@ -34,7 +34,7 @@ class Grapher(Base_Grapher):
                                       "total_good_users": [],
                                       "harm": [],
                                       "total_serviced": [],
-                                      "percent_serviced": [],
+                                      "percent_good_not_serviced": [],
                                       "utility": []}}
                       for manager in managers}
 
@@ -58,15 +58,13 @@ class Grapher(Base_Grapher):
         # total serviced
         cur_data["total_serviced"].append(serviced)
 
-        # Percentage serviced
-        percent_serviced = serviced * 100 / len(manager.connected_users)
-        cur_data["percent_serviced"].append(percent_serviced)
-
         # good users not serviced
         cur_data["good_users_not_serviced"].append(len([x for x in manager.connected_good_users
                                                         if x.bucket.attacked]))
         cur_data["total_good_users"].append(len(manager.connected_good_users))
-        cur_data["harm"].append(sum(cur_data["good_users_not_serviced"]) / sum(cur_data["total_good_users"]))
+
+        cur_data["percent_good_not_serviced"].append(sum(cur_data["good_users_not_serviced"]) / sum(cur_data["total_good_users"]))
+        cur_data["harm"].append(sum(cur_data["good_users_not_serviced"]))
 
         # Utility: total number ever serviced / total number of buckets used
         total_ever_serviced = sum(cur_data["total_serviced"])
@@ -128,7 +126,9 @@ class Grapher(Base_Grapher):
         """Returns a dictionary of managers to final utility/harm score"""
 
         return {manager.__class__: {"utility": self._data[manager]["Y"]["utility"][-1],
-                                    "harm": self._data[manager]["Y"]["harm"][-1]}
+                                    "harm": self._data[manager]["Y"]["harm"][-1],
+                                    "percent_good_not_serviced": self._data[manager]["Y"]["percent_good_not_serviced"][-1],
+                                    "bucket_bound": max(self._data[manager]["Y"]["num_buckets"])}
                 for manager in self._data}
 
     def chart_data(self, axs):
