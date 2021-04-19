@@ -11,6 +11,7 @@ __status__ = "Development"
 from .basic_attacker import Basic_Attacker
 from .even_turn_attacker import Even_Turn_Attacker
 from .motag_attacker import Motag_Attacker
+from .herzberg_motag_attacker import Herzberg_Motag_Attacker
 from .never_alone_attacker import Never_Alone_Attacker
 from .never_last_attacker import Never_Last_Attacker
 from .patient_attacker import Wait_For_One_Addition_Attacker
