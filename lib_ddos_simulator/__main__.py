@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 import os
 from sys import argv
 
-from .attackers import Basic_Attacker, Even_Turn_Attacker, Attacker, Motag_Attacker
+from .attackers import Basic_Attacker, Even_Turn_Attacker, Attacker, Motag_Attacker, Never_Last_Attacker
 from .ddos_simulators import DDOS_Simulator
 from .managers import Manager, Sieve_Manager_V0_S0, Sieve_Manager_V1_S0
 from .utils import Log_Levels
@@ -42,7 +42,7 @@ def main():
     args = parser.parse_args()
 
     if args.animate:
-        for atk_cls in [Motag_Attacker, Basic_Attacker, Even_Turn_Attacker]:
+        for atk_cls in [Never_Last_Attacker]:
             # NOTE: for optimal animations,
             # use 24, 4, 8, 10 for users, attackers, buckets, threshold
             DDOS_Simulator(args.num_users,  # number of users
