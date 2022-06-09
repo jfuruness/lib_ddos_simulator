@@ -48,28 +48,56 @@ class DDOS_Simulator:
                              "save": save,
                              "high_res": high_res}
 
-        # Ids start at one to make rows easier for animations for buckets
-        self.good_users = [user_cls(x) for x in range(1, num_users + 1)]
-
-        self.attackers = attacker_cls.get_attackers(num_users + 1,
-                                                    num_attackers)
-
-        self.users = self.good_users + self.attackers
-
-        self.next_unused_user_id = len(self.users)
-        # Shuffle so attackers are not at the end
-        random.shuffle(self.users)
+        self.num_users_to_user_orderings = dict()
         # Creates manager and distributes users evenly across buckets
-        self.managers = [X(num_buckets, deepcopy(self.users))
+        self.managers = [X(num_buckets, self._get_users(num_users,
+                                                        num_attackers,
+                                                        user_cls,
+                                                        attacker_cls))
                          for X in Manager_Child_Classes]
 
         # Creates graphing class to capture data
         self.grapher = Grapher(self.managers,
-                               len(self.good_users),
-                               len(self.attackers),
+                               num_users,
+                               num_attackers,
                                **self.graph_kwargs)
         self.attacker_cls = attacker_cls
         self.user_cls = user_cls
+
+    def _get_users(self, num_users, num_attackers, user_cls, attacker_cls):
+
+        key = (num_users, num_attackers) 
+
+        if key not in self.num_users_to_user_orderings:
+            # Ids start at one to make rows easier for animations for buckets
+            good_users = [user_cls(x) for x in range(1, num_users + 1)]
+
+            attackers = attacker_cls.get_attackers(num_users + 1,
+                                                        num_attackers)
+
+            self.users = good_users + attackers
+            random.shuffle(self.users)
+            self.num_users_to_user_orderings[key] = self.users
+
+        else:
+            self.users = list()
+            for old_user in self.num_users_to_user_orderings[key]:
+                cls = attacker_cls if isinstance(old_user, Attacker) else user_cls
+                self.users.append(cls(old_user.id))
+
+        self.next_unused_user_id = len(self.users)
+        return self.users
+
+    def randomly_order_users(self):
+        # Shuffle so attackers are not at the end
+        if len(self.users) not in self.num_users_to_user_orderings:
+            ordering = [x.id for x in self.users]
+            random.shuffle(ordering)
+            self.num_users_to_user_orderings[len(self.users)] = tuple(ordering)
+        ordering = self.num_users_to_user_orderings[len(self.users)]
+        temp_id_to_user_dict = {x.id: x for x in self.users}
+        self.users = [temp_id_to_user_dict[x] for x in ordering]
+
 
     def run(self, num_rounds: int, animate=False, graph_trials=True):
         """Runs simulation"""
@@ -83,11 +111,16 @@ class DDOS_Simulator:
     def run_sim(self, manager, num_rounds, animate: bool, graph_trials: bool):
         """Initializes sim for a single manager and runs"""
 
-        animater = Animater(manager,
-                            self.user_cls,
-                            self.attacker_cls,
-                            **self.graph_kwargs)
+        if animate:
+            animater = Animater(manager,
+                                self.user_cls,
+                                self.attacker_cls,
+                                **self.graph_kwargs)
+        else:
+            animater = None
         for turn in range(num_rounds):
+            if turn % 100 == 0:
+                print(f"round {turn} manager {manager.__class__.__name__} atk {self.attacker_cls.__name__}")
             # Attackers attack, users record stats
             self.user_actions(manager, turn)
             # Record data

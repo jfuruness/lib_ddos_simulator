@@ -10,7 +10,7 @@ __status__ = "Development"
 
 import random
 
-import scipy.special
+from .scipy_special_comb import comb
 
 from ..manager import Manager
 
@@ -144,10 +144,10 @@ class Motag_Manager(Manager):
             #print(client)
             #print(i)
             #print(insider)
-            numerator = scipy.special.comb(client - i,
-                                           insider,
-                                           exact=True) * i
-            denominator = scipy.special.comb(client, insider, exact=True)
+            numerator = comb(client - i,
+                             insider,
+                             exact=True) * i
+            denominator = comb(client, insider, exact=True)
             save = numerator / denominator
             #print(f"num: {numerator} de: {denominator}")
             if save > _max:

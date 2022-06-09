@@ -64,7 +64,7 @@ class Isolator_2i_1f(Protag_Manager_Base):
         for bucket in self.attacked_buckets:
             if len(bucket) == 1:
                 self.attackers_detected += 1
-                bucket.users[0].status = User_Status.ELIMINATED
+                self.change_user_status(bucket.users[0], User_Status.ELIMINATED)
                 bucket.users[0].bucket = None
                 self.remove_bucket(bucket)
                 attackers_guess -= 1

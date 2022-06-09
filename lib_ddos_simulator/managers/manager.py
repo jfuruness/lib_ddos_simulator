@@ -8,6 +8,8 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from collections import defaultdict
+
 import random
 
 from ..attackers import Attacker
@@ -58,7 +60,16 @@ class Manager:
         # Used in some managers
         self.num_attackers_guess = None
         # Users id dict
-        self.users = {x.id: x for x in users}
+        self.users = dict()
+        self.victim_status_dict = defaultdict(dict)
+        self.attacker_status_dict = defaultdict(dict)
+        for user in users:
+            if isinstance(user, Attacker):
+                status_dict = self.attacker_status_dict
+            else:
+                status_dict = self.victim_status_dict
+            status_dict[User_Status.CONNECTED][user.id] = user
+            self.users[user.id] = user
 
         # Create the buckets for the users
         self.used_buckets = {}
@@ -125,7 +136,7 @@ class Manager:
             if bucket.attacked and len(bucket) == 1:
                 self.attackers_detected += 1
                 for user in bucket.users:
-                    user.status = User_Status.ELIMINATED
+                    self.change_user_status(user, User_Status.ELIMINATED)
                     user.bucket = None
                 caught_attackers.extend(bucket.users)
                 removed_buckets.append(bucket)
@@ -149,7 +160,7 @@ class Manager:
             user.bucket.users.remove(user)
             buckets_to_check.add(user.bucket)
             user.bucket = None
-            user.status = User_Status.DISCONNECTED
+            self.change_user_status(user, User_Status.DISCONNECTED)
 
         for bucket in buckets_to_check:
             if len(bucket) == 0:
@@ -159,6 +170,17 @@ class Manager:
         """Returns a list of buckets by ids"""
 
         return [x for x in self.buckets if x.id in set(ids)]
+
+    def change_user_status(self, user, new_status):
+        """Must do it this way to avoid list comps"""
+
+        if isinstance(user, Attacker):
+            status_dict = self.attacker_status_dict
+        else:
+            status_dict = self.victim_status_dict
+        del status_dict[user.status][user.id]
+        user.status = new_status
+        status_dict[user.status][user.id] = user
 
 ##################################
 ### Convenience property funcs ###
@@ -220,8 +242,8 @@ class Manager:
 
     @property
     def connected_attackers(self):
-        return self._get_connected_users(lambda x: isinstance(x, Attacker))
+        return self.attacker_status_dict[User_Status.CONNECTED].values()
 
     @property
     def connected_good_users(self):
-        return self._get_connected_users(lambda x: not isinstance(x, Attacker))
+        return self.victim_status_dict[User_Status.CONNECTED].values()

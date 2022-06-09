@@ -11,6 +11,7 @@ __status__ = "Development"
 from copy import deepcopy
 import os
 
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -182,6 +183,7 @@ class Combination_Grapher(Base_Grapher):
                                y_val):
         """Creates and formats axes"""
 
+        matplotlib.use("Agg")
         fig, axs = plt.subplots(figsize=(20, 10))
         title = (f"Scenario: " 
                  f"users: {users_per_bucket * num_buckets}, "

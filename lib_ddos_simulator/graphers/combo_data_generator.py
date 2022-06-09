@@ -92,10 +92,12 @@ class Combo_Data_Generator(Base_Grapher):
         """Gets data for graphing and graphs it"""
 
         # Done so that trials are different
-        random.seed(str(percent_attackers_list)
-                    + str(attackers)
-                    + str(managers)
-                    + str(trial_num))
+        # JF 2022 - idk why I did this before. It makes no sense
+        # and resulted in a massive bottleneck (97% of runtime under pypy)
+        # random.seed(str(percent_attackers_list)
+        #             + str(attackers)
+        #             + str(managers)
+        #             + str(trial_num))
 
         ddos_sim_cls = deepcopy(ddos_simulator.DDOS_Simulator)
         attackers = deepcopy(attackers)
@@ -161,6 +163,7 @@ class Combo_Data_Generator(Base_Grapher):
         return [outcome_dict[manager_cls][x] for x in attrs]
 
     def print_progress(self, atk_num, atk_total, trial_num, trial_total):
+        #if trial_num % 500 == 0:
         print(f"{atk_num + 1}/{atk_total} attackers, "
               f"{trial_num + 1}/{trial_total} trials    \r")
 
