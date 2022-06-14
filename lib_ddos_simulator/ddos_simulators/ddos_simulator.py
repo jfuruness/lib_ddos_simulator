@@ -119,7 +119,8 @@ class DDOS_Simulator:
         else:
             animater = None
         for turn in range(num_rounds):
-            if turn % 100 == 0:
+            if turn % 100 == 0 or "motag" in manager.__class__.__name__.lower():
+                #pass
                 print(f"round {turn} manager {manager.__class__.__name__} atk {self.attacker_cls.__name__}")
             # Attackers attack, users record stats
             self.user_actions(manager, turn)

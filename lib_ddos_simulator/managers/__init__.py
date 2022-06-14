@@ -13,6 +13,7 @@ from .dose import DOSE_Manager, DOSE_Attack_Event
 from .motag import Motag_Manager_3_Bucket
 from .motag import Motag_Manager_20_Bucket
 from .motag import Motag_Manager_200_Bucket
+from .motag import Opt_S
 from .protag import Protag_Manager_Base
 from .protag import Protag_Manager_Merge
 from .protag import Protag_Manager_No_Merge
@@ -20,6 +21,7 @@ from .protag import Isolator_2i_1f
 from .protag import Isolator_3i_1f
 from .protag import Isolator_2i_kf
 from .protag import Isolator_3i_kf
+from .protag import Opt_H 
 
 
 from .sieve import Sieve_Manager_V0_S0, Sieve_Manager_V0_S1, Sieve_Manager_V0_S2
