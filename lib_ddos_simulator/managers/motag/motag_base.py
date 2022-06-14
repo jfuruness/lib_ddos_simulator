@@ -127,11 +127,12 @@ class Motag_Manager(Manager):
         # include this equation for the estimation
         # This means the true motag algo would perform worse
         # Much, much worse
+        # JF 2022 - modify this for bigO time
+        
         num_attackers = 0
-        for bucket in self.attacked_buckets:
-            for user in bucket.users:
-                if isinstance(user, Attacker):
-                    num_attackers += 1
+        for attacker in self.connected_attackers:
+            if attacker.bucket.attacked:
+                num_attackers += 1
         return num_attackers
 
     def max_proxy(self, client, upper_bound, insider):

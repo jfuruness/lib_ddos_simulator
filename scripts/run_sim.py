@@ -1,8 +1,8 @@
 from lib_ddos_simulator import Combination_Grapher, Protag_Manager_Merge, Protag_Manager_No_Merge,Motag_Manager_20_Bucket, Motag_Manager_200_Bucket, Isolator_2i_1f, Isolator_3i_kf, Opt_H, Opt_S, Attacker
 
 # stream_level and graph_path defaults, can be omitted
-grapher = Combination_Grapher(debug=True,
-                              graph_dir="/home/agorbenko/graph_dir",
+grapher = Combination_Grapher(debug=False,
+                              graph_dir="/tmp/ddos_graphs",
                               tikz=True,
                               save=True,
                               high_res=False)
@@ -15,4 +15,4 @@ grapher.run(managers=[Protag_Manager_Merge, Protag_Manager_No_Merge,Motag_Manage
             num_buckets=1,
             users_per_bucket=10000,
             num_rounds=101,
-            trials=1)
+            trials=10)
