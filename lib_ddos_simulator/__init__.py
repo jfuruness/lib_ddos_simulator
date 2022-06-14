@@ -42,3 +42,5 @@ from .managers import Isolator_3i_kf
 from .managers import Motag_Manager_3_Bucket
 from .managers import Motag_Manager_20_Bucket
 from .managers import Motag_Manager_200_Bucket
+from .managers import Opt_H 
+from .managers import Opt_S 

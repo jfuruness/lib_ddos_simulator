@@ -1,3 +1,56 @@
+ULONG_MAX = 1111111111111111111111
+
+def _comb_int_long(N, k):
+    """
+    Compute binom(N, k) for integers.
+    Returns 0 if error/overflow encountered.
+    """
+    if k > N or N == ULONG_MAX:
+        return 0
+
+    M = N + 1
+    nterms = min(k, N - k)
+
+    val = 1
+
+    for j in range(1, nterms + 1):
+        # Overflow check
+        if val > ULONG_MAX // (M - j):
+            return 0
+
+        val *= M - j
+        val //= j
+
+    return val
+
+def _comb_int(N, k):
+    # Fast path with machine integers
+    try:
+        r = _comb_int_long(N, k)
+        if r != 0:
+            return r
+    except (OverflowError, TypeError):
+        pass
+
+    # Fallback
+    N = int(N)
+    k = int(k)
+
+    if k > N or N < 0 or k < 0:
+        return 0
+
+    M = N + 1
+    nterms = min(k, N - k)
+
+    numerator = 1
+    denominator = 1
+    for j in range(1, nterms + 1):
+        numerator *= M - j
+        denominator *= j
+
+    return numerator // denominator
+
+
 def comb(N, k, exact=False, repetition=False, legacy=True):
     """scipy is not compatible with pypy
 
