@@ -49,8 +49,8 @@ def _comb_int(N, k):
         denominator *= j
 
     return numerator // denominator
-
-
+from functools import lru_cache
+@lru_cache(maxsize=1000000)
 def comb(N, k, exact=False, repetition=False, legacy=True):
     """scipy is not compatible with pypy
 
