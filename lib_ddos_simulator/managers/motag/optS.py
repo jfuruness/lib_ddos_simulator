@@ -16,3 +16,4 @@ class Opt_S(Motag_Manager):
     paper = False
     prox = 1
     percent_users_to_save = .95
+    name = "MinC"

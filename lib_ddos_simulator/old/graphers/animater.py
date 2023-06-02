@@ -45,7 +45,9 @@ mpl.rcParams['figure.dpi'] = dpi
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
-import numpy as np
+import os
+if not os.environ.get("PYPY3"):
+    import numpy as np
 from tqdm import tqdm
 
 from .base_grapher import Base_Grapher

@@ -13,6 +13,6 @@ from .motag_base import Motag_Manager
 
 class Motag_Manager_3_Bucket(Motag_Manager):
     runnable = True
-    paper = True
+    paper = False
     prox = 3
     percent_users_to_save = .95

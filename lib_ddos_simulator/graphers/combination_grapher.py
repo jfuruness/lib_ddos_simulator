@@ -218,10 +218,12 @@ class Combination_Grapher(Base_Grapher):
                      write_json=False):
         """Plots error bar"""
 
+        # Gets class attr name if it exists, if not, uses __name__
+        name = getattr(manager, "name", manager.__name__)
         axs.errorbar(scenario_data[manager][attacker]["X"],  # X val
                      scenario_data[manager][attacker][y_val],  # Y value
                      yerr=scenario_data[manager][attacker][y_val +"_YERR"],
-                     label=f"{manager.__name__}",
+                     label=name,
                      ls=self.styles(manager_i),
                      # https://stackoverflow.com/a/26305286/8903959
                      marker=self.markers(manager_i))
@@ -249,12 +251,13 @@ class Combination_Grapher(Base_Grapher):
         color_dict = self.get_worst_case_atk_color_dict()
         colors = [color_dict[atk_name] for atk_name in
                   scenario_data[manager][attacker]["ATKS"]]
-        axs.scatter(scenario_data[manager][attacker]["X"],
-                    scenario_data[manager][attacker][y_val],
-                    c=colors,
-                    s=45,
-                    zorder=3,
-                    marker=self.markers(manager_i))
+        # No longer wanted
+        #axs.scatter(scenario_data[manager][attacker]["X"],
+        #            scenario_data[manager][attacker][y_val],
+        #            c=colors,
+        #            s=45,
+        #            zorder=3,
+        #            marker=self.markers(manager_i))
 
         # Sort worst case attacker by freq
         atk_freq_dict = {}

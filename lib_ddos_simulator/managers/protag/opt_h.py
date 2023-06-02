@@ -27,6 +27,8 @@ class Opt_H(Protag_Manager_Base):
     __slots__ = []
 
     runnable = True
+    name = "MinH"
+
 
     def combine_buckets(self):
         pass
