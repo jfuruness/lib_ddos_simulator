@@ -27,7 +27,7 @@ managers=[
     Isolator_3i_SQRT_kf,
     Opt_S,
     Opt_H,
-]
+],
 
 
 users_per_bucket = 1000
@@ -41,7 +41,18 @@ print(len(Attacker.runnable_attackers))
 # For the full list of managers that is run by default,
 # see Managers section
 grapher.run(
-    managers=managers,
+    managers=[
+        Protag_Manager_Merge,
+        Protag_Manager_No_Merge,
+        Motag_Manager_20_Bucket,
+        Motag_Manager_200_Bucket,
+        Isolator_2i_1f,
+        Isolator_2i_kf,
+        Isolator_3i_1f,
+        Isolator_3i_kf,
+        Opt_S,
+        Opt_H,
+    ],
     attackers=[
         x for x in Attacker.runnable_attackers
         if "Never_Alone" not in x.__name__
@@ -67,7 +78,18 @@ print(len(Attacker.runnable_attackers))
 # see Managers section
 users_per_bucket = 10_000
 grapher.run(
-    managers=managers,
+    managers=[
+        Protag_Manager_Merge,
+        Protag_Manager_No_Merge,
+        Motag_Manager_20_Bucket,
+        Motag_Manager_200_Bucket,
+        Isolator_2i_1f,
+        Isolator_2i_kf,
+        Isolator_3i_1f,
+        Isolator_3i_kf,
+        Opt_S,
+        Opt_H
+    ],
     attackers=[
         x for x in Attacker.runnable_attackers
         if "Never_Alone" not in x.__name__

@@ -11,6 +11,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from math import sqrt
 
 from .protag_manager_base import Protag_Manager_Base
 
@@ -28,6 +29,7 @@ class Isolator_2i_1f(Protag_Manager_Base):
 
     runnable = True
     conservative = False
+    name = "(2,1)-ISOLATOR"
 
     def remove_attackers(self):
         """had to be moved into combine buckets func"""
@@ -88,6 +90,10 @@ class Isolator_2i_1f(Protag_Manager_Base):
         assert len(set(users)) == len(users)
         if self.conservative:
             split_num = max(min(len(users), attackers_guess), 1)
+        elif getattr(self, "sqrt", False): 
+            split_num = int(sqrt(max(min(len(users), attackers_guess), 1)))
+            if split_num == 0:
+                split_num = 1
         else:
             split_num = 1
 

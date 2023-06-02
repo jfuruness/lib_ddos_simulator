@@ -21,6 +21,9 @@ from .protag import Isolator_2i_1f
 from .protag import Isolator_3i_1f
 from .protag import Isolator_2i_kf
 from .protag import Isolator_3i_kf
+from .protag import Isolator_2i_SQRT_kf
+from .protag import Isolator_3i_SQRT_kf
+
 from .protag import Opt_H 
 
 

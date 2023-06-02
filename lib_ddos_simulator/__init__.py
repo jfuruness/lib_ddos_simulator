@@ -38,6 +38,9 @@ from .managers import Isolator_2i_1f
 from .managers import Isolator_3i_1f
 from .managers import Isolator_2i_kf
 from .managers import Isolator_3i_kf
+from .managers import Isolator_2i_SQRT_kf
+from .managers import Isolator_3i_SQRT_kf
+
 
 from .managers import Motag_Manager_3_Bucket
 from .managers import Motag_Manager_20_Bucket

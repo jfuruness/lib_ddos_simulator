@@ -7,7 +7,10 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 from matplotlib.pyplot import Polygon
-import numpy as np
+import os
+
+if not os.environ.get("PYPY3"):
+    import numpy as np
 
 from .anim_user import Anim_User
 

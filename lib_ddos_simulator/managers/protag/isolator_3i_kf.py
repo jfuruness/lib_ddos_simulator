@@ -27,3 +27,4 @@ class Isolator_3i_kf(Isolator_2i_kf):
     __slots__ = []
 
     split_factor = 3
+    name = "(3,k)-ISOLATOR"

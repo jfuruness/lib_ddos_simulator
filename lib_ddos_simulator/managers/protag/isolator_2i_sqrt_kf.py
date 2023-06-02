@@ -12,27 +12,21 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 
-from .protag_manager_base import Protag_Manager_Base
+from .isolator_2i_1f import Isolator_2i_1f
 
+from ...simulation_objects import User_Status
+from ...utils import split_list
 
-class Protag_Manager_Merge(Protag_Manager_Base):
+class Isolator_2i_SQRT_kf(Isolator_2i_1f):
     """Simulates a manager for a DDOS attack
 
     This Manager class uses a protag shuffling algorithm
 
-    this manager class also merges buckets if not attacked"""
+    this manager class also merges buckets in a smart way"""
 
     __slots__ = []
 
     runnable = True
-    name = "PROTAG"
-
-    def combine_buckets(self):
-        """Merge all non attacked buckets"""
-
-        users = []
-        for bucket in self.non_attacked_buckets:
-            users.extend(bucket.users)
-            self.remove_bucket(bucket)
-        if len(users) > 0:
-            self.get_new_bucket().reinit(users)
+    conservative = False
+    sqrt = True
+    name = "(2,sqrt(k))-ISOLATOR"

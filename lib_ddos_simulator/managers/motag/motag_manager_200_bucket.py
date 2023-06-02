@@ -16,3 +16,4 @@ class Motag_Manager_200_Bucket(Motag_Manager):
     paper = True
     prox = 200
     percent_users_to_save = .95
+    name = "(200)-MOTAG"

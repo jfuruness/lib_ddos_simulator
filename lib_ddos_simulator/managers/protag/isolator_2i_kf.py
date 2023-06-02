@@ -28,3 +28,4 @@ class Isolator_2i_kf(Isolator_2i_1f):
 
     runnable = True
     conservative = True
+    name = "(2,k)-ISOLATOR"

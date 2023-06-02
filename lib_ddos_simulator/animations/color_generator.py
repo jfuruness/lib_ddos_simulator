@@ -9,7 +9,10 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 import matplotlib as mpl
-import numpy as np
+
+import os
+if not os.environ.get("PYPY3"):
+    import numpy as np
 
 
 class Color_Generator:

@@ -22,7 +22,7 @@ setup(
     install_requires=[
         'flasgger',
         'flask',
-        'matplotlib',
+        'matplotlib==3.5.2',
         'tikzplotlib',
         'wheel',
         'setuptools',
