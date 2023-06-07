@@ -11,4 +11,3 @@ __status__ = "Development"
 from .motag_manager_3_bucket import Motag_Manager_3_Bucket
 from .motag_manager_20_bucket import Motag_Manager_20_Bucket
 from .motag_manager_200_bucket import Motag_Manager_200_Bucket
-from .optS import Opt_S

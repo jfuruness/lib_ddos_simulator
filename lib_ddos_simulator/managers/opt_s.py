@@ -8,12 +8,17 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from .motag_base import Motag_Manager
+from .manager import Manager
 
 
-class Opt_S(Motag_Manager):
+class Opt_S(Manager):
+    """Runs on 1 server and does nothing"""
+
     runnable = True
-    paper = False
-    prox = 1
-    percent_users_to_save = .95
+    paper = True
     name = "MinC"
+
+    def detect_and_shuffle(self, turn, *args):
+        """No op for this manager"""
+
+        pass
