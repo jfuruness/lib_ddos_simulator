@@ -15,6 +15,7 @@ class Never_Alone_Attacker(Attacker):
     """Basic attacker class"""
 
     runnable = True
+    paper = True
 
     def _attack(self, manager, turn):
         attacker_count = sum([1 for x in self.bucket.users

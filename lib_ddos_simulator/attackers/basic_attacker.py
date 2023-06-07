@@ -15,3 +15,4 @@ class Basic_Attacker(Attacker):
     """Basic attacker class"""
 
     runnable = True
+    paper = True

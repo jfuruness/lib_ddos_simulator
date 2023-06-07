@@ -22,6 +22,7 @@ from .random_attacker import Ten_Percent_Attacker
 from .x_turns_straight_attacker import Three_Turns_Straight_Attacker
 from .x_turns_straight_attacker import Ten_Turns_Straight_Attacker
 from .x_turns_straight_attacker import Twenty_Turns_Straight_Attacker
+from .until_percentage_attacker import Until_50_Percent_Attacker
 
 # Done here to fill subclasses
 from .attacker import Attacker

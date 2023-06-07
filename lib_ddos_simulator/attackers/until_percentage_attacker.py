@@ -42,6 +42,6 @@ class Until_50_Percent_Attacker(Until_Percentage_Attacker):
     """Basic attacker class"""
 
     runnable = False
-    paper = False
+    paper = True
 
     percentage_serviced = .5

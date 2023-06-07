@@ -15,6 +15,7 @@ class Even_Turn_Attacker(Attacker):
     """Attacker that only attacks on every even turn"""
 
     runnable = True
+    paper = True
 
     def _attack(self, manager, turn):
         if turn % 2:

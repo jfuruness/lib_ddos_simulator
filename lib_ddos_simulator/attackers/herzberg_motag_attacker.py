@@ -15,6 +15,7 @@ class Herzberg_Motag_Attacker(Attacker):
     """Basic attacker class"""
 
     runnable = True
+    paper = True
 
     def _attack(self, manager, turn):
         """desc below
@@ -37,7 +38,7 @@ class Herzberg_Motag_Attacker(Attacker):
             least_big_attacker = min(attackers, key=lambda x: len(x.bucket))
             manager.turn_dict[turn] = least_big_attacker.bucket.id
 
-           
+
 
         # If the attacker is the last one left, do not attack
         # Or else the attacker would be discovered

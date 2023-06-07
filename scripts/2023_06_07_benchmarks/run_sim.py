@@ -31,24 +31,24 @@ managers = [
 ]
 
 
-users_per_bucket = 1000
+users_per_bucket = 10_000
 # stream_level and graph_path defaults, can be omitted
 grapher = Combination_Grapher(debug=False,
                               graph_dir="/tmp/ddos_graphs",
                               tikz=False,
                               save=True,
                               high_res=False)
-print(len(Attacker.runnable_attackers))
+print(len(Attacker.paper_attackers))
 
 import time
 start = time.perf_counter()
-if False:
+if True:
     # For the full list of managers that is run by default,
     # see Managers section
     grapher.run(
         managers=managers,
         attackers=[
-            x for x in Attacker.runnable_attackers
+            x for x in Attacker.paper_attackers
             if "Never_Alone" not in x.__name__
         ],
         percent_attackers_list=[x / 100 for x in range(1, 7)],
@@ -56,7 +56,7 @@ if False:
         num_buckets=1,
         # Takes 1m 57s for 1k 2 trials 101 rounds
         users_per_bucket=users_per_bucket,
-        num_rounds=101,
+        num_rounds=501,
         # num_rounds=101,
         trials=2
     )
@@ -66,7 +66,7 @@ else:
     grapher.run(
         managers=managers[:1],
         attackers=[
-            x for x in Attacker.runnable_attackers
+            x for x in Attacker.paper_attackers
             if "Never_Alone" not in x.__name__
         ][:2],
         percent_attackers_list=[x / 100 for x in range(1, 7)][:2],
