@@ -33,6 +33,8 @@ class Motag_Attacker(Attacker):
             pass
         # Don't bother computing this math if the bucket is already attacked
         elif self.bucket.attacked is False:
+            # NOTE: FROM LOOKING AT CPROFILE - change this to be iterative
+            # Don't calculate in advance
             non_attacked_buckets = manager.non_attacked_buckets
             if len(non_attacked_buckets) > 0:
                 # If there is a bigger non attacked bucket, do nothing

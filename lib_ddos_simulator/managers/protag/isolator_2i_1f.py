@@ -35,7 +35,7 @@ class Isolator_2i_1f(Protag_Manager_Base):
         """had to be moved into combine buckets func"""
 
         pass
-                
+
 
     def combine_buckets(self):
         """Merge all non attacked buckets"""
@@ -90,7 +90,7 @@ class Isolator_2i_1f(Protag_Manager_Base):
         assert len(set(users)) == len(users)
         if self.conservative:
             split_num = max(min(len(users), attackers_guess), 1)
-        elif getattr(self, "sqrt", False): 
+        elif getattr(self, "sqrt", False):
             split_num = int(sqrt(max(min(len(users), attackers_guess), 1)))
             if split_num == 0:
                 split_num = 1
