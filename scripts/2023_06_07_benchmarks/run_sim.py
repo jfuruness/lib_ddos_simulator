@@ -1,3 +1,5 @@
+import time
+
 from lib_ddos_simulator import (
     Combination_Grapher,
     Protag_Manager_Merge,
@@ -31,7 +33,7 @@ managers = [
 ]
 
 
-users_per_bucket = 10_000
+users_per_bucket = 100_000
 # stream_level and graph_path defaults, can be omitted
 grapher = Combination_Grapher(debug=False,
                               graph_dir="/tmp/ddos_graphs",
@@ -40,7 +42,6 @@ grapher = Combination_Grapher(debug=False,
                               high_res=False)
 print(len(Attacker.paper_attackers))
 
-import time
 start = time.perf_counter()
 if True:
     # For the full list of managers that is run by default,
