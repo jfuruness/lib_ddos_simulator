@@ -1,4 +1,7 @@
 import time
+import cProfile
+import pstats
+import io
 
 from lib_ddos_simulator import (
     Combination_Grapher,
@@ -20,8 +23,9 @@ from lib_ddos_simulator import (
 managers = [
     Protag_Manager_Merge,
     Protag_Manager_No_Merge,
-    Motag_Manager_20_Bucket,
-    Motag_Manager_200_Bucket,
+    # Can't run Motag with 100k!!!
+    # Motag_Manager_20_Bucket,
+    # Motag_Manager_200_Bucket,
     Isolator_2i_1f,
     Isolator_2i_kf,
     Isolator_3i_1f,
@@ -33,9 +37,9 @@ managers = [
 ]
 
 
-users_per_bucket = 100_000
+users_per_bucket = 10_000
 # stream_level and graph_path defaults, can be omitted
-grapher = Combination_Grapher(debug=False,
+grapher = Combination_Grapher(debug=True,  # NOTE: SET TO FALSE FOR MuLTITHREADING!
                               graph_dir="/tmp/ddos_graphs",
                               tikz=False,
                               save=True,
@@ -44,6 +48,8 @@ print(len(Attacker.paper_attackers))
 
 start = time.perf_counter()
 if True:
+    pr = cProfile.Profile()
+    pr.enable()
     # For the full list of managers that is run by default,
     # see Managers section
     grapher.run(
@@ -61,6 +67,14 @@ if True:
         # num_rounds=101,
         trials=2
     )
+    pr.disable()
+
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
+    ps.print_stats()
+
+    with open('/tmp/test.txt', 'w') as f:
+        f.write(s.getvalue())
 else:
     # For the full list of managers that is run by default,
     # see Managers section
