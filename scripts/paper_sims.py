@@ -45,10 +45,10 @@ attackers = [
     Never_Last_Attacker,
     Log2n_Turns_Straight_Attacker
 ]
+attackers = attackers[::-1]
 
-
-users_per_bucket = 1000
-trials = 10
+users_per_bucket = 10_000
+trials = 2
 num_rounds = 501
 
 
@@ -103,7 +103,7 @@ grapher = Combination_Grapher(debug=False,
                               save=True,
                               high_res=False)
 grapher.run(
-    managers=managers,
+    managers=[x for x in managers if x != Opt_H],
     attackers=attackers,
     percent_attackers_list=[x / 100 for x in range(1, 7)],
     num_buckets=1,
@@ -121,7 +121,7 @@ grapher = Combination_Grapher(debug=False,
                               save=True,
                               high_res=False)
 grapher.run(
-    managers=managers,
+    managers=[x for x in managers if x != Opt_H],
     attackers=attackers,
     percent_attackers_list=[
         1/users_per_bucket,

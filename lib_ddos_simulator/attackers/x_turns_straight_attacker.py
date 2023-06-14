@@ -34,8 +34,10 @@ class Log2n_Turns_Straight_Attacker(Attacker):
     paper = True
 
     def _attack(self, manager, turn):
-        num_users = len(self.connected_users)
-        turns_in_a_row = int(log2(num_users))
+        # NOTE: To make it faster for 10k users, we've hardcoded this for 13
+        # num_users = len(manager.connected_users)
+        # turns_in_a_row = int(log2(num_users))
+        turns_in_a_row = 13
         if not (turn % turns_in_a_row == 0 and turn > 0):
             # Only attack when you are not alone
             if len(self.bucket) > 1:

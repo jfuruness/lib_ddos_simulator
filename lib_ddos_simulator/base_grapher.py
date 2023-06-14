@@ -18,11 +18,11 @@ from .managers import Motag_Manager_20_Bucket
 from .managers import Motag_Manager_200_Bucket
 from .managers import Opt_S
 from .managers import Isolator_2i_1f
-from .managers import Isolator_2i_SQRT_k_f
+from .managers import Isolator_2i_SQRT_kf
 from .managers import Isolator_3i_kf
 from .managers import Opt_H
 from .managers import Protag_Manager_Merge
-from .managers import Protag_manager_No_Merge
+from .managers import Protag_Manager_No_Merge
 
 
 class Base_Grapher:
@@ -60,13 +60,13 @@ class Base_Grapher:
                 Motag_Manager_200_Bucket: "--",
                 Opt_S: "-.",
                 Isolator_2i_1f: ":",
-                Isolator_2i_SQRT_k_f: "solid",
+                Isolator_2i_SQRT_kf: "solid",
                 Isolator_3i_kf: "dotted",
                 Opt_H: "-",
                 Protag_Manager_Merge: "dashed",
-                Protag_manager_No_Merge: "dashdot",
+                Protag_Manager_No_Merge: "dashdot",
             }
-            return opts[manager.__class__]
+            return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
             styles = ["-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"]
@@ -83,13 +83,13 @@ class Base_Grapher:
                 Motag_Manager_200_Bucket: "1",
                 Opt_S: "*",
                 Isolator_2i_1f: "x",
-                Isolator_2i_SQRT_k_f: "d",
+                Isolator_2i_SQRT_kf: "d",
                 Isolator_3i_kf: "2",
                 Opt_H: "3",
                 Protag_Manager_Merge: "4",
-                Protag_manager_No_Merge: ".",
+                Protag_Manager_No_Merge: ".",
             }
-            return opts[manager.__class__]
+            return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
             markers = [".", "1", "*", "x", "d", "2", "3", "4"]
@@ -106,13 +106,13 @@ class Base_Grapher:
                 Motag_Manager_200_Bucket: "blue",
                 Opt_S: "green",
                 Isolator_2i_1f: "purple",
-                Isolator_2i_SQRT_k_f: "orange",
+                Isolator_2i_SQRT_kf: "orange",
                 Isolator_3i_kf: "cyan",
                 Opt_H: "black",
                 Protag_Manager_Merge: "yellow",
-                Protag_manager_No_Merge: "brown",
+                Protag_Manager_No_Merge: "brown",
             }
-            return opts[manager.__class__]
+            return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
             colors = [

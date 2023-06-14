@@ -17,10 +17,20 @@ class Never_Alone_Attacker(Attacker):
     runnable = True
     paper = True
 
+    bucket_contains_other_attackers = dict()
+
     def _attack(self, manager, turn):
-        attacker_count = sum([1 for x in self.bucket.users
-                              if isinstance(x, Attacker)])
-        if attacker_count > 1:
+        """Only attack if the bucket contains other attackers"""
+        key = (manager.__class__, turn)
+        contains_other_attackers = self.bucket_contains_other_attackers.get(
+            key
+        )
+        if contains_other_attackers is None:
+            contains_other_attackers = False
+            for x in self.bucket.users:
+                if isinstance(x, Attacker) and self is not x:
+                    contains_other_attackers = True
+                    break
+            self.bucket_contains_other_attackers[key] = contains_other_attackers
+        if contains_other_attackers:
             self.bucket.attacked = True
-        elif attacker_count == 0:
-            assert False, "This should never happen"

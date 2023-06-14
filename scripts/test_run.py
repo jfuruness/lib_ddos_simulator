@@ -1,4 +1,8 @@
-# https://buildbot.pypy.org/nightly/release-pypy3.10-v7.x/pypy-c-jit-latest-linux64.tar.bz2
+import time
+import cProfile
+import pstats
+import io
+
 
 from lib_ddos_simulator import (
     Combination_Grapher,
@@ -15,30 +19,73 @@ from lib_ddos_simulator import (
     Opt_S,
     Attacker
 )
+from lib_ddos_simulator.attackers import (
+    Basic_Attacker,
+    Even_Turn_Attacker,
+    Herzberg_Motag_Attacker,  # All but one attacker
+    Never_Alone_Attacker,
+    Never_Last_Attacker,
+    Log2n_Turns_Straight_Attacker
+)
 
-users_per_bucket = 100
-# stream_level and graph_path defaults, can be omitted
-grapher = Combination_Grapher(debug=False,
-                              graph_dir="/tmp/ddos_graphs_test",
+managers=[
+    Protag_Manager_Merge,
+    Protag_Manager_No_Merge,
+    # Motag_Manager_20_Bucket,
+    # Motag_Manager_200_Bucket,
+    Isolator_2i_1f,
+    # Isolator_2i_kf,
+    # Isolator_3i_1f,
+    Isolator_3i_kf,
+    Isolator_2i_SQRT_kf,
+    # Isolator_3i_SQRT_kf,
+    Opt_S,
+    Opt_H,
+]
+
+attackers = [
+    Basic_Attacker,
+    Even_Turn_Attacker,
+    Herzberg_Motag_Attacker,  # All but one attacker
+    Never_Alone_Attacker,
+    Never_Last_Attacker,
+    Log2n_Turns_Straight_Attacker
+]
+
+users_per_bucket = 10_000
+trials = 2
+num_rounds = 501
+
+
+
+############### Attackers from 1 to 6% with Opt H #############
+
+start = time.perf_counter()
+pr = cProfile.Profile()
+pr.enable()
+
+grapher = Combination_Grapher(debug=True,
+                              graph_dir="/tmp/ddos_graphs/benchmark",
                               tikz=False,
                               save=True,
                               high_res=False)
-# For the full list of managers that is run by default,
-# see Managers section
 grapher.run(
-    managers=[
-        Protag_Manager_Merge,
-    ],
-    attackers=[
-        x for x in Attacker.runnable_attackers
-        if "Never_Alone" not in x.__name__
-    ][:2],
-    percent_attackers_list=[x / 100 for x in range(1, 7)][:2],
-    # percent_attackers_list = [1,10,100,1000],
+    managers=managers,
+    attackers=attackers,
+    percent_attackers_list=[5 / 100],
     num_buckets=1,
-    # Takes 1m 57s for 1k 2 trials 101 rounds
     users_per_bucket=users_per_bucket,
-    num_rounds=10,
-    #num_rounds=101,
-    trials=2
+    num_rounds=num_rounds,
+    trials=trials
 )
+end = time.perf_counter()
+pr.disable()
+
+s = io.StringIO()
+ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
+ps.print_stats()
+
+with open('/tmp/test.txt', 'w') as f:
+    f.write(s.getvalue())
+
+print(f"Ran in {round((end-start) / 2, 2)}s per trial")

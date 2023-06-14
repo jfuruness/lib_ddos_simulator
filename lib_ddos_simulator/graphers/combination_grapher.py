@@ -185,9 +185,9 @@ class Combination_Grapher(Base_Grapher):
 
         matplotlib.use("Agg")
         fig, axs = plt.subplots(figsize=(20, 10))
-        # title = (f"Scenario: "
-        #          f"users: {users_per_bucket * num_buckets}, "
-        #          f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
+        title = (f"Scenario: "
+                 f"users: {users_per_bucket * num_buckets}, "
+                 f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
         # fig.suptitle(title)
 
         # Gets maximum y value to set axis
@@ -196,8 +196,12 @@ class Combination_Grapher(Base_Grapher):
             if max(manager_data[attacker][y_val]) > max_y_limit:
                 max_y_limit = max(manager_data[attacker][y_val])
         # Sets y limit
-        axs.set_ylim(0, max_y_limit)
+        # Request for NDSS June 2023, inclrease Y limit by 10%
+        axs.set_ylim(0, max_y_limit * 1.02)
         # Add labels to axis
+        # Requested changes for NDSS June 2023
+        if y_val == "BUCKET_BOUND":
+            y_val = "COST"
         axs.set(xlabel="Percent Attackers", ylabel=y_val)
 
         return fig, axs, title
