@@ -11,6 +11,7 @@ __status__ = "Development"
 from .attacker import Attacker
 
 
+# NOTE: Change this name to be the all but one attacker
 class Herzberg_Motag_Attacker(Attacker):
     """Basic attacker class"""
 

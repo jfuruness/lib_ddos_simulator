@@ -15,6 +15,7 @@ class Motag_Attacker(Attacker):
     """Basic attacker class"""
 
     runnable = True
+    paper = False
 
     def _attack(self, manager, turn):
         """desc below

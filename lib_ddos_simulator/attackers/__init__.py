@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from .alternating_attacker import Alternating_Attacker
 from .basic_attacker import Basic_Attacker
 from .even_turn_attacker import Even_Turn_Attacker
 from .motag_attacker import Motag_Attacker
@@ -22,6 +23,7 @@ from .random_attacker import Ten_Percent_Attacker
 from .x_turns_straight_attacker import Three_Turns_Straight_Attacker
 from .x_turns_straight_attacker import Ten_Turns_Straight_Attacker
 from .x_turns_straight_attacker import Twenty_Turns_Straight_Attacker
+from .x_turns_straight_attacker import Log2n_Turns_Straight_Attacker
 from .until_percentage_attacker import Until_50_Percent_Attacker
 
 # Done here to fill subclasses

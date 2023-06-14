@@ -8,6 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+from math import log2
 from .attacker import Attacker
 
 
@@ -24,6 +25,21 @@ class X_Turns_Straight_Attacker(Attacker):
     def _attack(self, manager, turn):
         if not (turn % self.turns_in_a_row == 0 and turn > 0):
             self.bucket.attacked = True
+
+
+class Log2n_Turns_Straight_Attacker(Attacker):
+    """Attacker that attacks for x turns straight"""
+
+    runnable = True
+    paper = True
+
+    def _attack(self, manager, turn):
+        num_users = len(self.connected_users)
+        turns_in_a_row = int(log2(num_users))
+        if not (turn % turns_in_a_row == 0 and turn > 0):
+            # Only attack when you are not alone
+            if len(self.bucket) > 1:
+                self.bucket.attacked = True
 
 
 class Three_Turns_Straight_Attacker(X_Turns_Straight_Attacker):
