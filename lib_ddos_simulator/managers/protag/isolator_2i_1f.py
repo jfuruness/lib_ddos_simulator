@@ -51,18 +51,19 @@ class Isolator_2i_1f(Protag_Manager_Base):
                 if bucket.attacked or len(bucket) == 0:
                     # Remove the attacked bucket id from good buckets
                     remove_buckets.append(bucket)
-            for bucket in remove_buckets:
-                tracked_split.discard(bucket)
-                merge_buckets.discard(bucket)
+            if remove_buckets:
                 mergeable = True
+                tracked_split.difference_update(remove_buckets)
+                merge_buckets.difference_update(remove_buckets)
+            # NOTE: below could be refactored a bit better
             # Mergeable if attacked, or 0 buckets in tracked_split
             if mergeable:
-                for bucket in tracked_split:
-                    merge_buckets.add(bucket)
+                merge_buckets.update(tracked_split)
             else:
                 new_tracked_splits.append(tracked_split)
 
 
+        # NOTE: moved the remove attackers into here for some reason
         attackers_guess = len(attacked_buckets) + len(new_tracked_splits)
         for bucket in attacked_buckets:
             if len(bucket) == 1:
@@ -77,15 +78,16 @@ class Isolator_2i_1f(Protag_Manager_Base):
         # Get all users that are not in the tracked splits and aren't attacked
         for bucket in self.non_attacked_buckets:
             in_tracked_splits = False
-            for tracked_split in self.tracked_splits:
-                if bucket in tracked_split:
-                    in_tracked_splits = True
             if bucket in merge_buckets:
                 in_tracked_splits = True
+            else:
+                for tracked_split in self.tracked_splits:  # TODO
+                    if bucket in tracked_split:
+                        in_tracked_splits = True
             if in_tracked_splits is False:
                 merge_buckets.add(bucket)
         # Sorted to preserve deterministic randomness
-        for bucket in sorted(list(merge_buckets), key=lambda x: x.id):
+        for bucket in sorted(merge_buckets, key=lambda x: x.id):
             users.extend(bucket.users)
             self.remove_bucket(bucket)
         assert len(set(users)) == len(users)
