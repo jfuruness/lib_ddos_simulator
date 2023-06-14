@@ -40,14 +40,15 @@ class Isolator_2i_1f(Protag_Manager_Base):
     def combine_buckets(self):
         """Merge all non attacked buckets"""
 
+
+        attacked_buckets = self.attacked_buckets
         merge_buckets = set()
         new_tracked_splits = []
         for tracked_split in self.tracked_splits:
             mergeable = False
-            attacked_buckets = self.attacked_buckets
             remove_buckets = []
             for bucket in tracked_split:
-                if bucket in attacked_buckets or len(bucket) == 0:
+                if bucket.attacked or len(bucket) == 0:
                     # Remove the attacked bucket id from good buckets
                     remove_buckets.append(bucket)
             for bucket in remove_buckets:
@@ -62,8 +63,8 @@ class Isolator_2i_1f(Protag_Manager_Base):
                 new_tracked_splits.append(tracked_split)
 
 
-        attackers_guess = len(self.attacked_buckets) + len(new_tracked_splits)
-        for bucket in self.attacked_buckets:
+        attackers_guess = len(attacked_buckets) + len(new_tracked_splits)
+        for bucket in attacked_buckets:
             if len(bucket) == 1:
                 self.attackers_detected += 1
                 self.change_user_status(bucket.users[0], User_Status.ELIMINATED)
