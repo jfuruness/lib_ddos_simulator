@@ -185,10 +185,10 @@ class Combination_Grapher(Base_Grapher):
 
         matplotlib.use("Agg")
         fig, axs = plt.subplots(figsize=(20, 10))
-        title = (f"Scenario: " 
-                 f"users: {users_per_bucket * num_buckets}, "
-                 f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
-        fig.suptitle(title)
+        # title = (f"Scenario: "
+        #          f"users: {users_per_bucket * num_buckets}, "
+        #          f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
+        # fig.suptitle(title)
 
         # Gets maximum y value to set axis
         max_y_limit = 0
@@ -224,9 +224,11 @@ class Combination_Grapher(Base_Grapher):
                      scenario_data[manager][attacker][y_val],  # Y value
                      yerr=scenario_data[manager][attacker][y_val +"_YERR"],
                      label=name,
-                     ls=self.styles(manager_i),
+                     ls=self.styles(index=manager_i, manager=manager),
                      # https://stackoverflow.com/a/26305286/8903959
-                     marker=self.markers(manager_i))
+                     marker=self.markers(index=manager_i, manager=manager),
+                     color=self.colors(index=manager_i, manager=manager),
+                     )
         # This means we are graphing worst case
         if write_json:
             self.overlay_scatter_plot(axs,
