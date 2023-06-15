@@ -41,14 +41,14 @@ attackers = [
     Basic_Attacker,
     Even_Turn_Attacker,
     Herzberg_Motag_Attacker,  # All but one attacker
-    Never_Alone_Attacker,
+    # Never_Alone_Attacker,  # Anna said we don't need this
     Never_Last_Attacker,
     Log2n_Turns_Straight_Attacker
 ]
 attackers = attackers[::-1]
 
 users_per_bucket = 10_000
-trials = 2
+trials = 10
 num_rounds = 501
 
 
