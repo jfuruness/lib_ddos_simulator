@@ -31,8 +31,8 @@ from lib_ddos_simulator.attackers import (
 managers=[
     Protag_Manager_Merge,
     Protag_Manager_No_Merge,
-    Motag_Manager_20_Bucket,
-    Motag_Manager_200_Bucket,
+    # Motag_Manager_20_Bucket,
+    # Motag_Manager_200_Bucket,
     Isolator_2i_1f,
     # Isolator_2i_kf,
     # Isolator_3i_1f,
@@ -47,7 +47,7 @@ attackers = [
     Basic_Attacker,
     Even_Turn_Attacker,
     Herzberg_Motag_Attacker,  # All but one attacker
-    # Never_Alone_Attacker,  # Anna said we didn't need this
+    Never_Alone_Attacker,
     Never_Last_Attacker,
     Log2n_Turns_Straight_Attacker
 ]
@@ -61,8 +61,8 @@ num_rounds = 501
 ############### Attackers from 1 to 6% with Opt H #############
 
 start = time.perf_counter()
-#pr = cProfile.Profile()
-#pr.enable()
+pr = cProfile.Profile()
+pr.enable()
 
 grapher = Combination_Grapher(debug=True,
                               graph_dir="/tmp/ddos_graphs/benchmark",
@@ -79,13 +79,13 @@ grapher.run(
     trials=trials
 )
 end = time.perf_counter()
-#pr.disable()
+pr.disable()
 
-#s = io.StringIO()
-#ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
-#ps.print_stats()
+s = io.StringIO()
+ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
+ps.print_stats()
 
-#with open('/tmp/test.txt', 'w') as f:
-#    f.write(s.getvalue())
+with open('/tmp/test.txt', 'w') as f:
+    f.write(s.getvalue())
 
 print(f"Ran in {round((end-start) / 2, 2)}s per trial")

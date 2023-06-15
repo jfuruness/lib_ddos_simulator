@@ -52,15 +52,25 @@ class Grapher(Base_Grapher):
         # num buckets
         cur_data["num_buckets"].append(len(manager.used_buckets))
 
-        # num serviced
-        serviced = (sum(len(x) for x in manager.non_attacked_buckets))
+        # num serviced and not serviced. Done this way for speed
+        # (supported by cprofile, obvi list comprehensions too slow)
+        serviced = 0
+        for bucket in manager.used_buckets.values():
+            if not bucket.attacked:
+                serviced += len(bucket)
 
         # total serviced
         cur_data["total_serviced"].append(serviced)
 
+        # num serviced and not serviced. Done this way for speed
+        # (supported by cprofile, obvi list comprehensions too slow)
+        good_users_not_serviced = 0
+        for user in manager.connected_good_users:
+            if user.bucket.attacked:
+                good_users_not_serviced += 1
+
         # good users not serviced
-        cur_data["good_users_not_serviced"].append(len([x for x in manager.connected_good_users
-                                                        if x.bucket.attacked]))
+        cur_data["good_users_not_serviced"].append(good_users_not_serviced)
         cur_data["total_good_users"].append(len(manager.connected_good_users))
 
         cur_data["percent_good_not_serviced"].append(sum(cur_data["good_users_not_serviced"]) / sum(cur_data["total_good_users"]))

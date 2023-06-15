@@ -66,7 +66,7 @@ class DDOS_Simulator:
 
     def _get_users(self, num_users, num_attackers, user_cls, attacker_cls):
 
-        key = (num_users, num_attackers) 
+        key = (num_users, num_attackers)
 
         if key not in self.num_users_to_user_orderings:
             # Ids start at one to make rows easier for animations for buckets
