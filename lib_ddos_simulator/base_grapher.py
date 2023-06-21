@@ -14,8 +14,8 @@ import shutil
 import tikzplotlib
 
 from .utils import Log_Levels
-from .managers import Motag_Manager_20_Bucket
-from .managers import Motag_Manager_200_Bucket
+from .managers import Motag_Manager_40_Bucket
+from .managers import Motag_Manager_500_Bucket
 from .managers import Opt_S
 from .managers import Isolator_2i_1f
 from .managers import Isolator_2i_SQRT_kf
@@ -56,8 +56,8 @@ class Base_Grapher:
 
         if manager:
             opts = {
-                Motag_Manager_20_Bucket: "-",
-                Motag_Manager_200_Bucket: "--",
+                Motag_Manager_40_Bucket: "-",
+                Motag_Manager_500_Bucket: "--",
                 Opt_S: "-.",
                 Isolator_2i_1f: ":",
                 Isolator_2i_SQRT_kf: "solid",
@@ -79,8 +79,8 @@ class Base_Grapher:
 
         if manager:
             opts = {
-                Motag_Manager_20_Bucket: ".",
-                Motag_Manager_200_Bucket: "1",
+                Motag_Manager_40_Bucket: ".",
+                Motag_Manager_500_Bucket: "1",
                 Opt_S: "*",
                 Isolator_2i_1f: "x",
                 Isolator_2i_SQRT_kf: "d",
@@ -102,8 +102,8 @@ class Base_Grapher:
 
         if manager:
             opts = {
-                Motag_Manager_20_Bucket: "red",
-                Motag_Manager_200_Bucket: "blue",
+                Motag_Manager_40_Bucket: "red",
+                Motag_Manager_500_Bucket: "blue",
                 Opt_S: "green",
                 Isolator_2i_1f: "purple",
                 Isolator_2i_SQRT_kf: "orange",

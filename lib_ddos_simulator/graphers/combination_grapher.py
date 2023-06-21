@@ -193,7 +193,9 @@ class Combination_Grapher(Base_Grapher):
         # Request NDSS June 2023 change percent good not serviced to a non decimal
         for _, manager_data in scenario_data.items():
             if y_val == "PERCENT_GOOD_NOT_SERVICED":
-                manager_data[attacker][y_val] *= 100
+                vals = manager_data[attacker][y_val]
+                new_vals = [x * 100 for x in vals]
+                manager_data[attacker][y_val] = new_vals
 
         # Gets maximum y value to set axis
         max_y_limit = 0
