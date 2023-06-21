@@ -1,8 +1,8 @@
 from lib_ddos_simulator import (
     Combination_Grapher,
     Protag_Manager_Merge,
-    Protag_Manager_No_Merge,Motag_Manager_40_Bucket,
-    Motag_Manager_500_Bucket,
+    Protag_Manager_No_Merge,Motag_Manager_20_Bucket,
+    Motag_Manager_200_Bucket,
     Isolator_2i_1f,
     Isolator_2i_kf,
     Isolator_3i_1f,
@@ -24,14 +24,14 @@ from lib_ddos_simulator.attackers import (
 
 managers=[
     Protag_Manager_Merge,
-    # Protag_Manager_No_Merge,
-    Motag_Manager_40_Bucket,
-    Motag_Manager_500_Bucket,
+    Protag_Manager_No_Merge,
+    Motag_Manager_20_Bucket,
+    Motag_Manager_200_Bucket,
     Isolator_2i_1f,
     # Isolator_2i_kf,
     # Isolator_3i_1f,
     Isolator_3i_kf,
-    # Isolator_2i_SQRT_kf,
+    Isolator_2i_SQRT_kf,
     # Isolator_3i_SQRT_kf,
     Opt_S,
     Opt_H,
@@ -50,7 +50,7 @@ attackers = attackers[::-1]
 users_per_bucket = 10_000
 trials = 10
 num_rounds = 501
-percent_attackers_list = (0, .001, .005, .01, .02, .03, .04)
+
 
 
 ############### Attackers from 1 to 6% with Opt H #############
@@ -63,7 +63,31 @@ grapher = Combination_Grapher(debug=False,
 grapher.run(
     managers=managers,
     attackers=attackers,
-    percent_attackers_list=percent_attackers_list,
+    percent_attackers_list=[x / 100 for x in range(1, 7)],
+    num_buckets=1,
+    users_per_bucket=users_per_bucket,
+    num_rounds=num_rounds,
+    trials=trials
+)
+
+
+############### Attackers from 1 to 625 insiders with Opt H #############
+
+grapher = Combination_Grapher(debug=False,
+                              graph_dir="/tmp/ddos_graphs/2",
+                              tikz=False,
+                              save=True,
+                              high_res=False)
+grapher.run(
+    managers=managers,
+    attackers=attackers,
+    percent_attackers_list=[
+        1/users_per_bucket,
+        5/users_per_bucket,
+        25/users_per_bucket,
+        125/users_per_bucket,
+        625/users_per_bucket,
+    ],
     num_buckets=1,
     users_per_bucket=users_per_bucket,
     num_rounds=num_rounds,
@@ -81,7 +105,31 @@ grapher = Combination_Grapher(debug=False,
 grapher.run(
     managers=[x for x in managers if x != Opt_H],
     attackers=attackers,
-    percent_attackers_list=percent_attackers_list,
+    percent_attackers_list=[x / 100 for x in range(1, 7)],
+    num_buckets=1,
+    users_per_bucket=users_per_bucket,
+    num_rounds=num_rounds,
+    trials=trials
+)
+
+
+############### Attackers from 1 to 625 insiders without Opt H #############
+
+grapher = Combination_Grapher(debug=False,
+                              graph_dir="/tmp/ddos_graphs/4",
+                              tikz=False,
+                              save=True,
+                              high_res=False)
+grapher.run(
+    managers=[x for x in managers if x != Opt_H],
+    attackers=attackers,
+    percent_attackers_list=[
+        1/users_per_bucket,
+        5/users_per_bucket,
+        25/users_per_bucket,
+        125/users_per_bucket,
+        625/users_per_bucket,
+    ],
     num_buckets=1,
     users_per_bucket=users_per_bucket,
     num_rounds=num_rounds,

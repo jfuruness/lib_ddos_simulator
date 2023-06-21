@@ -12,7 +12,9 @@ from .bounded_manager import Bounded_Manager
 from .dose import DOSE_Manager, DOSE_Attack_Event
 from .motag import Motag_Manager_3_Bucket
 from .motag import Motag_Manager_20_Bucket
+from .motag import Motag_Manager_40_Bucket
 from .motag import Motag_Manager_200_Bucket
+from .motag import Motag_Manager_500_Bucket
 from .opt_s import Opt_S
 from .protag import Protag_Manager_Base
 from .protag import Protag_Manager_Merge

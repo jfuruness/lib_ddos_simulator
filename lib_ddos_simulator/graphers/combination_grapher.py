@@ -190,6 +190,11 @@ class Combination_Grapher(Base_Grapher):
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
         # fig.suptitle(title)
 
+        # Request NDSS June 2023 change percent good not serviced to a non decimal
+        for _, manager_data in scenario_data.items():
+            if y_val == "PERCENT_GOOD_NOT_SERVICED":
+                manager_data[attacker][y_val] *= 100
+
         # Gets maximum y value to set axis
         max_y_limit = 0
         for _, manager_data in scenario_data.items():
@@ -198,10 +203,19 @@ class Combination_Grapher(Base_Grapher):
         # Sets y limit
         # Request for NDSS June 2023, inclrease Y limit by 10%
         axs.set_ylim(0, max_y_limit * 1.02)
+        # Request for NDSS June 2023, set X limit to 0
+        axs.set_xlim(0, None)
+
+
         # Add labels to axis
         # Requested changes for NDSS June 2023
         if y_val == "BUCKET_BOUND":
             y_val = "COST"
+            # Request NDSS June 2023, Set Y scale to log
+            axs.set_yscale("log")
+        # Request NDSS June 2023 to change Y axis of this graph
+        if y_val == "PERCENT_GOOD_NOT_SERVICED":
+            y_val = "PERCENT HARMED"
         axs.set(xlabel="Percent Attackers", ylabel=y_val)
 
         return fig, axs, title
