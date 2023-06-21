@@ -56,7 +56,7 @@ percent_attackers_list = (0, .001, .005, .01, .02, .03, .04)
 ############### Attackers from 1 to 6% with Opt H #############
 
 grapher = Combination_Grapher(debug=False,
-                              graph_dir="/tmp/ddos_graphs/1",
+                              graph_dir="/tmp/ddos_graphs/w_opt_h",
                               tikz=False,
                               save=True,
                               high_res=False)
@@ -74,7 +74,7 @@ grapher.run(
 ############### Attackers from 1 to 6% without Opt H #############
 
 grapher = Combination_Grapher(debug=False,
-                              graph_dir="/tmp/ddos_graphs/3",
+                              graph_dir="/tmp/ddos_graphs/wout_opt_h",
                               tikz=False,
                               save=True,
                               high_res=False)
