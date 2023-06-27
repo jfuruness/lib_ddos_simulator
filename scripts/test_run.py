@@ -37,7 +37,6 @@ managers=[
     Opt_H,
 ]
 
-managers = managers[:1]
 attackers = [
     Basic_Attacker,
     Even_Turn_Attacker,
@@ -46,41 +45,24 @@ attackers = [
     Never_Last_Attacker,
     Log2n_Turns_Straight_Attacker
 ]
+attackers = attackers[::-1]
 attackers = attackers[:1]
 
-users_per_bucket = 1_000  # TODO: CHANGE BACK
-trials = 2  # TODO: CHANGE BACK
+users_per_bucket = 1_000
+trials = 2
 num_rounds = 101
-percent_attackers_list = (0, .005, .04)
+percent_attackers_list = (0, .001, .005, .01, .02, .03, .04)
 
 
 ############### Attackers from 1 to 6% with Opt H #############
 
-grapher = Combination_Grapher(debug=False,
-                              graph_dir="/tmp/ddos_graphs/1",
+grapher = Combination_Grapher(debug=True,
+                              graph_dir="/tmp/ddos_graphs/test_w_opt_h",
                               tikz=False,
                               save=True,
                               high_res=False)
 grapher.run(
     managers=managers,
-    attackers=attackers,
-    percent_attackers_list=percent_attackers_list,
-    num_buckets=1,
-    users_per_bucket=users_per_bucket,
-    num_rounds=num_rounds,
-    trials=trials
-)
-
-
-############### Attackers from 1 to 6% without Opt H #############
-
-grapher = Combination_Grapher(debug=False,
-                              graph_dir="/tmp/ddos_graphs/2",
-                              tikz=False,
-                              save=True,
-                              high_res=False)
-grapher.run(
-    managers=[x for x in managers if x != Opt_H],
     attackers=attackers,
     percent_attackers_list=percent_attackers_list,
     num_buckets=1,

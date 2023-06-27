@@ -194,7 +194,8 @@ class Combination_Grapher(Base_Grapher):
         for _, manager_data in scenario_data.items():
             if y_val == "PERCENT_GOOD_NOT_SERVICED":
                 vals = manager_data[attacker][y_val]
-                new_vals = [x * 100 for x in vals]
+                # For some reason if we * 100 it multiplies by 10000?
+                new_vals = [y * 10 for y in vals]
                 manager_data[attacker][y_val] = new_vals
 
         # Gets maximum y value to set axis
@@ -204,9 +205,14 @@ class Combination_Grapher(Base_Grapher):
                 max_y_limit = max(manager_data[attacker][y_val])
         # Sets y limit
         # Request for NDSS June 2023, inclrease Y limit by 10%
-        axs.set_ylim(0, max_y_limit * 1.02)
+        # UNLESS y_val is bucket bound or cost, which needs log scale
+        if y_val not in ["BUCKET_BOUND", "COST"]:
+            axs.set_ylim(0, max_y_limit * 1.02)
         # Request for NDSS June 2023, set X limit to 0
-        axs.set_xlim(0, None)
+        max_x_val = 0
+        for _, manager_data in scenario_data.items():
+            max_x_val = max(max_x_val, max(manager_data[attacker]["X"]))
+        axs.set_xlim(0, max_x_val * 1.02)
 
 
         # Add labels to axis

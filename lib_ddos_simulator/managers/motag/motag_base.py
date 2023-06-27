@@ -47,6 +47,12 @@ class Motag_Manager(Manager):
     prox = 3#20
     percent_users_to_save = .95
 
+    def __init__(self, num_buckets: int, users: list):
+        """inits buckets and stores threshold"""
+
+        # Ignore num buckets, always start with proxy
+        super().__init__(num_buckets=self.prox, users=users)
+
     def detect_and_shuffle(self, *args):
         """Motag Manager algorithm"""
 
@@ -123,12 +129,12 @@ class Motag_Manager(Manager):
 
     def get_approx_insiders(self, buckets):
         # NOTE that they estimate the number of insiders,
-        # but we just give it the exact amount, since they do not 
+        # but we just give it the exact amount, since they do not
         # include this equation for the estimation
         # This means the true motag algo would perform worse
         # Much, much worse
         # JF 2022 - modify this for bigO time
-        
+
         num_attackers = 0
         for attacker in self.connected_attackers:
             if attacker.bucket.attacked:
