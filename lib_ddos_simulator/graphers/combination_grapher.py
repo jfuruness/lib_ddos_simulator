@@ -185,6 +185,7 @@ class Combination_Grapher(Base_Grapher):
 
         matplotlib.use("Agg")
         fig, axs = plt.subplots(figsize=(20, 10))
+        plt.rcParams.update({"font.size": 14, "lines.markersize": 10})
         title = (f"Scenario: "
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
