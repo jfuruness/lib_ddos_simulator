@@ -6,7 +6,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from matplotlib.patches import FancyBboxPatch
+from matplotlib.patches import Rectangle, FancyBboxPatch
 
 from .anim_user import Anim_User
 from .bucket_states import Bucket_States
@@ -21,7 +21,7 @@ class Anim_Bucket:
     attacked_face_color = "y"
     zorder = 1
 
-    def __init__(self, id, buckets_per_row, max_users):
+    def __init__(self, id, buckets_per_row, max_users, high_res=False):
         """Stores users"""
 
         self.id = id
@@ -35,12 +35,18 @@ class Anim_Bucket:
         # Set x
         x = patch_width * prev_buckets + Anim_Bucket.patch_padding
         y = 0
-        self.patch = FancyBboxPatch((x, y),
-                                    self.patch_width,
-                                    max_users * Anim_User.patch_length(),
-                                    fc=self.og_face_color,
-                                    boxstyle="round,pad=0.1")
-        self.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+        if high_res:
+            self.patch = FancyBboxPatch((x, y),
+                                        self.patch_width,
+                                        max_users * Anim_User.patch_length(),
+                                        fc=self.og_face_color,
+                                        boxstyle="round,pad=0.1")
+            self.patch.set_boxstyle("round,pad=0.1, rounding_size=0.5")
+        else:
+            self.patch = Rectangle((x, y),
+                                   self.patch_width,
+                                   max_users * Anim_User.patch_length(),
+                                   fc=self.og_face_color)
 
     def add_to_anim(self, ax, zorder):
         """Adds patch to the animation for the first time"""
@@ -89,7 +95,7 @@ class Anim_Bucket:
                 *args):
         """Animates bucket"""
 
-        cur = self.states[f // fpr] 
+        cur = self.states[f // fpr]
         future = self.states[(f // fpr) + 1]
 
         self._set_transparency(cur, future, f, fpr)
@@ -103,7 +109,11 @@ class Anim_Bucket:
                           ):
         # Transition from used to unused
         if cur != Bucket_States.UNUSED and future == Bucket_States.UNUSED:
-            self.patch.set_alpha(1 - ((f % fpr) / fpr))
+            # Make sure it completely zeroes out. No increase in speed unfortunately.
+            if f % fpr == fpr - 1:
+                self.patch.set_alpha(0)
+            else:
+                self.patch.set_alpha(1 - ((f % fpr) / fpr))
 
         # Transition from unused to used
         if cur == Bucket_States.UNUSED and future != Bucket_States.UNUSED:

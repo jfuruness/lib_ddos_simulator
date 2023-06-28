@@ -16,15 +16,17 @@ class Anim_User:
 
     patch_radius = 1
     patch_padding = .25
+    # Changing colors, or even removing color, made it slower
     og_face_color = "g"
     disconnected_location = (-10, -10)
     # Needs different locs for disconnceted and detected
     # Because based on location we animate
     detected_location = (-20, -20)
 
-    def __init__(self, id, og_anim_bucket):
+    def __init__(self, id, og_anim_bucket, high_res=False):
         """Stores user values"""
 
+        self.high_res = high_res
         # Used to differentiate users
         self.id = id
         # Used to track suspicions
@@ -40,17 +42,19 @@ class Anim_User:
         self.patch = Circle((center_x, 5),
                              Anim_User.patch_radius,
                              fc=Anim_User.og_face_color)
-        self.text = text(center_x,
-                         5,
-                         self.id,
-                         horizontalalignment="center",
-                         verticalalignment="center")
+
+        if self.high_res:
+            self.text = text(center_x,
+                             5,
+                             self.id,
+                             horizontalalignment="center",
+                             verticalalignment="center")
 
     @property
     def anim_objects(self):
         """Animation objects used by the animation"""
 
-        return [self.patch, self.text]
+        return [self.patch, self.text] if self.high_res else [self.patch]
 
     @staticmethod
     def patch_length():
@@ -66,9 +70,10 @@ class Anim_User:
         ax.add_patch(self.patch)
         self.patch.set_zorder(zorder)
         self.patch.set_facecolor(self.og_face_color)
-        # Add text. X is already set properly.
-        self.text.set_y(self.points[0][1])
-        self.text.set_zorder(zorder + 1)
+        if self.high_res:
+            # Add text. X is already set properly.
+            self.text.set_y(self.points[0][1])
+            self.text.set_zorder(zorder + 1)
 
         return zorder + 2
 
@@ -109,8 +114,9 @@ class Anim_User:
         next_point = self._get_next_point(cur_pt, future_pt, f, fpr)
         # Set the center
         self.patch.center = next_point
-        self.text.set_x(next_point[0])
-        self.text.set_y(next_point[1])
+        if self.high_res:
+            self.text.set_x(next_point[0])
+            self.text.set_y(next_point[1])
 
     def _get_next_point(self,
                         cur_pt,  # Current point
@@ -152,15 +158,19 @@ class Anim_User:
             self._become_disconnected()
 
     def _update_sus(self, track_sus, frame, frames_per_round):
-        if track_sus:
+        if track_sus and self.high_res:
             text = f"{self.suspicions[(frame//frames_per_round) + 1]:.1f}"
             self.text.set_text(f"{self.id:2.0f}:{text}")
 
     def _become_detected(self):
         """Sets animation to detected"""
-        self.text.set_text("Detected")
+
+        if self.high_res:
+            self.text.set_text("Detected")
         self.patch.set_facecolor("grey")
 
     def _become_disconnected(self):
-        self.text.set_text("Disconnected")
+
+        if self.high_res:
+            self.text.set_text("Disconnected")
         self.patch.set_facecolor("purple")

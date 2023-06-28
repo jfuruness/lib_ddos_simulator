@@ -13,8 +13,7 @@ import matplotlib as mpl
 import os
 import platform
 
-if platform.python_implementation() != "PyPy":
-    import numpy as np
+import numpy as np
 
 
 class Color_Generator:

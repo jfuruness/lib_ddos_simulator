@@ -20,15 +20,16 @@ setup(
               'Distributed Denial of Service',
               'Denial of Service'],
     install_requires=[
+        'wheel',
+        'setuptools',
         'flasgger',
         'flask',
         'matplotlib==3.5.2',
         'tikzplotlib',
-        'wheel',
-        'setuptools',
         'tqdm',
         'pytest',
-        'pathos'
+        'pathos',
+        'numpy==1.24.3',
     ],
     classifiers=[
         'Environment :: Console',

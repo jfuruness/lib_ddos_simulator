@@ -8,10 +8,12 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
+import matplotlib.animation as animation
 from copy import deepcopy
 from enum import Enum
 import os
 import math
+from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -19,9 +21,7 @@ from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
 import os
 
-import platform
-if platform.python_implementation() != "PyPy":
-    import numpy as np
+import numpy as np
 from tqdm import tqdm
 
 from .anim_attacker import Anim_Attacker
@@ -56,9 +56,6 @@ class Animater(Base_Grapher):
                  attacker_cls,
                  **kwargs):
         """Initializes simulation"""
-
-        msg = "Must run animations in CPython due to numpy constraints"
-        assert platform.python_implementation() != "PyPy", msg
 
         super(Animater, self).__init__(**kwargs)
 
@@ -152,6 +149,7 @@ class Animater(Base_Grapher):
             mpl.use("Agg")
         else:
             mpl.use("TkAgg")
+        # Removing the background color did not increase speed
         plt.style.use('dark_background')
         # https://stackoverflow.com/a/48958260/8903959
         mpl.rcParams.update({'text.color': "black"})
@@ -175,20 +173,24 @@ class Animater(Base_Grapher):
         ax.set_axis_off()
         ax.margins(0)
 
-        Color_Generator.gradient_image(ax,
-                                       direction=0,
-                                       extent=(0, 1, 0, 1),
-                                       transform=ax.transAxes,
-                                       cmap=plt.cm.Oranges,
-                                       cmap_range=(0.1, 0.6))
+        if self.high_res:
+            Color_Generator.gradient_image(ax,
+                                           direction=0,
+                                           extent=(0, 1, 0, 1),
+                                           transform=ax.transAxes,
+                                           cmap=plt.cm.Oranges,
+                                           cmap_range=(0.1, 0.6))
 
 
         self.ax = ax
         return fig, row_cutoff
 
     def _create_buckets(self, bucket_ids, buckets_per_row, max_users_y):
-        self.buckets = {_id: Anim_Bucket(_id, buckets_per_row, max_users_y)
-                        for _id in sorted(bucket_ids)}
+        self.buckets = {
+            _id: Anim_Bucket(
+                _id, buckets_per_row, max_users_y, high_res=self.high_res
+            )
+            for _id in sorted(bucket_ids)}
 
 
     def _create_users(self, good_user_ids, attacker_ids):
@@ -199,7 +201,11 @@ class Animater(Base_Grapher):
             for _id in _ids:
                 og_bucket_id = self.manager.users[_id].bucket.id
 
-                self.users[_id] = cls(_id, self.buckets[og_bucket_id])
+                self.users[_id] = cls(
+                    _id,
+                    self.buckets[og_bucket_id],
+                    high_res=self.high_res
+                )
 
     def _append_bucket_data(self, manager_copy):
         used_bucket_ids = set()
@@ -248,7 +254,7 @@ class Animater(Base_Grapher):
                                        init_func=self.init,
                                        frames=frames,
                                        interval=40,
-                                       blit=True if self.save else False)
+                                       blit=(self.save and self.high_res))
 
         self.save_graph(anim, total_rounds)
 
@@ -261,15 +267,20 @@ class Animater(Base_Grapher):
 
             # graph_dir comes from inherited class
             path = os.path.join(self.graph_dir, f'{self.round_text._get_round_text(0).replace("Round 0     ", "")}.mp4')
-            pbar = tqdm(desc=f"Saving {path}",
+
+            pbar = tqdm(desc=f"Saving {Path(path).name}",
                         total=self.frames_per_round * total_rounds)
+
 
             # https://stackoverflow.com/a/14666461/8903959
             anim.save(path,
                       progress_callback=lambda *_: pbar.update(),
                       dpi=self.dpi,
                       # NOTE: bitrate barely impacts saving speed
-                      bitrate=12000)
+                      bitrate=12000,
+                      # NOTE: Tried various writers, made no difference
+                      # writer=writer
+            )
             pbar.close()
         else:
             plt.show()
