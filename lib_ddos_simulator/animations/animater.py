@@ -18,7 +18,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import animation
 import os
-if not os.environ.get("PYPY3"):
+
+import platform
+if platform.python_implementation() != "PyPy":
     import numpy as np
 from tqdm import tqdm
 
@@ -55,6 +57,8 @@ class Animater(Base_Grapher):
                  **kwargs):
         """Initializes simulation"""
 
+        msg = "Must run animations in CPython due to numpy constraints"
+        assert platform.python_implementation() != "PyPy", msg
 
         super(Animater, self).__init__(**kwargs)
 
@@ -82,6 +86,8 @@ class Animater(Base_Grapher):
         self.manager_copies.append(deepcopy(manager))
 
     def set_up_animation(self):
+
+
         # Step 1: Figure out max users in a bucket
         max_users_y, good_user_ids, attacker_ids = self._get_user_data()
         # Step 2: Get all the bucket ids ever made
@@ -153,7 +159,7 @@ class Animater(Base_Grapher):
         fig = plt.figure()
         # NOTE: Increasing figure size makes it take way longer
         fig.set_size_inches(16, 9)
-        
+
         # Buckets_per_row
         row_cutoff = 100 if max_users_y >= 40 else 32
 

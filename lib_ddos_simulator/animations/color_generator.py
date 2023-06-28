@@ -11,7 +11,9 @@ __status__ = "Development"
 import matplotlib as mpl
 
 import os
-if not os.environ.get("PYPY3"):
+import platform
+
+if platform.python_implementation() != "PyPy":
     import numpy as np
 
 

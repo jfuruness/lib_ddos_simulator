@@ -9,7 +9,8 @@ __status__ = "Development"
 from matplotlib.pyplot import Polygon
 import os
 
-if not os.environ.get("PYPY3"):
+import platform
+if platform.python_implementation() != "PyPy":
     import numpy as np
 
 from .anim_user import Anim_User
