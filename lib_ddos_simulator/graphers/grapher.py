@@ -9,6 +9,7 @@ __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
 import os
+from statistics import mean
 
 import matplotlib.pyplot as plt
 
@@ -138,7 +139,9 @@ class Grapher(Base_Grapher):
         return {manager.__class__: {"utility": self._data[manager]["Y"]["utility"][-1],
                                     "harm": self._data[manager]["Y"]["harm"][-1],
                                     "percent_good_not_serviced": self._data[manager]["Y"]["percent_good_not_serviced"][-1],
-                                    "bucket_bound": max(self._data[manager]["Y"]["num_buckets"])}
+                                    "bucket_bound": max(self._data[manager]["Y"]["num_buckets"]),
+                                    "total_buckets": sum(self._data[manager]["Y"]["num_buckets"]),
+                                    "average_buckets": mean(self._data[manager]["Y"]["num_buckets"])}
                 for manager in self._data}
 
     def chart_data(self, axs):

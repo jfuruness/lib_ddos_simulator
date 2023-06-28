@@ -107,6 +107,8 @@ class Combo_Data_Generator(Base_Grapher):
                                               "HARM": [],
                                               "PERCENT_GOOD_NOT_SERVICED": [],
                                               "BUCKET_BOUND": [],
+                                              "TOTAL_BUCKETS": [],
+                                              "AVG_BUCKETS": [],
                                               "UTILITY": []}
                                    for attacker in attackers}
                          for manager in managers}
@@ -124,7 +126,9 @@ class Combo_Data_Generator(Base_Grapher):
                     (harm,
                      percent_good_not_serviced,
                      bucket_bound,
-                     utility) = self.run_scenario(attacker,
+                     utility,
+                     total_buckets,
+                     avg_buckets) = self.run_scenario(attacker,
                                                   num_buckets,
                                                   users_per_bucket,
                                                   num_rounds,
@@ -134,6 +138,8 @@ class Combo_Data_Generator(Base_Grapher):
                     manager_data["PERCENT_GOOD_NOT_SERVICED"].append(percent_good_not_serviced)
                     manager_data["BUCKET_BOUND"].append(bucket_bound)
                     manager_data["UTILITY"].append(utility)
+                    manager_data["TOTAL_BUCKETS"].append(total_buckets)
+                    manager_data["AVG_BUCKETS"].append(avg_buckets)
         return scenario_data
 
     def run_scenario(self,
@@ -159,7 +165,14 @@ class Combo_Data_Generator(Base_Grapher):
                                             attacker_cls=attacker_cls)
         # dict of {manager: {utility: final utility, harm: final harm}}
         outcome_dict = sim.run(num_rounds, graph_trials=False)
-        attrs = ["harm", "percent_good_not_serviced", "bucket_bound", "utility"]
+        attrs = [
+            "harm",
+            "percent_good_not_serviced",
+            "bucket_bound",
+            "utility",
+            "total_buckets",
+            "average_buckets"
+        ]
         return [outcome_dict[manager_cls][x] for x in attrs]
 
     def print_progress(self, atk_num, atk_total, trial_num, trial_total):
@@ -184,6 +197,10 @@ class Combo_Data_Generator(Base_Grapher):
                                                           "PERCENT_GOOD_NOT_SERVICED_YERR": [],
                                                           "BUCKET_BOUND": [],
                                                           "BUCKET_BOUND_YERR": [],
+                                                          "TOTAL_BUCKETS": [],
+                                                          "TOTAL_BUCKETS_YERR": [],
+                                                          "AVG_BUCKETS": [],
+                                                          "AVG_BUCKETS_YERR": [],
                                                           "UTILITY": [],
                                                           "UTILITY_YERR": []}
                 cur_agg_data = agg_results[manager_cls][attacker_cls]
@@ -193,22 +210,30 @@ class Combo_Data_Generator(Base_Grapher):
                     raw_harm = []
                     raw_percent_good_not_serviced = []
                     raw_bucket_bound = []
+                    raw_total_buckets = []
+                    raw_avg_buckets = []
                     raw_utility = []
                     for result in results:
                         cur_result_data = result[manager_cls][attacker_cls]
                         raw_harm.append(cur_result_data["HARM"][i])
                         raw_percent_good_not_serviced.append(cur_result_data["PERCENT_GOOD_NOT_SERVICED"][i])
                         raw_bucket_bound.append(cur_result_data["BUCKET_BOUND"][i])
+                        raw_total_buckets.append(cur_result_data["TOTAL_BUCKETS"][i])
+                        raw_avg_buckets.append(cur_result_data["AVG_BUCKETS"][i])
                         raw_utility.append(cur_result_data["UTILITY"][i])
                     # Take the average of the raw data and append
                     cur_agg_data["HARM"].append(mean(raw_harm))
                     cur_agg_data["PERCENT_GOOD_NOT_SERVICED"].append(mean(raw_percent_good_not_serviced))
                     cur_agg_data["BUCKET_BOUND"].append(mean(raw_bucket_bound))
+                    cur_agg_data["TOTAL_BUCKETS"].append(mean(raw_total_buckets))
+                    cur_agg_data["AVG_BUCKETS"].append(mean(raw_avg_buckets))
                     cur_agg_data["UTILITY"].append(mean(raw_utility))
                     # error bar data and append
                     cur_agg_data["HARM_YERR"].append(self._error_bar(raw_harm))
                     cur_agg_data["PERCENT_GOOD_NOT_SERVICED_YERR"].append(self._error_bar(raw_percent_good_not_serviced))
                     cur_agg_data["BUCKET_BOUND_YERR"].append(self._error_bar(raw_bucket_bound))
+                    cur_agg_data["TOTAL_BUCKETS_YERR"].append(self._error_bar(raw_total_buckets))
+                    cur_agg_data["AVG_BUCKETS_YERR"].append(self._error_bar(raw_avg_buckets))
                     utility_y_err = self._error_bar(raw_utility)
                     cur_agg_data["UTILITY_YERR"].append(utility_y_err)
         return agg_results

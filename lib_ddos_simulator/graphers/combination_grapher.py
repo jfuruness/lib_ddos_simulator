@@ -43,7 +43,14 @@ class Combination_Grapher(Base_Grapher):
     Plots % of users that are attackers on the X axis
     """
 
-    y_vals = ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND", "UTILITY"]
+    y_vals = [
+        "HARM",
+        "PERCENT_GOOD_NOT_SERVICED",
+        "BUCKET_BOUND",
+        "UTILITY",
+        "TOTAL_BUCKETS",
+        "AVG_BUCKETS"
+    ]
 
     def __init__(self, *args, **kwargs):
         super(Combination_Grapher, self).__init__(*args, **kwargs)
@@ -112,7 +119,10 @@ class Combination_Grapher(Base_Grapher):
             xs = manager_data[attackers[0]]["X"]
             for i, x in enumerate(xs):
                 # should be changed to be abs max but whatevs
-                if y_val in ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND"]:
+                if y_val in [
+                    "HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND",
+                    "TOTAL_BUCKETS", "AVG_BUCKETS"
+                ]:
                     worst_case_y = -10000000000
                 elif y_val == "UTILITY":
                     worst_case_y = 10000000000
@@ -121,7 +131,10 @@ class Combination_Grapher(Base_Grapher):
                 worst_case_atk = None
                 yerr = None
                 for attacker in attackers:
-                    if y_val in ["HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND"]:
+                    if y_val in [
+                            "HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND",
+                            "TOTAL_BUCKETS", "AVG_BUCKETS"
+                    ]:
                         cond = manager_data[attacker][y_val][i] > worst_case_y
                     elif y_val == "UTILITY":
                         cond = manager_data[attacker][y_val][i] < worst_case_y
@@ -207,8 +220,9 @@ class Combination_Grapher(Base_Grapher):
         # Sets y limit
         # Request for NDSS June 2023, inclrease Y limit by 10%
         # UNLESS y_val is bucket bound or cost, which needs log scale
-        if y_val not in ["BUCKET_BOUND", "COST"]:
-            axs.set_ylim(0, max_y_limit * 1.02)
+        # REVERTED 6/28/2023 because this was innaccurate
+        # if y_val not in ["BUCKET_BOUND", "COST"]:
+        axs.set_ylim(0, max_y_limit * 1.02)
         # Request for NDSS June 2023, set X limit to 0
         max_x_val = 0
         for _, manager_data in scenario_data.items():
@@ -218,10 +232,12 @@ class Combination_Grapher(Base_Grapher):
 
         # Add labels to axis
         # Requested changes for NDSS June 2023
-        if y_val == "BUCKET_BOUND":
-            y_val = "COST"
-            # Request NDSS June 2023, Set Y scale to log
-            axs.set_yscale("log")
+        # June 28 2023 - reverting this change. cost != bucket bound,
+        # this was innaccurate
+        # if y_val == "BUCKET_BOUND":
+        #     y_val = "COST"
+        #     # Request NDSS June 2023, Set Y scale to log
+        #     axs.set_yscale("log")
         # Request NDSS June 2023 to change Y axis of this graph
         if y_val == "PERCENT_GOOD_NOT_SERVICED":
             y_val = "PERCENT HARMED"
