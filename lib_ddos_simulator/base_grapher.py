@@ -15,6 +15,7 @@ import tikzplotlib
 
 from .utils import Log_Levels
 from .managers import Motag_Manager_40_Bucket
+from .managers import Motag_Manager_40_Bucket_Invalid
 from .managers import Motag_Manager_500_Bucket
 from .managers import Opt_S
 from .managers import Isolator_2i_1f
@@ -57,6 +58,7 @@ class Base_Grapher:
         if manager:
             opts = {
                 Motag_Manager_40_Bucket: "-",
+                Motag_Manager_40_Bucket_Invalid: "-",
                 Motag_Manager_500_Bucket: "--",
                 Opt_S: "-.",
                 Isolator_2i_1f: ":",
@@ -80,6 +82,7 @@ class Base_Grapher:
         if manager:
             opts = {
                 Motag_Manager_40_Bucket: ".",
+                Motag_Manager_40_Bucket_Invalid: ".",
                 Motag_Manager_500_Bucket: "1",
                 Opt_S: "*",
                 Isolator_2i_1f: "x",
@@ -103,13 +106,14 @@ class Base_Grapher:
         if manager:
             opts = {
                 Motag_Manager_40_Bucket: "red",
+                Motag_Manager_40_Bucket_Invalid: "blue",
                 Motag_Manager_500_Bucket: "blue",
                 Opt_S: "green",
                 Isolator_2i_1f: "purple",
                 Isolator_2i_SQRT_kf: "orange",
                 Isolator_3i_kf: "cyan",
                 Opt_H: "black",
-                Protag_Manager_Merge: "yellow",
+                Protag_Manager_Merge: "grey",
                 Protag_Manager_No_Merge: "brown",
             }
             return opts[manager]

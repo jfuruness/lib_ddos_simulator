@@ -13,6 +13,7 @@ from .dose import DOSE_Manager, DOSE_Attack_Event
 from .motag import Motag_Manager_3_Bucket
 from .motag import Motag_Manager_20_Bucket
 from .motag import Motag_Manager_40_Bucket
+from .motag import Motag_Manager_40_Bucket_Invalid
 from .motag import Motag_Manager_200_Bucket
 from .motag import Motag_Manager_500_Bucket
 from .opt_s import Opt_S

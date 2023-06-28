@@ -45,6 +45,7 @@ from .managers import Isolator_3i_SQRT_kf
 from .managers import Motag_Manager_3_Bucket
 from .managers import Motag_Manager_20_Bucket
 from .managers import Motag_Manager_40_Bucket
+from .managers import Motag_Manager_40_Bucket_Invalid
 from .managers import Motag_Manager_200_Bucket
 from .managers import Motag_Manager_500_Bucket
 from .managers import Opt_H

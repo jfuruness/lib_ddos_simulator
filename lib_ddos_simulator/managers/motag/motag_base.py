@@ -47,12 +47,6 @@ class Motag_Manager(Manager):
     prox = 3#20
     percent_users_to_save = .95
 
-    def __init__(self, num_buckets: int, users: list):
-        """inits buckets and stores threshold"""
-
-        # Ignore num buckets, always start with proxy
-        super().__init__(num_buckets=self.prox, users=users)
-
     def detect_and_shuffle(self, *args):
         """Motag Manager algorithm"""
 
