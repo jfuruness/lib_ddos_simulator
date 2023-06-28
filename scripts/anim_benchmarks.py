@@ -5,10 +5,10 @@ from lib_ddos_simulator import DDOS_Simulator, Protag_Manager_Merge, Basic_Attac
 
 # Parameters to change for the animations
 ############################################################
-num_users = 100
-num_attackers = 10
+num_users = 10
+num_attackers = 1
 num_buckets = 1
-num_rounds = 10
+num_rounds = 5
 # All the managers to run. See manager section for a list
 manager_child_classes = [Protag_Manager_Merge]
 # The type of attacker. See attacker section for a list

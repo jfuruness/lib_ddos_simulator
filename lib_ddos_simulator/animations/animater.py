@@ -170,6 +170,9 @@ class Animater(Base_Grapher):
         ax = plt.axes(xlim=(0, min(len(bucket_ids),
                                    row_cutoff) * (Anim_Bucket.patch_length() + Anim_Bucket.patch_padding)),
                       ylim=(0, y_max))
+        # Set equal scaling (i.e., make circles look like circles)
+        ax.set_aspect('equal', 'box')
+
         ax.set_axis_off()
         ax.margins(0)
 
