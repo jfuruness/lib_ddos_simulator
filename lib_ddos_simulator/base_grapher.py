@@ -13,7 +13,6 @@ import os
 import shutil
 import tikzplotlib
 
-from .utils import Log_Levels
 from .managers import Motag_Manager_40_Bucket
 from .managers import Motag_Manager_40_Bucket_Invalid
 from .managers import Motag_Manager_500_Bucket
@@ -54,24 +53,26 @@ class Base_Grapher:
 
     def styles(self, index, manager=None):
         """returns styles and markers for graph lines"""
+        opts = {
+            Motag_Manager_40_Bucket: "-",
+            Motag_Manager_40_Bucket_Invalid: "-",
+            Motag_Manager_500_Bucket: "--",
+            Opt_S: "-.",
+            Isolator_2i_1f: ":",
+            Isolator_2i_SQRT_kf: "solid",
+            Isolator_3i_kf: "dotted",
+            Opt_H: "-",
+            Protag_Manager_Merge: "dashed",
+            Protag_Manager_No_Merge: "dashdot",
+        }
 
-        if manager:
-            opts = {
-                Motag_Manager_40_Bucket: "-",
-                Motag_Manager_40_Bucket_Invalid: "-",
-                Motag_Manager_500_Bucket: "--",
-                Opt_S: "-.",
-                Isolator_2i_1f: ":",
-                Isolator_2i_SQRT_kf: "solid",
-                Isolator_3i_kf: "dotted",
-                Opt_H: "-",
-                Protag_Manager_Merge: "dashed",
-                Protag_Manager_No_Merge: "dashdot",
-            }
+        if manager in opts:
             return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
-            styles = ["-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"]
+            styles = [
+                "-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"
+            ]
             styles += styles.copy()[::-1]
             styles += styles.copy()[0:-2:2]
             return styles[index]
@@ -79,19 +80,20 @@ class Base_Grapher:
     def markers(self, index, manager=None):
         """Markers for graphing"""
 
-        if manager:
-            opts = {
-                Motag_Manager_40_Bucket: ".",
-                Motag_Manager_40_Bucket_Invalid: ".",
-                Motag_Manager_500_Bucket: "1",
-                Opt_S: "*",
-                Isolator_2i_1f: "x",
-                Isolator_2i_SQRT_kf: "d",
-                Isolator_3i_kf: "2",
-                Opt_H: "3",
-                Protag_Manager_Merge: "4",
-                Protag_Manager_No_Merge: ".",
-            }
+        opts = {
+            Motag_Manager_40_Bucket: ".",
+            Motag_Manager_40_Bucket_Invalid: ".",
+            Motag_Manager_500_Bucket: "1",
+            Opt_S: "*",
+            Isolator_2i_1f: "x",
+            Isolator_2i_SQRT_kf: "d",
+            Isolator_3i_kf: "2",
+            Opt_H: "3",
+            Protag_Manager_Merge: "4",
+            Protag_Manager_No_Merge: ".",
+        }
+
+        if manager in opts:
             return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
@@ -103,19 +105,20 @@ class Base_Grapher:
     def colors(self, index, manager=None):
         """Colors for graphing"""
 
-        if manager:
-            opts = {
-                Motag_Manager_40_Bucket: "red",
-                Motag_Manager_40_Bucket_Invalid: "blue",
-                Motag_Manager_500_Bucket: "blue",
-                Opt_S: "green",
-                Isolator_2i_1f: "purple",
-                Isolator_2i_SQRT_kf: "orange",
-                Isolator_3i_kf: "cyan",
-                Opt_H: "black",
-                Protag_Manager_Merge: "grey",
-                Protag_Manager_No_Merge: "brown",
-            }
+        opts = {
+            Motag_Manager_40_Bucket: "red",
+            Motag_Manager_40_Bucket_Invalid: "blue",
+            Motag_Manager_500_Bucket: "blue",
+            Opt_S: "green",
+            Isolator_2i_1f: "purple",
+            Isolator_2i_SQRT_kf: "orange",
+            Isolator_3i_kf: "cyan",
+            Opt_H: "black",
+            Protag_Manager_Merge: "grey",
+            Protag_Manager_No_Merge: "brown",
+        }
+
+        if manager in opts:
             return opts[manager]
         else:
             print(f"Manager does not have a setting {manager.__class__}")
@@ -134,7 +137,6 @@ class Base_Grapher:
             colors += colors.copy()[0:-2:2]
             colors += colors.copy()[::-1]
             return colors[index]
-
 
     def save_graph(self, path, plt, fig=None):
         """Saves graph either as tikz or matplotlib"""

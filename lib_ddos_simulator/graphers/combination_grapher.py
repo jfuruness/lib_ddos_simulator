@@ -182,6 +182,7 @@ class Combination_Grapher(Base_Grapher):
 
         graph_dir = self.get_attacker_graph_dir(attacker)
         graph_path = os.path.join(graph_dir, y_val + f"_{title}.png")
+        graph_path = graph_path.replace(":", "_").replace(",", "_")
         self.save_graph(graph_path, plt, fig=fig)
 
         if write_json:

@@ -31,8 +31,8 @@ attackers = [
     Log2n_Turns_Straight_Attacker
 ]
 
-users_per_bucket = 1_000
-trials = 10
+users_per_bucket = 10_000
+trials = 8
 num_rounds = 501
 percent_attackers_list = (0, .001, .005, .01, .02, .03, .04)
 
