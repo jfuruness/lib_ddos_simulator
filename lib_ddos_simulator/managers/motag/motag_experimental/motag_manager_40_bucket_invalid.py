@@ -8,7 +8,7 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from .motag_base import Motag_Manager
+from ..motag_base import Motag_Manager
 
 
 class Motag_Manager_40_Bucket_Invalid(Motag_Manager):

@@ -1,19 +1,10 @@
 from lib_ddos_simulator import (
     Combination_Grapher,
-    Protag_Manager_Merge,
-    Protag_Manager_No_Merge,
     Motag_Manager_40_Bucket,
     Motag_Manager_40_Bucket_Invalid,
-    Motag_Manager_500_Bucket,
-    Isolator_2i_1f,
-    Isolator_2i_kf,
-    Isolator_3i_1f,
-    Isolator_3i_kf,
-    Isolator_2i_SQRT_kf,
-    Isolator_3i_SQRT_kf,
-    Opt_H,
-    Opt_S,
-    Attacker
+    Motag_Manager_40_Bucket_Combine_Diff_Start,
+    Motag_Manager_40_Bucket_No_Combine_Diff_Start,
+    Motag_Manager_40_Bucket_No_Combine_Normal_Start,
 )
 from lib_ddos_simulator.attackers import (
     Basic_Attacker,
@@ -25,25 +16,31 @@ from lib_ddos_simulator.attackers import (
 )
 
 managers=[
-    # Protag_Manager_No_Merge,
     Motag_Manager_40_Bucket,
     Motag_Manager_40_Bucket_Invalid,
+    Motag_Manager_40_Bucket_Combine_Diff_Start,
+    Motag_Manager_40_Bucket_No_Combine_Diff_Start,
+    Motag_Manager_40_Bucket_No_Combine_Normal_Start,
 ]
 
 attackers = [
     Basic_Attacker,
+    Even_Turn_Attacker,
+    Herzberg_Motag_Attacker,  # All but one attacker
+    Never_Last_Attacker,
+    Log2n_Turns_Straight_Attacker
 ]
 
 users_per_bucket = 1_000
-trials = 2
-num_rounds = 101
-percent_attackers_list = (.0001, .001, .005, .01, .02, .03, .04)
+trials = 10
+num_rounds = 501
+percent_attackers_list = (0, .001, .005, .01, .02, .03, .04)
 
 
-############### Attackers from 1 to 6% with Opt H #############
+############################
 
 grapher = Combination_Grapher(debug=True,
-                              graph_dir="/tmp/ddos_graphs/motag_ex",
+                              graph_dir="/tmp/ddos_graphs/motag_experiment",
                               tikz=False,
                               save=True,
                               high_res=False)

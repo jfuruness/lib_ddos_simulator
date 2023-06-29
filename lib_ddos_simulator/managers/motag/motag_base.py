@@ -46,8 +46,10 @@ class Motag_Manager(Manager):
     paper = False
     prox = 3#20
     percent_users_to_save = .95
+    merge_buckets = True
+    hidden_step = False
 
-    def detect_and_shuffle(self, *args):
+    def detect_and_shuffle(self, turn: int, *args):
         """Motag Manager algorithm"""
 
         self.remove_attackers()
@@ -58,6 +60,11 @@ class Motag_Manager(Manager):
             for bucket in self.attacked_buckets:
                 self.disconnect_users([x.id for x in bucket.users])
 
+        if turn == 0 and self.hidden_step:
+            # 6/28/2023 there is a proposal that there is a hidden step
+            # within the paper not covered in the pseudocode or the algorithm,
+            # where attackers will first be spread evenly amongst prox nodes
+            self.greedy_assign(num_insiders=0)
         else:
             self.greedy_assign()
 
@@ -162,9 +169,10 @@ class Motag_Manager(Manager):
     def combine_buckets(self):
         """Merge all non attacked buckets"""
 
-        users = []
-        for bucket in self.non_attacked_buckets:
-            users.extend(bucket.users)
-            self.remove_bucket(bucket)
-        if len(users) > 0:
-            self.get_new_bucket().reinit(users)
+        if self.merge_buckets:
+            users = []
+            for bucket in self.non_attacked_buckets:
+                users.extend(bucket.users)
+                self.remove_bucket(bucket)
+            if len(users) > 0:
+                self.get_new_bucket().reinit(users)

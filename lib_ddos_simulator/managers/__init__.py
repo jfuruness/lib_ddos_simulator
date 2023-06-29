@@ -37,5 +37,11 @@ from .sieve import Sieve_Manager_V1_S0, Sieve_Manager_V1_S1, Sieve_Manager_V1_S2
 from .sieve import Sieve_Manager_KPO_S0, Sieve_Manager_KPO_S1, Sieve_Manager_KPO_S2
 from .sieve import Sieve_Manager_Base
 
+# Experimental:
+from .motag import Motag_Manager_40_Bucket_Combine_Diff_Start
+from .motag import Motag_Manager_40_Bucket_No_Combine_Diff_Start
+from .motag import Motag_Manager_40_Bucket_No_Combine_Normal_Start
+from .motag import Motag_Manager_40_Bucket_Invalid
+
 # Done here to force init
 from .manager import Manager
