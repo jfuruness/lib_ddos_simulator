@@ -42,6 +42,12 @@ from .motag import Motag_Manager_40_Bucket_Combine_Diff_Start
 from .motag import Motag_Manager_40_Bucket_No_Combine_Diff_Start
 from .motag import Motag_Manager_40_Bucket_No_Combine_Normal_Start
 from .motag import Motag_Manager_40_Bucket_Invalid
+# 500
+from .motag import Motag_Manager_500_Bucket_Combine_Diff_Start
+from .motag import Motag_Manager_500_Bucket_No_Combine_Diff_Start
+from .motag import Motag_Manager_500_Bucket_No_Combine_Normal_Start
+from .motag import Motag_Manager_500_Bucket_Invalid
+
 
 # Done here to force init
 from .manager import Manager

@@ -224,7 +224,7 @@ class Combination_Grapher(Base_Grapher):
         # UNLESS y_val is bucket bound or cost, which needs log scale
         # REVERTED 6/28/2023 because this was innaccurate
         # Brought back 6/30/2023 for percent good not serviced
-        if y_val == "PERCENT_GOOD_NOT_SERVICED":
+        if y_val in ["PERCENT_GOOD_NOT_SERVICED", "AVG_BUCKETS"]:
             axs.set_yscale("log")
         else:
             axs.set_ylim(0, max_y_limit * 1.02)
@@ -245,6 +245,9 @@ class Combination_Grapher(Base_Grapher):
         # Request NDSS June 2023 to change Y axis of this graph
         if y_val == "PERCENT_GOOD_NOT_SERVICED":
             y_val = "PERCENT HARMED"
+        elif y_val == "AVG_BUCKETS":
+            y_val = "COST"
+
         axs.set(xlabel="Percent Attackers", ylabel=y_val)
 
         return fig, axs, title
