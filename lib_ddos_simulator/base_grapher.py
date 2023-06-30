@@ -69,7 +69,7 @@ class Base_Grapher:
         if manager in opts:
             return opts[manager]
         else:
-            print(f"Manager does not have a setting {manager.__class__}")
+            # print(f"Manager does not have a setting {manager.__class__}")
             styles = [
                 "-", "--", "-.", ":", "solid", "dotted", "dashdot", "dashed"
             ]
@@ -96,7 +96,7 @@ class Base_Grapher:
         if manager in opts:
             return opts[manager]
         else:
-            print(f"Manager does not have a setting {manager.__class__}")
+            # print(f"Manager does not have a setting {manager.__class__}")
             markers = [".", "1", "*", "x", "d", "2", "3", "4"]
             markers += markers.copy()[0:-2:2]
             markers += markers.copy()[::-1]
@@ -121,7 +121,7 @@ class Base_Grapher:
         if manager in opts:
             return opts[manager]
         else:
-            print(f"Manager does not have a setting {manager.__class__}")
+            # print(f"Manager does not have a setting {manager.__class__}")
             colors = [
                 "red",
                 "blue",

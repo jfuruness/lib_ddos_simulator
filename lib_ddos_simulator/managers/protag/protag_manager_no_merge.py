@@ -27,7 +27,7 @@ class Protag_Manager_No_Merge(Protag_Manager_Base):
     __slots__ = []
 
     runnable = True
-    name = "NM-PROTAG"
+    name = "PROTAG non merging"
 
     def combine_buckets(self):
         pass

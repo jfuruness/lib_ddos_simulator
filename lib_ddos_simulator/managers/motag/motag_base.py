@@ -48,6 +48,7 @@ class Motag_Manager(Manager):
     percent_users_to_save = .95
     merge_buckets = True
     hidden_step = False
+    unlimited_servers = False
 
     def detect_and_shuffle(self, turn: int, *args):
         """Motag Manager algorithm"""
@@ -125,7 +126,11 @@ class Motag_Manager(Manager):
                 self.remove_bucket(bucket)
             random.shuffle(attacked_users)
         if prox is None:
-            prox = self.prox - len(self.non_attacked_buckets)
+            if self.unlimited_servers:
+                prox = self.prox
+            else:
+                prox = self.prox - len(self.non_attacked_buckets)
+
         return num_insiders, attacked_users, prox
 
     def get_approx_insiders(self, buckets):

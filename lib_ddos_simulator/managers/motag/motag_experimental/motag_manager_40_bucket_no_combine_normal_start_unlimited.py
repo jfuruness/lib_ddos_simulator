@@ -8,12 +8,15 @@ __maintainer__ = "Justin Furuness"
 __email__ = "jfuruness@gmail.com, agorbenko97@gmail.com"
 __status__ = "Development"
 
-from .motag_base import Motag_Manager
+from ..motag_base import Motag_Manager
 
 
-class Motag_Manager_40_Bucket(Motag_Manager):
+class Motag_Manager_40_Bucket_No_Combine_Normal_Start_Unlimited(Motag_Manager):
     runnable = True
     paper = True
     prox = 40
     percent_users_to_save = .95
-    name = "(40)-MOTAG"
+    name = "(40)-MOTAG non merging unlimited servers"
+    merge_buckets = False
+    hidden_step = False
+    unlimited_servers = True
