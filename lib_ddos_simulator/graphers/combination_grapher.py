@@ -13,28 +13,21 @@ import os
 
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
-from statistics import mean, variance
-from math import sqrt
-from multiprocessing import cpu_count
-from pathos.multiprocessing import ProcessingPool
 import json
 
 from ..base_grapher import Base_Grapher
 from .combo_data_generator import Combo_Data_Generator
 
 from ..attackers import Attacker
-# Done this way to avoid circular imports
-from ..ddos_simulators import ddos_simulator
-from ..managers import Manager
-from ..utils import Log_Levels
+
 
 class Worst_Case_Attacker:
     """placeholder
 
     Later used to graph the worst case attacker graph"""
     pass
+
 
 class Combination_Grapher(Base_Grapher):
     """Compares managers against each other
@@ -109,12 +102,18 @@ class Combination_Grapher(Base_Grapher):
         """Creates a json of worst case attacker data"""
 
         # Create json of worst case attackers
-        worst_case_scenario_data = {manager: {Worst_Case_Attacker: {"X": [],
-                                                                    y_val: [],
-                                                                    y_val + "_YERR": [],
-                                                                    "ATKS": []}
-                                              }
-                                    for manager in managers}
+        worst_case_scenario_data = {
+            manager: {
+                Worst_Case_Attacker: {
+                    "X": [],
+                    y_val: [],
+                    y_val + "_YERR": [],
+                    "ATKS": []
+                }
+            }
+            for manager in managers
+        }
+
         for manager, manager_data in scenario_data.items():
             xs = manager_data[attackers[0]]["X"]
             for i, x in enumerate(xs):
@@ -132,8 +131,8 @@ class Combination_Grapher(Base_Grapher):
                 yerr = None
                 for attacker in attackers:
                     if y_val in [
-                            "HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND",
-                            "TOTAL_BUCKETS", "AVG_BUCKETS"
+                        "HARM", "PERCENT_GOOD_NOT_SERVICED", "BUCKET_BOUND",
+                        "TOTAL_BUCKETS", "AVG_BUCKETS"
                     ]:
                         cond = manager_data[attacker][y_val][i] > worst_case_y
                     elif y_val == "UTILITY":
@@ -199,13 +198,15 @@ class Combination_Grapher(Base_Grapher):
 
         matplotlib.use("Agg")
         fig, axs = plt.subplots(figsize=(20, 10))
-        plt.rcParams.update({"font.size": 16, "lines.markersize": 10})
+        plt.rcParams.update({"font.size": 18, "lines.markersize": 10})
+        # Request NDSS 6/30/2023 for higher dpi
+        fig.set_dpi(300)
         title = (f"Scenario: "
                  f"users: {users_per_bucket * num_buckets}, "
                  f"rounds: {num_rounds}, attacker_cls: {attacker.__name__} ")
         # fig.suptitle(title)
 
-        # Request NDSS June 2023 change percent good not serviced to a non decimal
+        # Request NDSS June 2023 change percent good not serviced to a decimal
         for _, manager_data in scenario_data.items():
             if y_val == "PERCENT_GOOD_NOT_SERVICED":
                 vals = manager_data[attacker][y_val]
@@ -222,14 +223,16 @@ class Combination_Grapher(Base_Grapher):
         # Request for NDSS June 2023, inclrease Y limit by 10%
         # UNLESS y_val is bucket bound or cost, which needs log scale
         # REVERTED 6/28/2023 because this was innaccurate
-        # if y_val not in ["BUCKET_BOUND", "COST"]:
-        axs.set_ylim(0, max_y_limit * 1.02)
+        # Brought back 6/30/2023 for percent good not serviced
+        if y_val == "PERCENT_GOOD_NOT_SERVICED":
+            axs.set_yscale("log")
+        else:
+            axs.set_ylim(0, max_y_limit * 1.02)
         # Request for NDSS June 2023, set X limit to 0
         max_x_val = 0
         for _, manager_data in scenario_data.items():
             max_x_val = max(max_x_val, max(manager_data[attacker]["X"]))
         axs.set_xlim(0, max_x_val * 1.02)
-
 
         # Add labels to axis
         # Requested changes for NDSS June 2023
@@ -266,7 +269,7 @@ class Combination_Grapher(Base_Grapher):
         name = getattr(manager, "name", manager.__name__)
         axs.errorbar(scenario_data[manager][attacker]["X"],  # X val
                      scenario_data[manager][attacker][y_val],  # Y value
-                     yerr=scenario_data[manager][attacker][y_val +"_YERR"],
+                     yerr=scenario_data[manager][attacker][y_val + "_YERR"],
                      label=name,
                      ls=self.styles(index=manager_i, manager=manager),
                      # https://stackoverflow.com/a/26305286/8903959
@@ -294,11 +297,11 @@ class Combination_Grapher(Base_Grapher):
         """Overlays error bars with worst case attacker colors"""
 
         # Get list of colors
-        color_dict = self.get_worst_case_atk_color_dict()
-        colors = [color_dict[atk_name] for atk_name in
-                  scenario_data[manager][attacker]["ATKS"]]
+        # color_dict = self.get_worst_case_atk_color_dict()
+        # colors = [color_dict[atk_name] for atk_name in
+        #           scenario_data[manager][attacker]["ATKS"]]
         # No longer wanted
-        #axs.scatter(scenario_data[manager][attacker]["X"],
+        # axs.scatter(scenario_data[manager][attacker]["X"],
         #            scenario_data[manager][attacker][y_val],
         #            c=colors,
         #            s=45,
